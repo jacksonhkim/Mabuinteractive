@@ -67,51 +67,70 @@ body {
 }
 
 #d-pad {
-    left: 20px;
-    width: 150px;
-    height: 150px;
-}
-
-#action-btn {
-    right: 20px;
-    width: 80px;
-    height: 80px;
-    background: rgba(255, 0, 0, 0.5);
+    left: 40px;
+    width: 180px;
+    height: 180px;
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 50%;
-    border: 2px solid #fff;
+    border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .d-btn {
     position: absolute;
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid #fff;
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    transition: background 0.1s, transform 0.1s;
 }
 
 #up {
-    top: 0;
-    left: 50px;
+    top: 5px;
+    left: 60px;
 }
 
 #down {
-    bottom: 0;
-    left: 50px;
+    bottom: 5px;
+    left: 60px;
 }
 
 #left {
-    top: 50px;
-    left: 0;
+    top: 60px;
+    left: 5px;
 }
 
 #right {
-    top: 50px;
-    right: 0;
+    top: 60px;
+    right: 5px;
+}
+
+/* Center Indicator */
+#d-pad::after {
+    content: '';
+    position: absolute;
+    top: 75px;
+    left: 75px;
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+}
+
+#action-btn {
+    right: 40px;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 0, 0, 0.4);
+    border-radius: 50%;
+    border: 4px solid #fff;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
 }
 
 .d-btn:active,
 #action-btn:active {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.6) !important;
+    transform: scale(1.1);
 }
 
 @media (hover: none) and (pointer: coarse) {
@@ -319,4 +338,65 @@ body {
 
 .hidden {
     display: none !important;
+}
+
+/* [New] Orientation Warning Styles */
+#orientation-warning {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #0d1b2a;
+    color: #fff;
+    z-index: 99999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-family: 'Malgun Gothic', sans-serif;
+}
+
+.rotate-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: rotateDevice 2s infinite ease-in-out;
+}
+
+.warning-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffcc00;
+    margin-bottom: 10px;
+}
+
+.sub-text {
+    font-size: 16px;
+    color: #aaa;
+}
+
+@keyframes rotateDevice {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(-90deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+/* Portrait Mode Detection */
+@media screen and (orientation: portrait) and (max-width: 1024px) {
+    #orientation-warning {
+        display: flex;
+    }
+
+    #game-container {
+        display: none;
+    }
 }

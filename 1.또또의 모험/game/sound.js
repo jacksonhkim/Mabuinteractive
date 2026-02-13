@@ -182,9 +182,14 @@ class SoundEngine {
         // [R&D] 상황별 음악 데이터베이스
         const themes = {
             'START': {
-                tempo: 90, volume: 0.3, osc: 'triangle',
-                bass: [130.81, 164.81], // C, E
-                melody: [[261, 329, 392, 523], [329, 392, 523, 659]] // C Maj
+                tempo: 100, volume: 0.35, osc: 'triangle',
+                bass: [130.81, 164.81, 196.00, 174.61], // C, E, G, F
+                melody: [
+                    [392, 523, 659, 784], // G, C, E, G
+                    [329, 392, 523, 659], // E, G, C, E
+                    [392, 523, 659, 784],
+                    [440, 523, 659, 698]  // A, C, E, F
+                ]
             },
             'SELECT': {
                 tempo: 140, volume: 0.2, osc: 'square',

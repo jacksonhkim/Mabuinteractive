@@ -18,6 +18,15 @@ window.sound = sound;
 window.updateBombUI = updateBombUI;
 window.startDialogue = startDialogue;
 window.startEndingSequence = startEndingSequence;
+window.goNextStage = () => {
+    if (state.isWorldMapActive && state.isWorldMapReady) {
+        state.isWorldMapActive = false;
+        state.isWorldMapReady = false;
+        state.currentStage++;
+        startDialogue(state.currentStage);
+        sound.playConfirm();
+    }
+};
 
 // [Cheat Logic] - Requested by CEO (QA Issue #5)
 window.gameCheat = function (type) {
@@ -61,17 +70,24 @@ window.gameCheat = function (type) {
 
 window.handleRestart = () => {
     resetState();
-    isGameStarted = false;
-    isCharacterSelection = true;
     const credits = document.getElementById('ending-credits');
     if (credits) credits.remove();
     const canvas = document.getElementById('gameCanvas');
     if (canvas) canvas.style.display = 'block';
 
+    // UI 레이어 초기화
+    document.getElementById('ui-layer').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+
     // UI HUD reset
     const hud = document.getElementById('hud');
     if (hud) hud.style.display = 'flex';
+
+    // 시작음 재생
     sound.startBGM('START');
+
+    // [Bug Fix] Interaction listener lost after restart
+    window.addEventListener('click', startGame, { once: true });
 };
 
 const canvas = document.getElementById('gameCanvas');
@@ -126,6 +142,12 @@ window.addEventListener('keydown', (e) => {
 
     if (state.gameActive) {
         state.keys[e.code] = true;
+
+        // World Map Go signal
+        if (state.isWorldMapActive && state.isWorldMapReady && (e.code === 'Space' || e.code === 'Enter')) {
+            window.goNextStage();
+        }
+
         // Dialogue / Branching logic
         if (state.isDialogueActive && (e.code === 'Space' || e.code === 'Enter')) {
             // handled in showNextDialogue
@@ -142,67 +164,120 @@ window.addEventListener('blur', () => {
     state.keys = {};
 });
 
-// Touch Controls
+// Mobile Controls Enhancement: Sliding D-Pad ("도로록" feel)
+const dPad = document.getElementById('d-pad');
 const dPadButtons = document.querySelectorAll('.d-btn');
-dPadButtons.forEach(btn => {
-    btn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        const key = btn.id === 'up' ? 'ArrowUp' : btn.id === 'down' ? 'ArrowDown' : btn.id === 'left' ? 'ArrowLeft' : 'ArrowRight';
-        state.keys[key] = true;
+
+function handleDPadTouch(e) {
+    if (!state.gameActive && !state.isSelectingCharacter) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = dPad.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    // Reset current keys
+    state.keys['ArrowUp'] = false;
+    state.keys['ArrowDown'] = false;
+    state.keys['ArrowLeft'] = false;
+    state.keys['ArrowRight'] = false;
+
+    // Determine direction based on touch position relative to center
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const threshold = 20;
+
+    if (y < centerY - threshold) state.keys['ArrowUp'] = true;
+    if (y > centerY + threshold) state.keys['ArrowDown'] = true;
+    if (x < centerX - threshold) state.keys['ArrowLeft'] = true;
+    if (x > centerX + threshold) state.keys['ArrowRight'] = true;
+}
+
+if (dPad) {
+    dPad.addEventListener('touchstart', handleDPadTouch);
+    dPad.addEventListener('touchmove', handleDPadTouch);
+    dPad.addEventListener('touchend', (e) => {
+        state.keys['ArrowUp'] = false;
+        state.keys['ArrowDown'] = false;
+        state.keys['ArrowLeft'] = false;
+        state.keys['ArrowRight'] = false;
     });
-    btn.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        const key = btn.id === 'up' ? 'ArrowUp' : btn.id === 'down' ? 'ArrowDown' : btn.id === 'left' ? 'ArrowLeft' : 'ArrowRight';
-        state.keys[key] = false;
-    });
-});
+}
+
 const actionBtn = document.getElementById('action-btn');
 if (actionBtn) {
-    actionBtn.addEventListener('touchstart', (e) => { e.preventDefault(); state.keys['Space'] = true; });
+    actionBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        state.keys['Space'] = true;
+        if (state.isWorldMapReady) window.goNextStage();
+    });
     actionBtn.addEventListener('touchend', (e) => { e.preventDefault(); state.keys['Space'] = false; });
 }
 
-// Global Start Function
-let isGameStarted = false;
-let isCharacterSelection = false;
-
+// Global Start Logic
 async function startGame() {
-    if (isGameStarted || isCharacterSelection) return;
+    // Only allow starting if we are on the title screen
+    if (state.gameActive || state.isSelectingCharacter) return;
 
+    // [Bug Fix] BGM Startup: Ensure Audio is initialized and BGM starts ASAP
     try {
-        // AudioContext must be resumed/created after user gesture
         await sound.init();
-        sound.startBGM('SELECT'); // Start selection theme
-        await ASSETS.loadAllAssets();
+        sound.startBGM('START');
+        sound.playConfirm();
+
+        // [New] Mobile: Try to lock orientation to landscape
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(e => console.log("Orientation lock skipped (requires fullscreen):", e));
+        }
     } catch (err) {
-        console.error("Asset/Sound Load Error:", err);
+        console.error("Audio Init Failed:", err);
     }
 
-    document.getElementById('start-screen').classList.add('hidden');
-    state.isSelectingCharacter = true;
-    isCharacterSelection = true;
-    state.selectedCharIndex = 0;
+    state.isTitleScreen = false;
 
-    // Remove the click listener to prevent double triggering
+    try {
+        const startMsg = document.querySelector('.start-message');
+        if (startMsg) startMsg.innerText = "LOADING ADVENTURE...";
+
+        await Promise.all([
+            ASSETS.loadAllAssets(),
+            new Promise(resolve => setTimeout(resolve, 1500))
+        ]);
+
+        document.getElementById('start-screen').classList.add('hidden');
+        state.isSelectingCharacter = true;
+        state.selectedCharIndex = 0;
+
+        // Smooth transition to select music
+        sound.startBGM('SELECT');
+
+    } catch (err) {
+        console.error("Asset Load Error:", err);
+    }
     window.removeEventListener('click', startGame);
+
+    // [New] Add global click listener for map 'GO'
+    window.addEventListener('click', () => {
+        if (state.isWorldMapActive && state.isWorldMapReady) {
+            window.goNextStage();
+        }
+    });
 }
 
-// Attach to window for onclick in HTML
 window.startGame = startGame;
-// We only want ONE interaction to trigger start
 window.addEventListener('click', startGame, { once: true });
 window.addEventListener('keydown', (e) => {
-    if (!isGameStarted && !isCharacterSelection && (e.code === 'Space' || e.code === 'Enter')) {
+    if (!state.gameActive && !state.isSelectingCharacter && (e.code === 'Space' || e.code === 'Enter')) {
         startGame();
     }
 });
 
 function confirmCharacter() {
-    if (isGameStarted) return;
-    isGameStarted = true;
-    isCharacterSelection = false;
+    if (state.gameActive) return;
+
     state.isSelectingCharacter = false;
     state.gameActive = true;
+    state.gameOver = false;
 
     // Apply Character Stats
     const char = CHARACTERS[state.selectedCharIndex];
@@ -214,8 +289,7 @@ function confirmCharacter() {
     document.getElementById('ui-layer').classList.remove('hidden');
     updateLivesUI();
     updateBombUI();
-    sound.playGameStart(); // 게임 시작 임팩트 사운드 재생
-    // Start Stage 1
+    sound.playGameStart();
     sound.startBGM('STAGE_1');
     startDialogue(1);
 }

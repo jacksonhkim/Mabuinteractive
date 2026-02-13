@@ -138,7 +138,8 @@ export function fireCharacterChargeShot() {
             pierce: true, rotation: 0, hp: 999
         });
     } else if (charId === 'momo') {
-        state.player.invincible = 120 + (level * 30);
+        state.player.invincible = true;
+        state.player.invincibleTime = 120 + (level * 30);
         state.bullets.push({ x: p.x, y: p.y, width: 0, height: 0, type: 'SHIELD_EFFECT', duration: 60, isChargeShot: true });
         const heartCount = 4 + level * 2;
         for (let i = 0; i < heartCount; i++) {
@@ -166,30 +167,48 @@ export function spawnItem(x, y) {
     if (rand < 0.25) type = 'P';
     else if (rand < 0.35) type = 'B';
     if (type) {
-        state.items.push({ x, y, type, vx: -2, vy: 0, width: 40, height: 40 });
+        state.items.push({ x, y, startY: y, type, vx: -2, time: 0, width: 40, height: 40 });
     }
 }
 
 export function updateItems() {
     for (let i = state.items.length - 1; i >= 0; i--) {
         const item = state.items[i];
+        item.time++;
         item.x += item.vx;
-        item.y += Math.sin(Date.now() / 500) * 1;
-        if (state.player.x < item.x + item.width && state.player.x + state.player.width > item.x &&
-            state.player.y < item.y + item.height && state.player.y + state.player.height > item.y) {
+        // [Optimization] Fix jitter: use fixed oscillation around startY instead of additive drift
+        item.y = item.startY + Math.sin(item.time * 0.05) * 15;
+
+        const p = state.player;
+        if (p.x < item.x + item.width && p.x + p.width > item.x &&
+            p.y < item.y + item.height && p.y + p.height > item.y) {
+
             if (item.type === 'P') {
-                if (state.player.powerLevel < 5) state.player.powerLevel++;
-                state.score += 500;
-                sound.playPowerUp();
+                if (p.powerLevel < 5) {
+                    p.powerLevel++;
+                    state.score += 500;
+                    sound.playPowerUp();
+                } else {
+                    // [Planning] Max Power Bonus: 2,000 pts
+                    state.score += 2000;
+                    sound.playItemGet();
+                }
             } else if (item.type === 'B') {
-                state.player.bombCount++;
-                updateBombUI();
-                sound.playItemGet();
+                if (p.bombCount < 5) {
+                    p.bombCount++;
+                    updateBombUI();
+                    sound.playItemGet();
+                } else {
+                    // [Planning] Max Bomb Bonus: 5,000 pts
+                    state.score += 5000;
+                    sound.playItemGet();
+                }
             }
+            document.getElementById('score').innerText = state.score.toString().padStart(6, '0');
             state.items.splice(i, 1);
             continue;
         }
-        if (item.x < -40) state.items.splice(i, 1);
+        if (item.x < -100) state.items.splice(i, 1);
     }
 }
 
@@ -241,11 +260,11 @@ export function updateBullets() {
             // Find target if none
             const isTargetAlive = (b.target === state.boss && state.boss && state.boss.hp > 0) || (state.enemies.includes(b.target) && b.target.hp > 0);
             if (!b.target || !isTargetAlive) {
-                let minDist = 1000;
+                let minDistSq = 1000000; // Squared distance to avoid Math.sqrt
                 let nearest = null;
                 state.enemies.forEach(en => {
-                    const d = Math.sqrt((en.x - b.x) ** 2 + (en.y - b.y) ** 2);
-                    if (d < minDist) { minDist = d; nearest = en; }
+                    const d2 = (en.x - b.x) ** 2 + (en.y - b.y) ** 2;
+                    if (d2 < minDistSq) { minDistSq = d2; nearest = en; }
                 });
                 if (state.boss) { nearest = state.boss; } // Boss priority
                 b.target = nearest;
@@ -557,91 +576,102 @@ export function updateEnemies() {
         const e = state.enemies[i];
         e.time = (e.time || 0) + 1;
 
-        // 1. Unique Movement Patterns
-        switch (e.type) {
-            case ENEMY_TYPES.SCOUT_WASP:
-                e.x -= e.speed;
-                e.y += Math.sin(e.time * 0.1) * 2;
-                break;
-            case ENEMY_TYPES.DANCING_BUTTERFLY:
-                e.x -= e.speed * 0.8;
-                e.y += Math.sin(e.time * 0.05) * 5;
-                break;
-            case ENEMY_TYPES.BEETLE:
-                // Zig-zag movement
-                e.x -= e.speed;
-                if (Math.floor(e.time / 60) % 2 === 0) e.y += 2;
-                else e.y -= 2;
-                break;
-            case ENEMY_TYPES.DRONE:
-                // Chases player Y
-                e.x -= e.speed;
-                const dy = state.player.y - e.y;
-                if (Math.abs(dy) > 5) e.y += (dy > 0 ? 1 : -1) * 1.5;
-                break;
-            case ENEMY_TYPES.GHOST:
-                // Fast dash then slow down
-                const cycle = e.time % 120;
-                if (cycle < 40) e.x -= e.speed * 3;
-                else e.x -= e.speed * 0.5;
-                break;
-            case ENEMY_TYPES.SLIME:
-                // Jumping movement
-                e.x -= e.speed;
-                e.y += Math.sin(e.time * 0.08) * 8;
-                break;
-            default:
-                e.x -= e.speed;
-        }
+        moveEnemy(e);
+        enemyShootLogic(e);
 
-        // 2. Aggressive Shooting (Tengai Style)
-        // Enemies shoot more often as levels progress or based on type
-        let shootInterval = 80 + (Math.random() * 40);
-        if (state.currentStage > 3) shootInterval -= 20;
+        if (handleEnemyCollisions(e, i)) continue;
 
-        if (e.time % Math.floor(shootInterval) === 0 && e.x > 100 && e.x < CONFIG.SCREEN_WIDTH) {
-            enemyShoot(e);
-        }
-
-        let enemyDestroyed = false;
-        // Collision with player bullets
-        for (let j = state.bullets.length - 1; j >= 0; j--) {
-            const b = state.bullets[j];
-            if (b.x < e.x + e.width && b.x + b.width > e.x &&
-                b.y < e.y + e.height && b.y + b.height > e.y) {
-
-                e.hp -= (b.isChargeShot ? 5 : 1);
-                if (e.hp <= 0) {
-                    state.score += 100;
-                    createExplosion(e.x + e.width / 2, e.y + e.height / 2, '#ff4444');
-                    sound.playExplosion();
-                    spawnItem(e.x, e.y);
-                    document.getElementById('score').innerText = state.score.toString().padStart(6, '0');
-                    state.enemies.splice(i, 1);
-                    enemyDestroyed = true;
-                }
-                if (!b.isChargeShot) {
-                    state.bullets.splice(j, 1);
-                } else {
-                    const hpLoss = (b.type === 'BIT_BEE') ? 2 : 1;
-                    b.hp -= hpLoss;
-                    if (b.hp <= 0) state.bullets.splice(j, 1);
-                }
-                if (enemyDestroyed) break;
-            }
-        }
-        if (enemyDestroyed) continue;
-
-        // Collision with player
-        if (!state.player.invincible &&
-            state.player.x < e.x + e.width && state.player.x + state.player.width > e.x &&
-            state.player.y < e.y + e.height && state.player.y + state.player.height > e.y) {
-            playerHit();
-        }
-        else if (e.x + e.width < -100) {
+        // Out of bounds
+        if (e.x + e.width < -150) {
             state.enemies.splice(i, 1);
         }
     }
+}
+
+function moveEnemy(e) {
+    switch (e.type) {
+        case ENEMY_TYPES.SCOUT_WASP:
+            e.x -= e.speed;
+            e.y += Math.sin(e.time * 0.1) * 2;
+            break;
+        case ENEMY_TYPES.DANCING_BUTTERFLY:
+            e.x -= e.speed * 0.8;
+            e.y += Math.sin(e.time * 0.05) * 5;
+            break;
+        case ENEMY_TYPES.BEETLE:
+            e.x -= e.speed;
+            if (Math.floor(e.time / 60) % 2 === 0) e.y += 2;
+            else e.y -= 2;
+            break;
+        case ENEMY_TYPES.DRONE:
+            e.x -= e.speed;
+            const dy = state.player.y - e.y;
+            if (Math.abs(dy) > 5) e.y += (dy > 0 ? 1 : -1) * 1.5;
+            break;
+        case ENEMY_TYPES.GHOST:
+            const cycle = e.time % 120;
+            if (cycle < 40) e.x -= e.speed * 3;
+            else e.x -= e.speed * 0.5;
+            break;
+        case ENEMY_TYPES.SLIME:
+            e.x -= e.speed;
+            e.y += Math.sin(e.time * 0.08) * 8;
+            break;
+        default:
+            e.x -= e.speed;
+    }
+}
+
+function enemyShootLogic(e) {
+    let shootInterval = 80 + (Math.random() * 40);
+    if (state.currentStage > 3) shootInterval -= 20;
+
+    if (e.time % Math.floor(shootInterval) === 0 && e.x > 100 && e.x < CONFIG.SCREEN_WIDTH) {
+        enemyShoot(e);
+    }
+}
+
+function handleEnemyCollisions(e, index) {
+    // 1. Collision with player bullets
+    for (let j = state.bullets.length - 1; j >= 0; j--) {
+        const b = state.bullets[j];
+        if (b.x < e.x + e.width && b.x + b.width > e.x &&
+            b.y < e.y + e.height && b.y + b.height > e.y) {
+
+            e.hp -= (b.isChargeShot ? 5 : 1);
+
+            if (e.hp <= 0) {
+                state.score += 100;
+                createExplosion(e.x + e.width / 2, e.y + e.height / 2, '#ff4444');
+                sound.playExplosion();
+                spawnItem(e.x, e.y);
+                document.getElementById('score').innerText = state.score.toString().padStart(6, '0');
+                state.enemies.splice(index, 1);
+
+                // Cleanup bullet
+                if (!b.isChargeShot) state.bullets.splice(j, 1);
+                return true; // Enemy destroyed
+            }
+
+            if (!b.isChargeShot) {
+                state.bullets.splice(j, 1);
+            } else {
+                const hpLoss = (b.type === 'BIT_BEE') ? 2 : 1;
+                b.hp -= hpLoss;
+                if (b.hp <= 0) state.bullets.splice(j, 1);
+            }
+        }
+    }
+
+    // 2. Collision with player
+    if (!state.player.invincible &&
+        state.player.x < e.x + e.width && state.player.x + state.player.width > e.x &&
+        state.player.y < e.y + e.height && state.player.y + state.player.height > e.y) {
+        playerHit();
+        return true; // Simple removal or handle damage
+    }
+
+    return false;
 }
 
 export function enemyShoot(e) {
@@ -664,19 +694,9 @@ export function enemyShoot(e) {
             state.enemyBullets.push({ ...common, vx: (bdx / bdist) * 4, vy: (bdy / bdist) * 4, width: 24, height: 24, color: '#FFD54F' });
             break;
         case ENEMY_TYPES.DRONE:
-            // Burst shot (2 bullets)
-            setTimeout(() => {
-                const ddx1 = state.player.x - e.x;
-                const ddy1 = state.player.y - e.y;
-                const dist1 = Math.sqrt(ddx1 * ddx1 + ddy1 * ddy1);
-                state.enemyBullets.push({ ...common, vx: (ddx1 / dist1) * 8, vy: (ddy1 / dist1) * 8, color: '#00E5FF' });
-            }, 0);
-            setTimeout(() => {
-                const ddx2 = state.player.x - (e.x - 20);
-                const ddy2 = state.player.y - e.y;
-                const dist2 = Math.sqrt(ddx2 * ddx2 + ddy2 * ddy2);
-                state.enemyBullets.push({ ...common, vx: (ddx2 / dist2) * 8, vy: (ddy2 / dist2) * 8, color: '#00E5FF' });
-            }, 100);
+            // [Optimization] Removed setTimeout - spawning in same frame or handle in state loop
+            state.enemyBullets.push({ ...common, vx: -8, vy: 0, color: '#00E5FF' });
+            state.enemyBullets.push({ ...common, x: e.x - 30, y: e.y + e.height / 2, vx: -8, vy: 0, color: '#00E5FF' });
             break;
         case ENEMY_TYPES.GHOST:
             // 8-way star burst

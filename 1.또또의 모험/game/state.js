@@ -45,6 +45,7 @@ export const state = {
     isBranching: false,
     selectedBranch: 'day',
     isWorldMapActive: false,
+    isWorldMapReady: false,
     worldMapTimer: 0,
     mapProgress: 0
 };
@@ -53,15 +54,20 @@ export function resetState() {
     state.score = 0;
     state.lives = 3;
     state.keys = {};
+
+    // Reset Player
     state.player.x = 100;
     state.player.y = 300;
     state.player.vx = 0;
     state.player.vy = 0;
     state.player.lastShotTime = 0;
+    state.player.invincible = false;
     state.player.invincibleTime = 0;
     state.player.powerLevel = 1;
     state.player.bombCount = 3;
     state.player.chargeValue = 0;
+
+    // Reset Game Entities
     state.enemies = [];
     state.bullets = [];
     state.items = [];
@@ -69,16 +75,21 @@ export function resetState() {
     state.particles = [];
     state.enemyBullets = [];
     state.boss = null;
+
+    // Reset Progress Flags
     state.bgOffset = 0;
     state.gameActive = false;
     state.gameOver = false;
-    state.isSelectingCharacter = true; // Go back to selection
+    state.isTitleScreen = true;
+    state.isSelectingCharacter = false;
     state.currentStage = 1;
     state.stageCleared = false;
     state.bossSpawnedInStage = false;
     state.stageTransitionTimer = 0;
+    state.stageStartScore = 0;
     state.isDialogueActive = false;
     state.isWorldMapActive = false;
+    state.isWorldMapReady = false;
 }
 
 // Expose state for cheats/debugging

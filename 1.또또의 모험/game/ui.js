@@ -139,20 +139,19 @@ export function drawCharacterSelectionUI(ctx, selectedIndex) {
 
 export function startWorldMap() {
     state.isWorldMapActive = true;
+    state.isWorldMapReady = false;
     state.mapProgress = 0;
 
     // Auto-advance map progress
     const mapInterval = setInterval(() => {
-        state.mapProgress += 0.02;
+        state.mapProgress += 0.015; // Slightly slower for better feel
         if (state.mapProgress >= 1) {
+            state.mapProgress = 1;
             clearInterval(mapInterval);
-            setTimeout(() => {
-                state.isWorldMapActive = false;
-                state.currentStage++; // Fixed: Increment stage after map animation
-                startDialogue(state.currentStage);
-            }, 1000);
+            state.isWorldMapReady = true;
+            console.log("Map Journey Complete. Waiting for 'Go' signal.");
         }
-    }, 30)
+    }, 30);
 }
 
 // 대화 시스템

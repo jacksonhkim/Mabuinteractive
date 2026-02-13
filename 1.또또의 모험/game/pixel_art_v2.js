@@ -1538,63 +1538,150 @@ export function drawCharacterSelectionUI(ctx, CONFIG, characters, selectedIndex)
 }
 
 // [World Map UI] Drawing
+// [World Map UI] RPG-Style Continental Drawing
 export function drawWorldMap(ctx, CONFIG, state) {
     ctx.save();
-    ctx.fillStyle = '#2c3e50';
+    // 1. Map Background (Antique Parchment Style)
+    ctx.fillStyle = '#e8d5b5';
     ctx.fillRect(0, 0, CONFIG.SCREEN_WIDTH, CONFIG.SCREEN_HEIGHT);
 
-    // Map Title
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 40px "Malgun Gothic"';
-    ctx.textAlign = 'center';
-    ctx.fillText(`WORLD MAP - STAGE ${state.currentStage} to ${state.currentStage + 1}`, CONFIG.SCREEN_WIDTH / 2, 100);
-
-    // Draw Nodes
-    const mapY = CONFIG.SCREEN_HEIGHT / 2;
-    const padding = 150;
-    const stages = 5; // Display 5 stages for simplicity
-    const stepX = (CONFIG.SCREEN_WIDTH - padding * 2) / (stages - 1);
-
-    for (let i = 1; i <= stages; i++) {
-        const x = padding + (i - 1) * stepX;
-        const color = i <= state.currentStage ? '#00E676' : '#546E7A';
-        const radius = i === state.currentStage + 1 ? 25 : 15;
-
-        // Line to next
-        if (i < stages) {
-            ctx.beginPath();
-            ctx.strokeStyle = '#546E7A';
-            ctx.lineWidth = 5;
-            ctx.moveTo(x, mapY);
-            ctx.lineTo(padding + i * stepX, mapY);
-            ctx.stroke();
-        }
-
-        // Node
-        ctx.beginPath();
-        ctx.fillStyle = color;
-        ctx.arc(x, mapY, radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Stage Label
-        ctx.fillStyle = '#fff';
-        ctx.font = '16px "Malgun Gothic"';
-        ctx.fillText(`STAGE ${i}`, x, mapY + 50);
+    // Subtle Grid / Texture
+    ctx.strokeStyle = 'rgba(139, 69, 19, 0.1)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < CONFIG.SCREEN_WIDTH; i += 80) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, CONFIG.SCREEN_HEIGHT); ctx.stroke();
+    }
+    for (let i = 0; i < CONFIG.SCREEN_HEIGHT; i += 80) {
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(CONFIG.SCREEN_WIDTH, i); ctx.stroke();
     }
 
-    // Player Icon Animation
-    const t = (Date.now() / 1000) % 1;
-    const startX = padding + (state.currentStage - 1) * stepX;
-    const endX = padding + (state.currentStage) * stepX;
+    // 2. Continents / Regions (Enhanced with Borders)
+    const drawRegion = (x, y, w, h, color, name, decoration = 'none') => {
+        // Shadow/Depth
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.beginPath(); ctx.ellipse(x + 5, y + 5, w, h, 0, 0, Math.PI * 2); ctx.fill();
 
-    // Lerp logic handle in game state, here just draw at state.mapPlayerX if possible, or simulate
-    // For visual simplicity, we use state.mapProgress (0 to 1)
+        // Base
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 3; ctx.stroke();
+
+        // Label Decoration
+        ctx.fillStyle = '#4e342e';
+        ctx.font = 'italic bold 22px "Malgun Gothic"';
+        ctx.textAlign = 'center';
+        ctx.fillText(name, x, y - h - 15);
+
+        // Simple Decoration
+        if (decoration === 'mountains') {
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.beginPath(); ctx.moveTo(x - 30, y); ctx.lineTo(x, y - 40); ctx.lineTo(x + 30, y); ctx.fill();
+        } else if (decoration === 'waves') {
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2;
+            for (let i = -2; i <= 2; i++) {
+                ctx.beginPath(); ctx.arc(x + i * 20, y, 10, 0, Math.PI); ctx.stroke();
+            }
+        }
+    };
+
+    drawRegion(250, 480, 220, 160, '#81c784', "VERDANT FOREST", 'mountains');
+    drawRegion(600, 450, 200, 130, '#64b5f6', "AZURE OCEAN", 'waves');
+    drawRegion(920, 380, 240, 180, '#ffab91', "IRON VALLEY", 'mountains');
+    drawRegion(1150, 200, 160, 140, '#b2ebf2', "SKY KINGDOM");
+
+    // 3. Map Decorations (Compass Rose)
+    const cx = 150, cy = 150;
+    ctx.strokeStyle = '#5d4037'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx, cy - 40); ctx.lineTo(cx, cy + 40); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - 40, cy); ctx.lineTo(cx + 40, cy); ctx.stroke();
+    ctx.fillStyle = '#5d4037'; ctx.font = 'bold 16px Arial';
+    ctx.fillText("N", cx, cy - 45); ctx.fillText("S", cx, cy + 55);
+    ctx.fillText("W", cx - 50, cy + 5); ctx.fillText("E", cx + 50, cy + 5);
+
+    // 4. Stage Node Coordinates (10 Stages) - RPG Path
+    const stageNodes = [
+        { x: 150, y: 580 }, { x: 280, y: 480 }, { x: 420, y: 530 }, // Forest
+        { x: 580, y: 450 }, { x: 740, y: 490 }, // Ocean
+        { x: 880, y: 410 }, { x: 980, y: 470 }, { x: 1080, y: 350 }, // Valley
+        { x: 1160, y: 220 }, { x: 1240, y: 140 } // Sky/Space
+    ];
+
+    // 5. Draw Path Lines (Dash Style)
+    ctx.setLineDash([8, 8]);
+    ctx.strokeStyle = '#795548';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(stageNodes[0].x, stageNodes[0].y);
+    for (let i = 1; i < stageNodes.length; i++) {
+        ctx.lineTo(stageNodes[i].x, stageNodes[i].y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 6. Draw Nodes
+    stageNodes.forEach((node, i) => {
+        const stageNum = i + 1;
+        const isActive = stageNum <= state.currentStage;
+        const isNext = stageNum === state.currentStage + 1;
+
+        if (isNext) { // Glow for next
+            ctx.shadowBlur = 20; ctx.shadowColor = '#fff';
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.beginPath(); ctx.arc(node.x, node.y, 24, 0, Math.PI * 2); ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        ctx.fillStyle = isActive ? '#388e3c' : (isNext ? '#fbc02d' : '#bdbdbd');
+        ctx.beginPath(); ctx.arc(node.x, node.y, 18, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
+        ctx.fillText(stageNum, node.x, node.y + 5);
+    });
+
+    // 7. Map Title (Calligraphy Style Feel)
+    ctx.fillStyle = '#3e2723';
+    ctx.font = '900 52px "Malgun Gothic"';
+    ctx.textAlign = 'left';
+    ctx.fillText("MAP OF ADVENTURE", 80, 80);
+
+    // 8. Player Icon (Mini Toto)
     const progress = state.mapProgress || 0;
-    const currentX = startX + (endX - startX) * progress;
-    const bounceY = mapY - 40 - Math.abs(Math.sin(progress * Math.PI)) * 50;
+    const currentIdx = state.currentStage - 1;
+    const nextIdx = Math.min(state.currentStage, stageNodes.length - 1);
 
-    // Draw Mini Toto
-    drawPixelTotoV5(ctx, currentX - 25, bounceY - 25, 50, 50);
+    if (currentIdx >= 0) {
+        const start = stageNodes[currentIdx];
+        const end = stageNodes[nextIdx];
+        const currentX = start.x + (end.x - start.x) * progress;
+        const currentY = start.y + (end.y - start.y) * progress;
+        const bounceY = currentY - 35 - Math.abs(Math.sin(progress * Math.PI)) * 45;
+
+        ctx.shadowBlur = 15; ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        drawPixelTotoV5(ctx, currentX - 25, bounceY - 25, 50, 50);
+        ctx.shadowBlur = 0;
+    }
+
+    // 9. 'GO' BUTTON (Appears when Ready)
+    if (state.isWorldMapReady) {
+        const btnX = CONFIG.SCREEN_WIDTH / 2;
+        const btnY = CONFIG.SCREEN_HEIGHT - 100;
+
+        // Button Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillRect(btnX - 145, btnY - 35, 300, 80);
+
+        // Button Body
+        ctx.fillStyle = (Date.now() % 1000 < 500) ? '#ffeb3b' : '#fbc02d';
+        ctx.fillRect(btnX - 150, btnY - 40, 300, 80);
+        ctx.strokeStyle = '#3e2723'; ctx.lineWidth = 5;
+        ctx.strokeRect(btnX - 150, btnY - 40, 300, 80);
+
+        ctx.fillStyle = '#3e2723';
+        ctx.font = 'bold 28px "Malgun Gothic"';
+        ctx.textAlign = 'center';
+        ctx.fillText("START STAGE " + (state.currentStage + 1), btnX, btnY + 10);
+    }
 
     ctx.restore();
 }

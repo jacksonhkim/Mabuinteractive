@@ -40,8 +40,11 @@ export function draw(ctx, state) {
                 ctx.fillStyle = '#FF7043'; ctx.fillRect(-b.width / 4, -b.height / 4, b.width / 2, b.height / 2);
             } else if (b.type === 'PRISM_LASER') {
                 const pulse = Math.sin(Date.now() / 50) * 0.2 + 0.8;
-                ctx.shadowColor = '#F48FB1'; ctx.shadowBlur = 20 * pulse;
-                ctx.fillStyle = `rgba(244, 143, 177, ${0.8 * pulse})`; ctx.fillRect(-b.width / 2, -b.height / 2, b.width, b.height);
+                // [Optimization] ShadowBlur removed - extremely slow in Canvas 2D
+                ctx.fillStyle = `rgba(244, 143, 177, ${0.4 * pulse})`;
+                ctx.fillRect(-b.width / 2 - 5, -b.height / 2 - 5, b.width + 10, b.height + 10);
+                ctx.fillStyle = `rgba(244, 143, 177, ${0.8 * pulse})`;
+                ctx.fillRect(-b.width / 2, -b.height / 2, b.width, b.height);
                 ctx.fillStyle = '#FFF'; ctx.fillRect(-b.width / 2, -5, b.width, 10);
             } else if (b.type === 'SONIC_BOOM') {
                 ctx.strokeStyle = '#64FFDA'; ctx.lineWidth = 4;
@@ -108,11 +111,7 @@ export function draw(ctx, state) {
     state.enemyBullets.forEach(eb => {
         ctx.fillStyle = eb.color;
         ctx.fillRect(eb.x, eb.y, eb.width, eb.height);
-        // Add a small glow to bullets for better visibility
-        ctx.shadowBlur = 4;
-        ctx.shadowColor = eb.color;
-        ctx.fillRect(eb.x, eb.y, eb.width, eb.height);
-        ctx.shadowBlur = 0;
+        // [Optimization] ShadowBlur removed for performance
     });
     state.items.forEach(it => drawPixelItemV2(ctx, it.x, it.y, it.type));
     state.bombs.forEach(b => drawPixelBombEffectV2(ctx, b.x, b.y, b.radius, b.alpha, b.charId, b.timer));
