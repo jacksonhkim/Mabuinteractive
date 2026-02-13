@@ -330,7 +330,9 @@ async function startGame() {
         // [Optimization] If it's a touch on a control button, don't trigger global action
         if (e.target.closest('.control-group')) return;
 
-        if (state.isWorldMapActive && state.isWorldMapReady) {
+        console.log(`[Game] handleGlobalAction: select=${state.isSelectingCharacter}, dialogue=${state.isDialogueActive}`);
+
+        if (state.isWorldMapActive && state.isWorldMapReady && (e.code === 'Space' || e.code === 'Enter')) {
             window.goNextStage();
         }
         if (state.isSelectingCharacter) {
