@@ -5,7 +5,7 @@ import * as ASSETS from './assets.js';
 import {
     updateBackground, updatePlayer, updateBullets, spawnEnemy, updateEnemies,
     updateBoss, updateEnemyBullets, updateItems, updateBombs, updateParticles
-} from './entities.js';
+} from './entities.js?v=bust2';
 import {
     drawTitleScreen, drawGameOverScreen, drawStageClear,
     drawCharacterSelectionUI, updateLivesUI, updateBombUI,
