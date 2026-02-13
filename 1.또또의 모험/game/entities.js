@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { CONFIG, ENEMY_TYPES, STAGE_ENEMIES, BOSS_DATA } from './constants.js';
+import { CONFIG, ENEMY_TYPES, STAGE_ENEMIES, BOSS_DATA, CHARACTERS } from './constants.js';
 import { updateLivesUI, updateBombUI, startEndingSequence } from './ui.js';
 import { sound } from './sound.js';
 
