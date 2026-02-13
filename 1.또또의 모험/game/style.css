@@ -281,7 +281,7 @@ body {
 
 @font-face {
     font-family: 'Jalnan';
-    src: url('https://deb26887.cdn.ntruss.com/font/jalnan/YeogioetteJallanche.woff') format('woff');
+    src: url('https://cdn.jsdelivr.net/gh/jabont/Jalnan/Jalnan.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
