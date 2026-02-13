@@ -117,7 +117,7 @@ class SoundEngine {
         if (!this.isEnabled) return;
         const t = this.ctx.currentTime;
 
-        // 1. 즉각적인 확정음 (Arpeggio)
+        // 즉각적인 확정음 (Arpeggio) - "딩-링-딩-링~"
         [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
@@ -128,18 +128,6 @@ class SoundEngine {
             osc.connect(gain); gain.connect(this.ctx.destination);
             osc.start(t + i * 0.06); osc.stop(t + i * 0.06 + 0.4);
         });
-
-        // 2. 강한 라이징 임팩트 (배경음) - 0.1초 뒤 시작
-        const osc1 = this.ctx.createOscillator();
-        const gain1 = this.ctx.createGain();
-        osc1.type = 'sawtooth';
-        osc1.frequency.setValueAtTime(110, t + 0.1);
-        osc1.frequency.exponentialRampToValueAtTime(880, t + 0.9);
-        gain1.gain.setValueAtTime(0, t + 0.1);
-        gain1.gain.linearRampToValueAtTime(0.2, t + 0.2);
-        gain1.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
-        osc1.connect(gain1); gain1.connect(this.ctx.destination);
-        osc1.start(t + 0.1); osc1.stop(t + 0.9);
     }
 
     // --- BGM R&D Section ---
