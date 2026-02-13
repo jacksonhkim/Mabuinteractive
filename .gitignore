@@ -1,3 +1,4 @@
+# 1. Global Ignores
 node_modules/
 .env
 *.log
@@ -6,35 +7,37 @@ build/
 .vscode/
 .idea/
 .DS_Store
-package-lock.json
 .agent/
 .vite/
 .tmp/
 *.tmp
 
-# Unity
-[Ll]ibrary/
-[Tt]emp/
-[Oo]bj/
-[Bb]uild/
-[Bb]uilds/
-[Ll]ogs/
-[Mm]emoryCaptures/
-Assets/Plugins/Editor/JetBrains*
-ExportedObj/
-.plastic/
-
-# Internal Documents & Sensitive Assets (SECURITY FIX)
+# 2. Project-Specific Ignores (Exclude everything by default for safety)
+Company_Mabu/
+agent assets/
+Mabu_Project1/
 "1.또또의 모험/프로젝트_문서/"
-"Company_Mabu/"
-"agent assets/"
-"Mabu_Project1/"
-*.md
-!index.html
-!1.또또의 모험/game/**/*.md
+"1.또또의 모험/node_modules/"
+
+# 3. Development Tools & Bot Scripts (Strictly Local)
 config.mjs
 gemini_helper.mjs
 peter_report.mjs
 slack_bot.mjs
 analyze_excel.mjs
 generate_airport_rates.mjs
+
+# 4. Documentation & Reports (Exclude all Markdown files)
+*.md
+!1.또또의 모험/game/README.md # Optional: Allow specific README if needed
+
+# 5. Whitelist: Essential Game Execution Files
+# Exclude everything in the game folder first, then allow only what's needed
+!index.html
+!1.또또의 모험/game/
+!1.또또의 모험/game/**
+!1.또또의 모험/package.json
+!1.또또의 모험/package-lock.json
+
+# Explicitly exclude internal dev tools within game folder if any
+1.또또의 모험/game/asset_baker.html
