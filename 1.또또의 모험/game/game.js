@@ -81,7 +81,10 @@ window.handleRestart = () => {
 
     // UI HUD reset
     const hud = document.getElementById('hud');
-    if (hud) hud.style.display = 'flex';
+    if (hud) {
+        hud.style.display = 'flex';
+        hud.classList.remove('hidden');
+    }
 
     // 시작음 재생
     sound.startBGM('START');
@@ -213,9 +216,11 @@ if (dPad) {
     });
 }
 
-const actionBtn = document.getElementById('action-btn');
-if (actionBtn) {
-    actionBtn.addEventListener('touchstart', (e) => {
+const btnShot = document.getElementById('btn-shot');
+const btnBomb = document.getElementById('btn-bomb');
+
+if (btnShot) {
+    btnShot.addEventListener('touchstart', (e) => {
         e.preventDefault();
 
         // 1. Character Selection Confirm
@@ -230,10 +235,24 @@ if (actionBtn) {
             return;
         }
 
+        // 3. Gameplay Shot
         state.keys['Space'] = true;
         if (state.isWorldMapReady) window.goNextStage();
     });
-    actionBtn.addEventListener('touchend', (e) => { e.preventDefault(); state.keys['Space'] = false; });
+    btnShot.addEventListener('touchend', (e) => { e.preventDefault(); state.keys['Space'] = false; });
+}
+
+if (btnBomb) {
+    btnBomb.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (state.gameActive && !state.gameOver) {
+            state.keys['KeyX'] = true;
+        }
+    });
+    btnBomb.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        state.keys['KeyX'] = false;
+    });
 }
 
 // Logic to handle D-pad navigation for menus
@@ -299,12 +318,17 @@ async function startGame() {
     }
     window.removeEventListener('click', startGame);
 
-    // [New] Add global click listener for map 'GO'
-    window.addEventListener('click', () => {
+    // [New] Add global click listener for map 'GO' and Game Over Restart
+    const handleGlobalAction = () => {
         if (state.isWorldMapActive && state.isWorldMapReady) {
             window.goNextStage();
         }
-    });
+        if (state.gameOver) {
+            window.handleRestart();
+        }
+    };
+    window.addEventListener('click', handleGlobalAction);
+    window.addEventListener('touchstart', handleGlobalAction);
 }
 
 window.startGame = startGame;

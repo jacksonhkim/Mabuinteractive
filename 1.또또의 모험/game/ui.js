@@ -33,11 +33,20 @@ export function drawTitleScreen(ctx) {
 }
 
 export function drawGameOverScreen(ctx) {
-    ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0, 0, CONFIG.SCREEN_WIDTH, CONFIG.SCREEN_HEIGHT);
-    ctx.font = '900 64px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ff5252';
-    ctx.fillText("GAME OVER", CONFIG.SCREEN_WIDTH / 2, CONFIG.SCREEN_HEIGHT / 2);
-    ctx.font = '24px sans-serif'; ctx.fillStyle = '#fff';
-    ctx.fillText("Press 'R' to Restart", CONFIG.SCREEN_WIDTH / 2, CONFIG.SCREEN_HEIGHT / 2 + 60);
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillRect(0, 0, CONFIG.SCREEN_WIDTH, CONFIG.SCREEN_HEIGHT);
+
+    ctx.font = '900 80px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ff5252';
+    ctx.shadowColor = '#000';
+    ctx.shadowBlur = 15;
+    ctx.fillText("GAME OVER", CONFIG.SCREEN_WIDTH / 2, CONFIG.SCREEN_HEIGHT / 2 - 20);
+
+    ctx.shadowBlur = 0;
+    ctx.font = 'bold 32px sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.fillText("TOUCH TO RESTART", CONFIG.SCREEN_WIDTH / 2, CONFIG.SCREEN_HEIGHT / 2 + 80);
 }
 
 export function drawStageClear(ctx) {
