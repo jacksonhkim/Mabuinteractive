@@ -21,9 +21,10 @@ export function updatePlayer() {
         dy /= mag;
     }
 
-    state.player.x += dx * CONFIG.PLAYER_SPEED;
-    state.player.y += dy * CONFIG.PLAYER_SPEED;
-    state.player.vy = dy * CONFIG.PLAYER_SPEED;
+    const charSpeed = CHARACTERS[state.selectedCharIndex]?.speed || 5.0;
+    state.player.x += dx * CONFIG.PLAYER_SPEED * (charSpeed / 5.0);
+    state.player.y += dy * CONFIG.PLAYER_SPEED * (charSpeed / 5.0);
+    state.player.vy = dy * CONFIG.PLAYER_SPEED * (charSpeed / 5.0);
 
     state.player.x = Math.max(0, Math.min(CONFIG.SCREEN_WIDTH - state.player.width, state.player.x));
     state.player.y = Math.max(0, Math.min(CONFIG.SCREEN_HEIGHT - state.player.height, state.player.y));
@@ -61,7 +62,7 @@ export function updatePlayer() {
 
 export function shoot() {
     const p = state.player;
-    let bulletData = { speed: 14, width: 22, height: 6, color: '#fff', vx: 14, vy: 0, damage: 1 };
+    let bulletData = { speed: 14, width: 33, height: 9, color: '#fff', vx: 14, vy: 0, damage: 1 };
 
     if (p.id === 'kaka') {
         bulletData.width = 35; bulletData.height = 12; bulletData.damage = 2; bulletData.color = '#FFD54F';
@@ -75,31 +76,31 @@ export function shoot() {
 
     switch (p.powerLevel) {
         case 1:
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 3 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 9 });
             break;
         case 2:
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 12 });
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 6 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 36 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 18 });
             break;
         case 3:
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 18 });
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 3 });
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 12 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 54 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 9 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 36 });
             break;
         case 4:
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 20, vy: -1 });
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 8 });
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 2 });
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 14, vy: 1 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 60, vy: -1.5 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 24 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 6 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 42, vy: 1.5 });
             break;
         case 5:
-            const heavyBullet = { ...bulletData, width: 30, height: 10, color: '#00e676' };
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 25, vy: -2.5 });
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 15, vy: -1 });
-            state.bullets.push({ ...heavyBullet, x: p.x + p.width, y: p.y + p.height / 2 - 5 });
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 5, vy: 1 });
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 15, vy: 2.5 });
-            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 15, vy: 2.5 });
+            const heavyBullet = { ...bulletData, width: 45, height: 15, color: '#00e676' };
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 75, vy: -3.5 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 - 45, vy: -1.5 });
+            state.bullets.push({ ...heavyBullet, x: p.x + p.width, y: p.y + p.height / 2 - 15 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 15, vy: 1.5 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 45, vy: 3.5 });
+            state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 45, vy: 3.5 });
             break;
     }
     sound.playShot();
@@ -115,7 +116,7 @@ export function fireCharacterChargeShot() {
         for (let i = 0; i < beeCount; i++) {
             state.bullets.push({
                 x: p.x + p.width / 2, y: p.y + p.height / 2,
-                width: 32, height: 32, speed: 8 + Math.random() * 4,
+                width: 48, height: 48, speed: 8 + Math.random() * 4,
                 vx: 2 + Math.random() * 5, vy: (Math.random() - 0.5) * 8, // Slower initial takeoff for better orbit
                 color: '#FFD700', isChargeShot: true,
                 type: 'BIT_BEE', homing: true, damage: 10 + level * 2,
@@ -126,12 +127,12 @@ export function fireCharacterChargeShot() {
         }
     } else if (charId === 'lulu') {
         state.bullets.push({
-            x: p.x + p.width, y: p.y + p.height / 2, width: CONFIG.SCREEN_WIDTH, height: 30 + (level * 10),
+            x: p.x + p.width, y: p.y + p.height / 2, width: CONFIG.SCREEN_WIDTH, height: 45 + (level * 15),
             speed: 50, color: '#F48FB1', isChargeShot: true, type: 'PRISM_LASER', damage: 2 + level,
             duration: 60 + (level * 10), hp: 9999
         });
     } else if (charId === 'kaka') {
-        const rockSize = 60 + (level * 25);
+        const rockSize = 90 + (level * 37);
         state.bullets.push({
             x: p.x + p.width, y: p.y + p.height / 2 - rockSize / 2, width: rockSize, height: rockSize,
             speed: 8, color: '#5D4037', isChargeShot: true, type: 'METEOR', damage: 50 + (level * 20),
@@ -146,14 +147,14 @@ export function fireCharacterChargeShot() {
             const angle = (Math.PI * 2 / heartCount) * i;
             state.bullets.push({
                 x: p.x + p.width / 2, y: p.y + p.height / 2, vx: Math.cos(angle) * 15, vy: Math.sin(angle) * 15,
-                width: 30, height: 30, color: '#FF5252', isChargeShot: true, type: 'LOVE_BOMB', damage: 20 + level * 5
+                width: 45, height: 45, color: '#FF5252', isChargeShot: true, type: 'LOVE_BOMB', damage: 20 + level * 5
             });
         }
     } else if (charId === 'pipi') {
-        const boomHeight = 300 + (level * 50);
+        const boomHeight = 450 + (level * 75);
         state.bullets.push({
             x: p.x + p.width, y: p.y + p.height / 2 - boomHeight / 2,
-            width: 120, height: boomHeight, speed: 35,
+            width: 180, height: boomHeight, speed: 35,
             color: '#64FFDA', isChargeShot: true, type: 'SONIC_BOOM',
             damage: 20 + (level * 5), hp: 999
         });

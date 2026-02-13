@@ -7,8 +7,8 @@ export const state = {
         y: 300,
         vx: 0,
         vy: 0,
-        width: 64,
-        height: 64,
+        width: 192,
+        height: 192,
         color: '#ffcc00',
         strokeColor: '#ffffff',
         lastShotTime: 0,
@@ -47,7 +47,8 @@ export const state = {
     isWorldMapActive: false,
     isWorldMapReady: false,
     worldMapTimer: 0,
-    mapProgress: 0
+    mapProgress: 0,
+    isContinuing: false
 };
 
 export function resetState() {
@@ -90,6 +91,7 @@ export function resetState() {
     state.isDialogueActive = false;
     state.isWorldMapActive = false;
     state.isWorldMapReady = false;
+    state.isContinuing = false;
 }
 
 // Expose state for cheats/debugging

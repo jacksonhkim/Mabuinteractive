@@ -41,12 +41,35 @@ export function drawGameOverScreen(ctx) {
     ctx.fillStyle = '#ff5252';
     ctx.shadowColor = '#000';
     ctx.shadowBlur = 15;
-    ctx.fillText("GAME OVER", CONFIG.SCREEN_WIDTH / 2, CONFIG.SCREEN_HEIGHT / 2 - 20);
+    ctx.fillText("GAME OVER", CONFIG.SCREEN_WIDTH / 2, CONFIG.SCREEN_HEIGHT / 2 - 80);
 
     ctx.shadowBlur = 0;
-    ctx.font = 'bold 32px sans-serif';
+
+    // Draw Buttons
+    const btnW = 400;
+    const btnH = 60;
+    const centerX = CONFIG.SCREEN_WIDTH / 2;
+    const centerY = CONFIG.SCREEN_HEIGHT / 2 + 20;
+
+    // Continue Button
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.strokeStyle = '#00E676';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(centerX - btnW / 2, centerY, btnW, btnH);
+    ctx.fillRect(centerX - btnW / 2, centerY, btnW, btnH);
+
+    ctx.font = 'bold 24px sans-serif';
     ctx.fillStyle = '#fff';
-    ctx.fillText("TOUCH TO RESTART", CONFIG.SCREEN_WIDTH / 2, CONFIG.SCREEN_HEIGHT / 2 + 80);
+    ctx.fillText("CONTINUE (CHANGE HERO)", centerX, centerY + 38);
+
+    // Quit Button
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.strokeStyle = '#ff5252';
+    ctx.strokeRect(centerX - btnW / 2, centerY + 80, btnW, btnH);
+    ctx.fillRect(centerX - btnW / 2, centerY + 80, btnW, btnH);
+
+    ctx.fillStyle = '#ccc';
+    ctx.fillText("QUIT TO MENU", centerX, centerY + 118);
 }
 
 export function drawStageClear(ctx) {

@@ -70,26 +70,7 @@
         </div>
     </div>
     <script src="game.js" type="module"></script>
-    <!-- [Dev Tools] Improved for Mobile: Collapsible & Non-blocking -->
-    <div id="dev-tools">
-        <button id="dev-toggle" onclick="toggleDevPanel()">🛠️ DEV</button>
-        <div id="dev-panel" class="hidden">
-            <button onclick="window.gameCheat('killBoss')" style="background: red;">☠️ KILL BOSS</button>
-            <button onclick="window.gameCheat('maxPower')" style="background: orange;">💪 MAX POWER</button>
-            <button onclick="window.gameCheat('fullBomb')" style="background: blue;">💣 FULL BOMB</button>
-            <button onclick="window.gameCheat('invincible')" style="background: green;">🛡️ GOD MODE</button>
-            <button onclick="window.gameCheat('nextStage')" style="background: purple;">⏭️ NEXT STAGE</button>
-            <button onclick="window.gameCheat('ending')" style="background: #111; border: 1px solid white;">🎬 FORCE
-                ENDING</button>
-        </div>
-    </div>
-
-    <script>
-        function toggleDevPanel() {
-            const panel = document.getElementById('dev-panel');
-            panel.classList.toggle('hidden');
-        }
-    </script>
+    <script src="game.js" type="module"></script>
 </body>
 
 </html>

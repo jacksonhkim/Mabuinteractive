@@ -56,8 +56,8 @@ export function draw(ctx, state) {
                 ctx.bezierCurveTo(-10, -18, 0, -18, 0, -10); ctx.bezierCurveTo(0, -18, 10, -18, 10, -10);
                 ctx.bezierCurveTo(10, -5, 0, 0, 0, 5); ctx.fill();
             } else if (b.type === 'SHIELD_EFFECT') {
-                ctx.beginPath(); ctx.strokeStyle = '#FF5252'; ctx.lineWidth = 3;
-                ctx.arc(0, 0, 60, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.strokeStyle = '#FF5252'; ctx.lineWidth = 5;
+                ctx.arc(0, 0, 110, 0, Math.PI * 2); ctx.stroke();
                 ctx.globalAlpha = 0.3; ctx.fillStyle = '#FFEBEE'; ctx.fill(); ctx.globalAlpha = 1.0;
             }
             ctx.restore();

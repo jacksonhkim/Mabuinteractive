@@ -310,6 +310,12 @@ async function startGame() {
         state.isSelectingCharacter = true;
         state.selectedCharIndex = 0;
 
+        // [New] Mobile Detection Fallback: If touch is detected, ensure controls are visible
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            const controls = document.getElementById('mobile-controls');
+            if (controls) controls.style.display = 'block';
+        }
+
         // Smooth transition to select music
         sound.startBGM('SELECT');
 
@@ -317,14 +323,50 @@ async function startGame() {
         console.error("Asset Load Error:", err);
     }
     window.removeEventListener('click', startGame);
+    window.removeEventListener('touchstart', startGame);
 
     // [New] Add global click listener for map 'GO' and Game Over Restart
-    const handleGlobalAction = () => {
+    const handleGlobalAction = (e) => {
+        // [Optimization] If it's a touch on a control button, don't trigger global action
+        if (e.target.closest('.control-group')) return;
+
         if (state.isWorldMapActive && state.isWorldMapReady) {
             window.goNextStage();
         }
         if (state.gameOver) {
-            window.handleRestart();
+            // Check button clicks on Game Over screen
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = CONFIG.SCREEN_WIDTH / rect.width;
+            const scaleY = CONFIG.SCREEN_HEIGHT / rect.height;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const canvasX = (clientX - rect.left) * scaleX;
+            const canvasY = (clientY - rect.top) * scaleY;
+
+            const btnW = 400;
+            const btnH = 60;
+            const centerX = CONFIG.SCREEN_WIDTH / 2;
+            const centerY = CONFIG.SCREEN_HEIGHT / 2 + 20;
+
+            // 1. Continue Button (Character Select)
+            if (canvasX >= centerX - btnW / 2 && canvasX <= centerX + btnW / 2 &&
+                canvasY >= centerY && canvasY <= centerY + btnH) {
+                state.isContinuing = true;
+                state.gameOver = false;
+                state.isSelectingCharacter = true;
+                sound.playConfirm();
+                sound.startBGM('SELECT');
+                return;
+            }
+
+            // 2. Quit Button
+            if (canvasX >= centerX - btnW / 2 && canvasX <= centerX + btnW / 2 &&
+                canvasY >= centerY + 80 && canvasY <= centerY + 80 + btnH) {
+                window.handleRestart();
+                return;
+            }
         }
     };
     window.addEventListener('click', handleGlobalAction);
@@ -341,11 +383,13 @@ window.addEventListener('keydown', (e) => {
 });
 
 function confirmCharacter() {
-    if (state.gameActive) return;
+    if (state.gameActive && !state.isContinuing) return;
 
+    const isCont = state.isContinuing;
     state.isSelectingCharacter = false;
     state.gameActive = true;
     state.gameOver = false;
+    state.isContinuing = false;
 
     // Apply Character Stats
     const char = CHARACTERS[state.selectedCharIndex];
@@ -353,15 +397,38 @@ function confirmCharacter() {
     state.player.id = char.id;
     state.player.shotDelay = char.shotDelay;
 
+    // Character Specific Stats update (Size/Speed)
+    state.player.width = 192;
+    state.player.height = 192;
+
     // UI Update
     document.getElementById('ui-layer').classList.remove('hidden');
     const hud = document.getElementById('hud');
     if (hud) hud.classList.remove('hidden');
-    updateLivesUI();
-    updateBombUI();
-    sound.playGameStart();
-    sound.startBGM('STAGE_1');
-    startDialogue(1);
+
+    if (isCont) {
+        // Continue Logic: Reset basic stats but keep stage/score
+        state.lives = 3;
+        state.player.bombCount = 3;
+        state.player.powerLevel = 1; // Penalty for dying
+        state.player.invincible = true;
+        state.player.invincibleTime = 120;
+        state.player.x = 100;
+        state.player.y = 300;
+        state.enemies = []; // Clear current enemies for fair resume
+        state.enemyBullets = [];
+        updateLivesUI();
+        updateBombUI();
+        sound.playConfirm();
+        sound.startBGM(`STAGE_${state.currentStage}`);
+    } else {
+        // Fresh start
+        updateLivesUI();
+        updateBombUI();
+        sound.playGameStart();
+        sound.startBGM(`STAGE_${state.currentStage}`);
+        startDialogue(state.currentStage);
+    }
 }
 
 // Game Loop

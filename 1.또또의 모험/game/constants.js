@@ -2,18 +2,18 @@
 export const CONFIG = {
     SCREEN_WIDTH: 1280,
     SCREEN_HEIGHT: 720,
-    PLAYER_SPEED: 2.5,
+    PLAYER_SPEED: 9.0,
     FRICTION: 0.9,
     FPS: 60,
     GAME_SPEED: 1.0
 };
 
 export const CHARACTERS = [
-    { id: 'toto', name: '또또', speed: 4.0, power: '일반', range: '광역', shotDelay: 200, color: '#ffcc00' },
-    { id: 'lulu', name: '루루', speed: 5.5, power: '일반', range: '좁음', shotDelay: 130, color: '#F06292' },
-    { id: 'kaka', name: '카카', speed: 2.8, power: '강력', range: '중앙', shotDelay: 350, color: '#4E342E' },
-    { id: 'momo', name: '모모', speed: 3.5, power: '일반', range: '광역', shotDelay: 220, color: '#D32F2F' },
-    { id: 'pipi', name: '피피', speed: 4.5, power: '일반', range: '유도', shotDelay: 180, color: '#2E7D32' }
+    { id: 'toto', name: '또또', speed: 6.8, power: '일반', range: '광역', shotDelay: 200, color: '#ffcc00' },
+    { id: 'lulu', name: '루루', speed: 9.5, power: '일반', range: '좁음', shotDelay: 130, color: '#F06292' },
+    { id: 'kaka', name: '카카', speed: 5.2, power: '강력', range: '중앙', shotDelay: 350, color: '#4E342E' },
+    { id: 'momo', name: '모모', speed: 5.8, power: '일반', range: '광역', shotDelay: 220, color: '#D32F2F' },
+    { id: 'pipi', name: '피피', speed: 7.5, power: '일반', range: '유도', shotDelay: 180, color: '#2E7D32' }
 ];
 
 export const ENEMY_TYPES = {
