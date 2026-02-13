@@ -195,20 +195,13 @@ export function startDialogue(stage) {
     showNextDialogue();
 }
 
-// Global reference for reliable listener cleanup
-let activeDialogueFunc = null;
+// Global reference for reliable listener cleanup - REMOVED interactions
+// let activeDialogueFunc = null;
 
 export function showNextDialogue() {
     const dialogues = STAGE_DIALOGUES[state.currentStage];
     const box = document.getElementById('dialogue-box');
 
-    // Cleanup any existing listeners
-    if (activeDialogueFunc) {
-        window.removeEventListener('click', activeDialogueFunc);
-        window.removeEventListener('keydown', activeDialogueFunc);
-        window.removeEventListener('touchstart', activeDialogueFunc);
-        activeDialogueFunc = null;
-    }
     if (!dialogues || state.dialogueIndex >= dialogues.length) {
         state.isDialogueActive = false;
         if (box) box.classList.add('hidden');
@@ -222,33 +215,18 @@ export function showNextDialogue() {
         box.querySelector('.character-name').innerText = displayName;
         box.querySelector('.text').innerText = d.text.replace(/또또/g, charName);
     }
-
-    activeDialogueFunc = (e) => {
-        if (e && e.type === 'keydown' && e.code !== 'Space' && e.code !== 'Enter' && e.code !== 'ArrowRight') return;
-        if (e && e.type === 'touchstart') e.preventDefault();
-        window.advanceDialogue();
-    };
-
-    setTimeout(() => {
-        if (state.isDialogueActive) {
-            window.addEventListener('click', activeDialogueFunc);
-            window.addEventListener('keydown', activeDialogueFunc);
-            window.addEventListener('touchstart', activeDialogueFunc);
-        }
-    }, 200);
 }
 
 // Global helper for mobile controls
 window.advanceDialogue = () => {
     if (!state.isDialogueActive) return false;
 
-    // Remove active listeners immediately
-    if (activeDialogueFunc) {
-        window.removeEventListener('click', activeDialogueFunc);
-        window.removeEventListener('keydown', activeDialogueFunc);
-        window.removeEventListener('touchstart', activeDialogueFunc);
-        activeDialogueFunc = null;
+    // Debounce to prevent instant skipping
+    const now = Date.now();
+    if (now - (state.lastDialogueTime || 0) < 300) {
+        return false;
     }
+    state.lastDialogueTime = now;
 
     state.dialogueIndex++;
     showNextDialogue();

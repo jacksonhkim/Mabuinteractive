@@ -153,7 +153,7 @@ window.addEventListener('keydown', (e) => {
 
         // Dialogue / Branching logic
         if (state.isDialogueActive && (e.code === 'Space' || e.code === 'Enter')) {
-            // handled in showNextDialogue
+            window.advanceDialogue();
         }
     }
 });
@@ -375,12 +375,7 @@ async function startGame() {
 
         // [New] Dialogue Advance Logic (Centralized)
         if (state.isDialogueActive) {
-            // Debounce to prevent instant skipping
-            const now = Date.now();
-            if (now - (state.lastDialogueTime || 0) > 300) {
-                state.lastDialogueTime = now;
-                window.advanceDialogue();
-            }
+            window.advanceDialogue();
             return;
         }
 
