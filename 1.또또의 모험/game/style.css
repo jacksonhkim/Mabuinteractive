@@ -208,6 +208,8 @@ body {
     display: flex;
     padding: 20px;
     z-index: 1000;
+    pointer-events: auto;
+    /* Allow clicking the box to advance dialogue */
     transition: opacity 0.3s, transform 0.3s;
 }
 

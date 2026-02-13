@@ -156,16 +156,27 @@ export function startWorldMap() {
 
 // 대화 시스템
 export function startDialogue(stage) {
-    const dialogues = STAGE_DIALOGUES[stage];
-    if (!dialogues) return;
+    if (!STAGE_DIALOGUES[stage]) return;
+    state.currentStage = stage; // Fix: Sync state with requested stage
     state.isDialogueActive = true;
     state.dialogueIndex = 0;
     showNextDialogue();
 }
 
+// Global reference for reliable listener cleanup
+let activeDialogueFunc = null;
+
 export function showNextDialogue() {
     const dialogues = STAGE_DIALOGUES[state.currentStage];
     const box = document.getElementById('dialogue-box');
+
+    // Cleanup any existing listeners
+    if (activeDialogueFunc) {
+        window.removeEventListener('click', activeDialogueFunc);
+        window.removeEventListener('keydown', activeDialogueFunc);
+        window.removeEventListener('touchstart', activeDialogueFunc);
+        activeDialogueFunc = null;
+    }
     if (!dialogues || state.dialogueIndex >= dialogues.length) {
         state.isDialogueActive = false;
         if (box) box.classList.add('hidden');
@@ -174,39 +185,42 @@ export function showNextDialogue() {
     const d = dialogues[state.dialogueIndex];
     if (box) {
         box.classList.remove('hidden');
-        const charName = CHARACTERS[state.selectedCharIndex].name;
+        const charName = CHARACTERS[state.selectedCharIndex]?.name || '또또';
         const displayName = (d.name === '또또') ? charName : d.name;
         box.querySelector('.character-name').innerText = displayName;
         box.querySelector('.text').innerText = d.text.replace(/또또/g, charName);
     }
 
-    const nextFunc = (e) => {
-        if (e.type === 'keydown' && e.code !== 'Space' && e.code !== 'Enter') return;
-        if (e.type === 'touchstart') e.preventDefault();
-
-        window.removeEventListener('click', nextFunc);
-        window.removeEventListener('keydown', nextFunc);
-        window.removeEventListener('touchstart', nextFunc);
-
-        state.dialogueIndex++;
-        showNextDialogue();
+    activeDialogueFunc = (e) => {
+        if (e && e.type === 'keydown' && e.code !== 'Space' && e.code !== 'Enter' && e.code !== 'ArrowRight') return;
+        if (e && e.type === 'touchstart') e.preventDefault();
+        window.advanceDialogue();
     };
 
     setTimeout(() => {
-        window.addEventListener('click', nextFunc);
-        window.addEventListener('keydown', nextFunc);
-        window.addEventListener('touchstart', nextFunc);
+        if (state.isDialogueActive) {
+            window.addEventListener('click', activeDialogueFunc);
+            window.addEventListener('keydown', activeDialogueFunc);
+            window.addEventListener('touchstart', activeDialogueFunc);
+        }
     }, 200);
 }
 
 // Global helper for mobile controls
 window.advanceDialogue = () => {
-    if (state.isDialogueActive) {
-        state.dialogueIndex++;
-        showNextDialogue();
-        return true;
+    if (!state.isDialogueActive) return false;
+
+    // Remove active listeners immediately
+    if (activeDialogueFunc) {
+        window.removeEventListener('click', activeDialogueFunc);
+        window.removeEventListener('keydown', activeDialogueFunc);
+        window.removeEventListener('touchstart', activeDialogueFunc);
+        activeDialogueFunc = null;
     }
-    return false;
+
+    state.dialogueIndex++;
+    showNextDialogue();
+    return true;
 };
 
 export function startEndingSequence(ctx) {
