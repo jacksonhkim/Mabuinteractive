@@ -187,10 +187,19 @@ function handleDPadTouch(e) {
     const centerY = rect.height / 2;
     const threshold = 20;
 
-    if (y < centerY - threshold) state.keys['ArrowUp'] = true;
-    if (y > centerY + threshold) state.keys['ArrowDown'] = true;
-    if (x < centerX - threshold) state.keys['ArrowLeft'] = true;
-    if (x > centerX + threshold) state.keys['ArrowRight'] = true;
+    const up = y < centerY - threshold;
+    const down = y > centerY + threshold;
+    const left = x < centerX - threshold;
+    const right = x > centerX + threshold;
+
+    if (state.isSelectingCharacter) {
+        handleDPadNavigation(left, right);
+    } else {
+        state.keys['ArrowUp'] = up;
+        state.keys['ArrowDown'] = down;
+        state.keys['ArrowLeft'] = left;
+        state.keys['ArrowRight'] = right;
+    }
 }
 
 if (dPad) {
@@ -208,10 +217,32 @@ const actionBtn = document.getElementById('action-btn');
 if (actionBtn) {
     actionBtn.addEventListener('touchstart', (e) => {
         e.preventDefault();
+
+        // Character Selection Confirm
+        if (state.isSelectingCharacter) {
+            confirmCharacter();
+            return;
+        }
+
         state.keys['Space'] = true;
         if (state.isWorldMapReady) window.goNextStage();
     });
     actionBtn.addEventListener('touchend', (e) => { e.preventDefault(); state.keys['Space'] = false; });
+}
+
+// Logic to handle D-pad navigation for menus
+let lastDPadSignal = 0;
+function handleDPadNavigation(left, right) {
+    if (Date.now() - lastDPadSignal < 250) return; // Debounce
+    if (left) {
+        state.selectedCharIndex = (state.selectedCharIndex - 1 + CHARACTERS.length) % CHARACTERS.length;
+        sound.playSelect();
+        lastDPadSignal = Date.now();
+    } else if (right) {
+        state.selectedCharIndex = (state.selectedCharIndex + 1) % CHARACTERS.length;
+        sound.playSelect();
+        lastDPadSignal = Date.now();
+    }
 }
 
 // Global Start Logic
@@ -245,6 +276,12 @@ async function startGame() {
         ]);
 
         document.getElementById('start-screen').classList.add('hidden');
+
+        // [Fix] Show UI layer for Mobile Controls (Character select needs them)
+        document.getElementById('ui-layer').classList.remove('hidden');
+        const hud = document.getElementById('hud');
+        if (hud) hud.classList.add('hidden'); // Ensure HUD is still hidden
+
         state.isSelectingCharacter = true;
         state.selectedCharIndex = 0;
 
@@ -266,6 +303,7 @@ async function startGame() {
 
 window.startGame = startGame;
 window.addEventListener('click', startGame, { once: true });
+window.addEventListener('touchstart', startGame, { once: true });
 window.addEventListener('keydown', (e) => {
     if (!state.gameActive && !state.isSelectingCharacter && (e.code === 'Space' || e.code === 'Enter')) {
         startGame();
@@ -287,6 +325,8 @@ function confirmCharacter() {
 
     // UI Update
     document.getElementById('ui-layer').classList.remove('hidden');
+    const hud = document.getElementById('hud');
+    if (hud) hud.classList.remove('hidden');
     updateLivesUI();
     updateBombUI();
     sound.playGameStart();
