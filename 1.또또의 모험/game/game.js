@@ -371,46 +371,57 @@ async function startGame() {
                 }
             }
         }
-
-        if (state.gameOver) {
-            // Check button clicks on Game Over screen
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = CONFIG.SCREEN_WIDTH / rect.width;
-            const scaleY = CONFIG.SCREEN_HEIGHT / rect.height;
-
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-            const canvasX = (clientX - rect.left) * scaleX;
-            const canvasY = (clientY - rect.top) * scaleY;
-
-            const btnW = 400;
-            const btnH = 60;
-            const centerX = CONFIG.SCREEN_WIDTH / 2;
-            const centerY = CONFIG.SCREEN_HEIGHT / 2 + 20;
-
-            // 1. Continue Button (Character Select)
-            if (canvasX >= centerX - btnW / 2 && canvasX <= centerX + btnW / 2 &&
-                canvasY >= centerY && canvasY <= centerY + btnH) {
-                state.isContinuing = true;
-                state.gameOver = false;
-                state.isSelectingCharacter = true;
-                sound.playConfirm();
-                sound.startBGM('SELECT');
-                return;
-            }
-
-            // 2. Quit Button
-            if (canvasX >= centerX - btnW / 2 && canvasX <= centerX + btnW / 2 &&
-                canvasY >= centerY + 80 && canvasY <= centerY + 80 + btnH) {
-                window.handleRestart();
-                return;
-            }
-        }
-    };
-    window.addEventListener('click', handleGlobalAction);
-    window.addEventListener('touchstart', handleGlobalAction);
+    }
 }
+
+// [New] Dialogue Advance Logic (Centralized)
+if (state.isDialogueActive) {
+    // Debounce to prevent instant skipping
+    const now = Date.now();
+    if (now - (state.lastDialogueTime || 0) > 300) {
+        state.lastDialogueTime = now;
+        window.advanceDialogue();
+    }
+    return;
+}
+
+if (state.gameOver) {
+    // Check button clicks on Game Over screen
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = CONFIG.SCREEN_WIDTH / rect.width;
+    const scaleY = CONFIG.SCREEN_HEIGHT / rect.height;
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    const canvasX = (clientX - rect.left) * scaleX;
+    const canvasY = (clientY - rect.top) * scaleY;
+
+    const btnW = 400;
+    const btnH = 60;
+    const centerX = CONFIG.SCREEN_WIDTH / 2;
+    const centerY = CONFIG.SCREEN_HEIGHT / 2 + 20;
+
+    // 1. Continue Button (Character Select)
+    if (canvasX >= centerX - btnW / 2 && canvasX <= centerX + btnW / 2 &&
+        canvasY >= centerY && canvasY <= centerY + btnH) {
+        state.isContinuing = true;
+        state.gameOver = false;
+        state.isSelectingCharacter = true;
+        sound.playConfirm();
+        sound.startBGM('SELECT');
+        return;
+    }
+
+    // 2. Quit Button
+    if (canvasX >= centerX - btnW / 2 && canvasX <= centerX + btnW / 2 &&
+        canvasY >= centerY + 80 && canvasY <= centerY + 80 + btnH) {
+        window.handleRestart();
+        return;
+    }
+};
+window.addEventListener('click', handleGlobalAction);
+window.addEventListener('touchstart', handleGlobalAction);
 
 window.startGame = startGame;
 window.addEventListener('click', startGame, { once: true });
