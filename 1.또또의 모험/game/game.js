@@ -218,9 +218,15 @@ if (actionBtn) {
     actionBtn.addEventListener('touchstart', (e) => {
         e.preventDefault();
 
-        // Character Selection Confirm
+        // 1. Character Selection Confirm
         if (state.isSelectingCharacter) {
             confirmCharacter();
+            return;
+        }
+
+        // 2. Advance Dialogue
+        if (state.isDialogueActive) {
+            window.advanceDialogue();
             return;
         }
 

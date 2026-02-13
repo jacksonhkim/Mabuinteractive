@@ -167,7 +167,9 @@ export function showNextDialogue() {
     const dialogues = STAGE_DIALOGUES[state.currentStage];
     const box = document.getElementById('dialogue-box');
     if (!dialogues || state.dialogueIndex >= dialogues.length) {
-        state.isDialogueActive = false; if (box) box.classList.add('hidden'); return;
+        state.isDialogueActive = false;
+        if (box) box.classList.add('hidden');
+        return;
     }
     const d = dialogues[state.dialogueIndex];
     if (box) {
@@ -177,15 +179,35 @@ export function showNextDialogue() {
         box.querySelector('.character-name').innerText = displayName;
         box.querySelector('.text').innerText = d.text.replace(/또또/g, charName);
     }
+
     const nextFunc = (e) => {
         if (e.type === 'keydown' && e.code !== 'Space' && e.code !== 'Enter') return;
-        window.removeEventListener('click', nextFunc); window.removeEventListener('keydown', nextFunc);
-        state.dialogueIndex++; showNextDialogue();
+        if (e.type === 'touchstart') e.preventDefault();
+
+        window.removeEventListener('click', nextFunc);
+        window.removeEventListener('keydown', nextFunc);
+        window.removeEventListener('touchstart', nextFunc);
+
+        state.dialogueIndex++;
+        showNextDialogue();
     };
+
     setTimeout(() => {
-        window.addEventListener('click', nextFunc); window.addEventListener('keydown', nextFunc);
+        window.addEventListener('click', nextFunc);
+        window.addEventListener('keydown', nextFunc);
+        window.addEventListener('touchstart', nextFunc);
     }, 200);
 }
+
+// Global helper for mobile controls
+window.advanceDialogue = () => {
+    if (state.isDialogueActive) {
+        state.dialogueIndex++;
+        showNextDialogue();
+        return true;
+    }
+    return false;
+};
 
 export function startEndingSequence(ctx) {
     console.log("Ending Sequence Started");
