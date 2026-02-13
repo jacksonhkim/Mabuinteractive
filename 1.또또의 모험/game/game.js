@@ -333,6 +333,45 @@ async function startGame() {
         if (state.isWorldMapActive && state.isWorldMapReady) {
             window.goNextStage();
         }
+        if (state.isSelectingCharacter) {
+            // Character Card Click Logic
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = CONFIG.SCREEN_WIDTH / rect.width;
+            const scaleY = CONFIG.SCREEN_HEIGHT / rect.height;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const canvasX = (clientX - rect.left) * scaleX;
+            const canvasY = (clientY - rect.top) * scaleY;
+
+            const cardW = 160;
+            const cardH = 240;
+            const gap = 20;
+            const totalW = CHARACTERS.length * cardW + (CHARACTERS.length - 1) * gap;
+            const startX = (CONFIG.SCREEN_WIDTH - totalW) / 2;
+            const startY = CONFIG.SCREEN_HEIGHT / 2 - cardH / 2;
+
+            for (let i = 0; i < CHARACTERS.length; i++) {
+                const x = startX + i * (cardW + gap);
+                const y = startY;
+
+                if (canvasX >= x && canvasX <= x + cardW &&
+                    canvasY >= y && canvasY <= y + cardH) {
+
+                    if (state.selectedCharIndex === i) {
+                        // Confirm if clicked again
+                        confirmCharacter();
+                    } else {
+                        // Select
+                        state.selectedCharIndex = i;
+                        sound.playSelect();
+                    }
+                    return;
+                }
+            }
+        }
+
         if (state.gameOver) {
             // Check button clicks on Game Over screen
             const rect = canvas.getBoundingClientRect();
