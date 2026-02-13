@@ -202,10 +202,7 @@ export function showNextDialogue() {
     const dialogues = STAGE_DIALOGUES[state.currentStage];
     const box = document.getElementById('dialogue-box');
 
-    console.log(`[UI] showNextDialogue: Stage ${state.currentStage}, Index ${state.dialogueIndex}`);
-
     if (!dialogues || state.dialogueIndex >= dialogues.length) {
-        console.log("[UI] Dialogue Complete. Resuming Game.");
         state.isDialogueActive = false;
         if (box) box.classList.add('hidden');
         return;
@@ -222,13 +219,11 @@ export function showNextDialogue() {
 
 // Global helper for mobile controls
 window.advanceDialogue = () => {
-    console.log(`[UI] advanceDialogue called. isActive: ${state.isDialogueActive}`);
     if (!state.isDialogueActive) return false;
 
     // Debounce to prevent instant skipping
     const now = Date.now();
     if (now - (state.lastDialogueTime || 0) < 300) {
-        console.log("[UI] Debounce hit");
         return false;
     }
     state.lastDialogueTime = now;
