@@ -23,3 +23,18 @@ package-lock.json
 Assets/Plugins/Editor/JetBrains*
 ExportedObj/
 .plastic/
+
+# Internal Documents & Sensitive Assets (SECURITY FIX)
+"1.또또의 모험/프로젝트_문서/"
+"Company_Mabu/"
+"agent assets/"
+"Mabu_Project1/"
+*.md
+!index.html
+!1.또또의 모험/game/**/*.md
+config.mjs
+gemini_helper.mjs
+peter_report.mjs
+slack_bot.mjs
+analyze_excel.mjs
+generate_airport_rates.mjs

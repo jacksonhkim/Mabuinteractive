@@ -214,6 +214,7 @@ function confirmCharacter() {
     document.getElementById('ui-layer').classList.remove('hidden');
     updateLivesUI();
     updateBombUI();
+    sound.playGameStart(); // 게임 시작 임팩트 사운드 재생
     // Start Stage 1
     sound.startBGM('STAGE_1');
     startDialogue(1);
