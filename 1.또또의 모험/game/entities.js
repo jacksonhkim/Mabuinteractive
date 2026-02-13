@@ -502,56 +502,56 @@ export function bossShoot(boss) {
     const b = boss || state.boss;
     if (b.type === 1) {
         for (let i = 0; i < 3; i++) {
-            state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -7, vy: (i - 1) * 1.5, width: 12, height: 6, color: '#ff5252' });
+            state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -7, vy: (i - 1) * 1.5, width: 15, height: 8, color: '#ff5252' });
         }
     } else if (b.type === 2) {
         for (let i = 0; i < 5; i++) {
-            state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -5 - Math.random() * 2, vy: (i - 2) * 1.5 + (Math.random() - 0.5), width: 10, height: 10, color: '#aa00ff' });
+            state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -5 - Math.random() * 2, vy: (i - 2) * 1.5 + (Math.random() - 0.5), width: 12, height: 12, color: '#aa00ff' });
         }
     } else if (b.type === 3) {
-        state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -12, vy: 0, width: 30, height: 8, color: '#00e5ff' });
-        state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -8, vy: 3, width: 20, height: 6, color: '#00e5ff' });
-        state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -8, vy: -3, width: 20, height: 6, color: '#00e5ff' });
+        state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -12, vy: 0, width: 36, height: 10, color: '#00e5ff' });
+        state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -8, vy: 3, width: 24, height: 8, color: '#00e5ff' });
+        state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -8, vy: -3, width: 24, height: 8, color: '#00e5ff' });
     } else if (b.type === 4) {
         for (let i = 0; i < 5; i++) {
-            state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -15, vy: (Math.random() - 0.5) * 10, width: 15, height: 4, color: '#cfd8dc' });
+            state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -15, vy: (Math.random() - 0.5) * 10, width: 18, height: 5, color: '#cfd8dc' });
         }
     } else if (b.type === 5) {
         for (let i = 0; i < 8; i++) {
             const angle = (Math.PI * 2 / 8) * i;
-            state.enemyBullets.push({ x: b.x + b.width / 2, y: b.y + b.height / 2, vx: Math.cos(angle) * 4 - 2, vy: Math.sin(angle) * 4, width: 10, height: 10, color: '#e040fb' });
+            state.enemyBullets.push({ x: b.x + b.width / 2, y: b.y + b.height / 2, vx: Math.cos(angle) * 4 - 2, vy: Math.sin(angle) * 4, width: 12, height: 12, color: '#e040fb' });
         }
     } else if (b.type === 6) {
         for (let i = 0; i < 3; i++) {
-            state.enemyBullets.push({ x: b.x, y: b.y + 40, vx: -6 - i, vy: (Math.random() - 0.5) * 2, width: 40, height: 10, color: '#ff3d00' });
+            state.enemyBullets.push({ x: b.x, y: b.y + 40, vx: -6 - i, vy: (Math.random() - 0.5) * 2, width: 48, height: 12, color: '#ff3d00' });
         }
     } else if (b.type === 7) {
         for (let i = 0; i < 6; i++) {
-            state.enemyBullets.push({ x: b.x + b.width / 2, y: b.y + b.height / 2, vx: (Math.random() - 0.8) * 8, vy: (Math.random() - 0.5) * 8, width: 12, height: 12, color: '#795548' });
+            state.enemyBullets.push({ x: b.x + b.width / 2, y: b.y + b.height / 2, vx: (Math.random() - 0.8) * 8, vy: (Math.random() - 0.5) * 8, width: 14, height: 14, color: '#795548' });
         }
     } else if (b.type === 8) {
         for (let i = 0; i < 4; i++) {
-            state.enemyBullets.push({ x: b.x + Math.random() * b.width, y: b.y + b.height, vx: -3, vy: 5 + Math.random() * 5, width: 8, height: 14, color: '#76ff03' });
+            state.enemyBullets.push({ x: b.x + Math.random() * b.width, y: b.y + b.height, vx: -3, vy: 5 + Math.random() * 5, width: 10, height: 16, color: '#76ff03' });
         }
     } else if (b.type === 9) {
-        state.enemyBullets.push({ x: b.x, y: b.y + Math.random() * b.height, vx: -5, vy: (state.player.y - (b.y + b.height / 2)) * 0.05, width: 20, height: 8, color: '#ff1744' });
+        state.enemyBullets.push({ x: b.x, y: b.y + Math.random() * b.height, vx: -5, vy: (state.player.y - (b.y + b.height / 2)) * 0.05, width: 24, height: 10, color: '#ff1744' });
         if (b.timer % 100 === 0) {
             for (let i = 0; i < 4; i++) {
-                state.enemyBullets.push({ x: b.x + b.width / 2, y: b.y + b.height / 2, vx: Math.cos(Math.PI / 2 * i) * 6, vy: Math.sin(Math.PI / 2 * i) * 6, width: 50, height: 50, color: '#cfd8dc' });
+                state.enemyBullets.push({ x: b.x + b.width / 2, y: b.y + b.height / 2, vx: Math.cos(Math.PI / 2 * i) * 6, vy: Math.sin(Math.PI / 2 * i) * 6, width: 60, height: 60, color: '#cfd8dc' });
             }
         }
     } else if (b.type === 10) {
         if (b.hp > b.maxHp * 0.7) {
-            state.enemyBullets.push({ x: b.x, y: b.y + 40, vx: -12, vy: 0, width: 40, height: 10, color: '#ffd600' });
-            state.enemyBullets.push({ x: b.x, y: b.y + 100, vx: -12, vy: 0, width: 40, height: 10, color: '#ffd600' });
+            state.enemyBullets.push({ x: b.x, y: b.y + 40, vx: -12, vy: 0, width: 48, height: 12, color: '#ffd600' });
+            state.enemyBullets.push({ x: b.x, y: b.y + 100, vx: -12, vy: 0, width: 48, height: 12, color: '#ffd600' });
         } else if (b.hp > b.maxHp * 0.3) {
             for (let i = 0; i < 3; i++) {
-                state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -10 - Math.random() * 5, vy: (Math.random() - 0.5) * 10, width: 32, height: 8, color: '#e0e0e0' });
+                state.enemyBullets.push({ x: b.x, y: b.y + b.height / 2, vx: -10 - Math.random() * 5, vy: (Math.random() - 0.5) * 10, width: 38, height: 10, color: '#e0e0e0' });
             }
         } else {
             for (let i = 0; i < 12; i++) {
                 const angle = b.timer * 0.1 + (Math.PI * 2 / 12) * i;
-                state.enemyBullets.push({ x: b.x + b.width / 2, y: b.y + b.height / 2, vx: Math.cos(angle) * 6, vy: Math.sin(angle) * 6, width: 10, height: 10, color: '#ff1744' });
+                state.enemyBullets.push({ x: b.x + b.width / 2, y: b.y + b.height / 2, vx: Math.cos(angle) * 6, vy: Math.sin(angle) * 6, width: 12, height: 12, color: '#ff1744' });
             }
         }
     }
@@ -678,26 +678,26 @@ function handleEnemyCollisions(e, index) {
 }
 
 export function enemyShoot(e) {
-    const common = { x: e.x, y: e.y + e.height / 2, width: 10, height: 10, color: '#FF5252' };
+    // Base size increased from 10x10 -> 12x12
+    const common = { x: e.x, y: e.y + e.height / 2, width: 12, height: 12, color: '#FF5252' };
     switch (e.type) {
         case ENEMY_TYPES.SCOUT_WASP:
             state.enemyBullets.push({ ...common, vx: -7, vy: 0 }); // Faster bullet
             break;
         case ENEMY_TYPES.DANCING_BUTTERFLY:
-            // 5-way fan for more challenge
+            // 5-way fan
             for (let i = -2; i <= 2; i++) {
                 state.enemyBullets.push({ ...common, vx: -5, vy: i * 1.2, color: '#FF4081' });
             }
             break;
         case ENEMY_TYPES.BEETLE:
-            // Heavy aimed shot
+            // Heavy aimed shot (24 -> 28)
             const bdx = state.player.x - e.x;
             const bdy = state.player.y - e.y;
             const bdist = Math.sqrt(bdx * bdx + bdy * bdy);
-            state.enemyBullets.push({ ...common, vx: (bdx / bdist) * 4, vy: (bdy / bdist) * 4, width: 24, height: 24, color: '#FFD54F' });
+            state.enemyBullets.push({ ...common, vx: (bdx / bdist) * 4, vy: (bdy / bdist) * 4, width: 28, height: 28, color: '#FFD54F' });
             break;
         case ENEMY_TYPES.DRONE:
-            // [Optimization] Removed setTimeout - spawning in same frame or handle in state loop
             state.enemyBullets.push({ ...common, vx: -8, vy: 0, color: '#00E5FF' });
             state.enemyBullets.push({ ...common, x: e.x - 30, y: e.y + e.height / 2, vx: -8, vy: 0, color: '#00E5FF' });
             break;
