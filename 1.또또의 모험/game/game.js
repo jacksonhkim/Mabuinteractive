@@ -446,8 +446,8 @@ function confirmCharacter() {
     state.player.shotDelay = char.shotDelay;
 
     // Character Specific Stats update (Size/Speed)
-    state.player.width = 164;
-    state.player.height = 164;
+    state.player.width = 148;
+    state.player.height = 148;
 
     // UI Update
     document.getElementById('ui-layer').classList.remove('hidden');
