@@ -1,0 +1,25 @@
+node_modules/
+.env
+*.log
+dist/
+build/
+.vscode/
+.idea/
+.DS_Store
+package-lock.json
+.agent/
+.vite/
+.tmp/
+*.tmp
+
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+Assets/Plugins/Editor/JetBrains*
+ExportedObj/
+.plastic/

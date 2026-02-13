@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>또또의 모험 (The Adventure of Toto)</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        window.onerror = function (msg, url, lineNo, columnNo, error) {
+            const errDiv = document.createElement('div');
+            errDiv.style.position = 'fixed';
+            errDiv.style.top = '0';
+            errDiv.style.left = '0';
+            errDiv.style.width = '100%';
+            errDiv.style.background = 'red';
+            errDiv.style.color = 'white';
+            errDiv.style.zIndex = '100000';
+            errDiv.style.padding = '10px';
+            errDiv.style.fontFamily = 'monospace';
+            errDiv.innerText = 'ERROR: ' + msg + ' at ' + url + ':' + lineNo;
+            document.body.appendChild(errDiv);
+            return false;
+        };
+    </script>
+</head>
+
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="start-screen">
+            <h1 class="title">또또의 모험</h1>
+            <div class="start-message">CLICK TO START</div>
+            <div class="instruction-message">Space: Shoot | X: Bomb | Arrows: Move</div>
+            <div class="company-credit">Provided by Mabu Interactive</div>
+        </div>
+        <div id="ui-layer" class="hidden">
+            <div id="hud">
+                <div class="score-container">SCORE: <span id="score">000000</span></div>
+                <div class="life-container">LIFE: <span id="lives">★★★</span></div>
+                <div class="bomb-container">BOMB: <span id="bombs">💣💣💣</span></div>
+            </div>
+            <div id="dialogue-box" class="hidden">
+                <div class="character-portrait"></div>
+                <div class="dialogue-content">
+                    <div class="character-name">또또</div>
+                    <div class="text">오늘따라 숲이 너무 조용한 걸?</div>
+                </div>
+            </div>
+            <!-- 모바일 컨트롤 (터치용) -->
+            <div id="mobile-controls">
+                <div id="d-pad" class="control-group">
+                    <div id="up" class="d-btn" data-key="ArrowUp"></div>
+                    <div id="down" class="d-btn" data-key="ArrowDown"></div>
+                    <div id="left" class="d-btn" data-key="ArrowLeft"></div>
+                    <div id="right" class="d-btn" data-key="ArrowRight"></div>
+                </div>
+                <div id="action-btn" class="control-group" data-key="Space"></div>
+            </div>
+        </div>
+    </div>
+    <script src="game.js" type="module"></script>
+    <div id="dev-tools"
+        style="position: fixed; top: 10px; right: 10px; z-index: 9999; display: flex; flex-direction: column; gap: 5px;">
+        <button onclick="window.gameCheat('killBoss')"
+            style="padding: 10px; background: red; color: white; border: none; font-weight: bold; cursor: pointer;">☠️
+            KILL BOSS</button>
+        <button onclick="window.gameCheat('maxPower')"
+            style="padding: 10px; background: orange; color: white; border: none; font-weight: bold; cursor: pointer;">💪
+            MAX POWER</button>
+        <button onclick="window.gameCheat('fullBomb')"
+            style="padding: 10px; background: blue; color: white; border: none; font-weight: bold; cursor: pointer;">💣
+            FULL BOMB</button>
+        <button onclick="window.gameCheat('invincible')"
+            style="padding: 10px; background: green; color: white; border: none; font-weight: bold; cursor: pointer;">🛡️
+            GOD MODE</button>
+        <button onclick="window.gameCheat('nextStage')"
+            style="padding: 10px; background: purple; color: white; border: none; font-weight: bold; cursor: pointer;">⏭️
+            NEXT STAGE</button>
+        <button onclick="window.gameCheat('ending')"
+            style="padding: 10px; background: linear-gradient(45deg, #111, #444); color: white; border: none; font-weight: bold; cursor: pointer; border: 1px solid white;">🎬
+            FORCE ENDING</button>
+    </div>
+</body>
+
+</html>

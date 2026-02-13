@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Toto Asset Baker</title>
+    <style>
+        body {
+            background: #333;
+            color: #fff;
+            font-family: monospace;
+            text-align: center;
+        }
+
+        canvas {
+            border: 1px solid #555;
+            background: transparent;
+            margin: 10px;
+        }
+
+        .asset-card {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px;
+            background: #444;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎨 Toto's Asset Baker</h1>
+    <p>절차적 아트를 PNG 파일로 변환합니다.</p>
+
+    <div id="container"></div>
+
+    <script type="module">
+        import { drawPixelTotoV2, drawPixelWaspV2, drawPixelButterflyV2 } from './pixel_art_v2.js';
+
+        const ASSETS = [
+            { name: 'ch_toto', func: drawPixelTotoV2, w: 64, h: 64 },
+            { name: 'en_wasp', func: drawPixelWaspV2, w: 64, h: 64 },
+            { name: 'en_butterfly', func: drawPixelButterflyV2, w: 64, h: 64 }
+        ];
+
+        const container = document.getElementById('container');
+
+        ASSETS.forEach(asset => {
+            const card = document.createElement('div');
+            card.className = 'asset-card';
+
+            const title = document.createElement('h3');
+            title.innerText = asset.name + '.png';
+            card.appendChild(title);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = asset.w;
+            canvas.height = asset.h;
+            const ctx = canvas.getContext('2d');
+
+            // Draw Asset (Center it)
+            // 가상의 상태값(state)를 넘겨줘야 할 수도 있음
+            ctx.clearRect(0, 0, asset.w, asset.h);
+
+            // 캔버스 중앙에 그리기 위해 좌표 조정 (함수들이 중심점 기준이라 가정)
+            // drawPixelTotoV2(ctx, x, y, w, h) -> x,y는 좌상단
+            // 픽셀 아트 함수들이 (x, y)를 받아서 중앙(cx, cy)를 계산함.
+            // 여기서는 0,0에 w,h 크기로 그림
+            asset.func(ctx, 0, 0, asset.w, asset.h, 0);
+
+            card.appendChild(canvas);
+
+            const btn = document.createElement('button');
+            btn.innerText = '💾 Download PNG';
+            btn.onclick = () => downloadCanvas(canvas, asset.name);
+            card.appendChild(btn);
+
+            container.appendChild(card);
+        });
+
+        function downloadCanvas(canvas, name) {
+            const link = document.createElement('a');
+            link.download = `${name}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+
+</html>

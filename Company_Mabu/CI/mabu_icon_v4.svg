@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="g4" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF5E5E"/>
+      <stop offset="50%" style="stop-color:#FFA568"/>
+      <stop offset="100%" style="stop-color:#00BFA5"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" fill="white"/>
+  
+  <!-- Compact Icon -->
+  <g transform="translate(20, 40) scale(0.5)">
+    <path d="M40,140 Q40,40 100,80 T160,140 T220,80 T280,140 L280,60 Q280,0 220,0 T160,60 T100,0 Q40,0 40,60 Z" 
+          fill="none" stroke="url(#g4)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="100" cy="80" r="12" fill="white" stroke="#FF5E5E" stroke-width="4"/>
+    <circle cx="220" cy="80" r="12" fill="white" stroke="#00BFA5" stroke-width="4"/>
+  </g>
+  
+  <text x="100" y="160" font-family="'Malgun Gothic', sans-serif" font-weight="900" font-size="28" fill="#2d3436" text-anchor="middle" letter-spacing="2">MABU</text>
+</svg>

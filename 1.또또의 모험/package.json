@@ -1,0 +1,14 @@
+{
+  "description": "The Adventure of Toto - Mabu Interactive",
+  "scripts": {
+    "start": "npx serve game",
+    "dev": "npx serve game"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@slack/bolt": "^4.6.0",
+    "@slack/web-api": "^7.13.0",
+    "exceljs": "^4.4.0",
+    "pptxgenjs": "^4.0.1"
+  }
+}

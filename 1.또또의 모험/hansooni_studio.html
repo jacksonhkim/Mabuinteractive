@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>한순이 픽셀 아트 스튜디오 [Masterpiece Edition]</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap');
+
+        :root {
+            --bg-dark: #0a0a0c;
+            --panel-bg: #141418;
+            --accent: #ffd54f;
+            --accent-glow: rgba(255, 213, 79, 0.3);
+            --text-main: #e0e0e0;
+            --text-dim: #808080;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            padding: 40px;
+            background: var(--panel-bg);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .header {
+            text-align: left;
+            margin-bottom: 40px;
+            border-left: 4px solid var(--accent);
+            padding-left: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            letter-spacing: -1px;
+            color: var(--accent);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            margin: 5px 0 0 0;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .asset-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .asset-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .canvas-wrapper {
+            background: #000;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            aspect-ratio: 1;
+        }
+
+        canvas {
+            image-rendering: pixelated;
+            width: 100%;
+            height: 100%;
+            max-width: 256px;
+            max-height: 256px;
+        }
+
+        .asset-info h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--accent);
+        }
+
+        .asset-info span {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .download-btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
+
+        .download-btn:hover {
+            opacity: 0.8;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hansooni-sign {
+            font-weight: 300;
+            font-style: italic;
+            color: var(--text-dim);
+        }
+
+        .quote {
+            max-width: 600px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #aaa;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .quote b {
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>HANSOONI STUDIO</h1>
+            <p>Mabu Interactive - Enemy & Boss Production [v5.1 Downloadable]</p>
+        </div>
+
+        <div class="gallery" id="gallery">
+            <!-- Cards will be injected by script -->
+        </div>
+
+        <div class="quote">
+            "<b>한순입니다.</b> 다운로드가 되지 않았던 이유는 화면에 '그려진' 상태로만 존재했기 때문입니다. <br>
+            각 에셋 카드 하단에 <b>[PNG 다운로드]</b> 버튼을 추가했습니다. <br>
+            이제 제가 정성껏 찍은 픽셀들을 실제 파일로 소장하여 개발에 바로 활용하실 수 있습니다."
+        </div>
+
+        <div class="footer">
+            <div class="hansooni-sign">Produced by Hansooni (Art Director)</div>
+            <div style="color: var(--accent); font-weight: bold;">[V5.1 PRODUCTION]</div>
+        </div>
+    </div>
+
+    <script>
+        const assets = [
+            { id: 'boss_buzz', name: '버즈 (General Buzz)', type: 'Boss', size: 128 },
+            { id: 'enemy_wasp', name: '스카우트 (Wasp)', type: 'Enemy', size: 64 },
+            { id: 'enemy_butterfly', name: '나비 (Butterfly)', type: 'Enemy', size: 64 },
+            { id: 'enemy_beetle', name: '풍뎅이 (Beetle)', type: 'Enemy', size: 64 },
+            { id: 'enemy_drone', name: '드론 (Drone)', type: 'Enemy', size: 64 },
+            { id: 'enemy_ghost', name: '유령 (Ghost)', type: 'Enemy', size: 64 },
+            { id: 'enemy_slime', name: '슬라임 (Slime)', type: 'Enemy', size: 64 }
+        ];
+
+        const colors = {
+            'B': '#3E2723', 'Y': '#FFD54F', 'y': '#FFA000', 'O': '#E65100',
+            'H': '#FFF9C4', 'W': '#FFFFFF', 'E': '#1A1A1A', 'g': 'rgba(200, 230, 255, 0.4)', 'p': '#FFAB91',
+            'F': '#FFCCBC', 'P': '#E91E63', 'K': '#1A1A1A', 'R': '#D32F2F', 'T': 'rgba(129, 212, 250, 0.5)',
+            'M': '#3E2723', 'S': '#455A64', 'X': '#263238', 'o': '#FFB300', '.': '#78909C', 'G': '#43A047',
+            'r': '#FF1744', 's': '#B0BEC5'
+        };
+
+        const grids = {
+            boss_buzz: [
+                "      XXXXXXXXXXXXXXXXXXXX      ",
+                "    XXssssssssssssssssssssXX    ",
+                "  XXssssssssssssssssssssssssXX  ",
+                " XsssssssssXXXXXXXXsssssssssssX ",
+                "XssssssssXXKKKKKKKKXXssssssssssX",
+                "XsssssssXKKKKKKKKKKKKXsssssssssX",
+                "XsssssssXKKKrKKKKKKKKXsssssssssX",
+                "XssssssssXXKKKKKKKKXXssssssssssX",
+                "XyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyX",
+                "XyyyyyyyyyX........XyyyyyyyyyyyX",
+                "XooooooooooooooooooooooooooooooX",
+                " XssssssssssssssssssssssssssssX ",
+                "  XssssssssssX..XssssssssssssX  ",
+                "   XXssssssssssssssssssssssXX   ",
+                "     XXXXXXXXXXXXXXXXXXXXXX     "
+            ],
+            enemy_wasp: [
+                "      XXXX      ",
+                "    XXyyyyXX    ",
+                "  XXyyyyyyyyXX  ",
+                " XyyyyyyyyyyyyX ",
+                "XyyKKKyyyyKKKyyX",
+                "XyKKrKyyyyKrKKyX",
+                "XyKKKKyyyyKKKKyX",
+                "XooooooooooooooX",
+                "XooooooooooooooX",
+                "XssssssssssssssX",
+                " XssssssssssssX ",
+                "  XssssssssssX  ",
+                "   XssssssssX   ",
+                "    XXssssXX    ",
+                "      XXXX      ",
+                "       RR       "
+            ],
+            enemy_butterfly: [
+                "  MMMM    MMMM  ",
+                " MMMMMMM MMMMMMM",
+                "MMMMMMMMMMMMMMMM",
+                "MMMMMMMMMMMMMMMM",
+                " MMMMMMMMMMMMMM ",
+                "  MMMMMMMMMMMM  ",
+                "   MMMKKKKMMM   ",
+                "    MKKKKKKM    ",
+                "     KKKKKK     ",
+                "    KKKKKKKK    ",
+                "   KKKKKKKKKK   ",
+                "  MMMMMMMMMMMM  ",
+                " MMMMMMMMMMMMMM ",
+                "MMMMMMMMMMMMMMMM",
+                "MMMMMMMMMMMMMMMM",
+                " MMMMMMM MMMMMMM"
+            ],
+            enemy_beetle: [
+                "      XXXX      ",
+                "    XXssssXX    ",
+                "  XXssssssssXX  ",
+                " XssssssssssssX ",
+                "XssssssssssssssX",
+                "XsssssXXXXsssssX",
+                "XssssXXKKXXssssX",
+                "XssssXKKKKXssssX",
+                "XooooooooooooooX",
+                "XooooooooooooooX",
+                "XssssssssssssssX",
+                " XssssssssssssX ",
+                "  XXssssssssXX  ",
+                "    XXssssXX    ",
+                "      XXXX      ",
+                "     KK  KK     "
+            ],
+            enemy_drone: [
+                "      XXXX      ",
+                "    XXssssXX    ",
+                "  XXssssssssXX  ",
+                " XssssXXXXXXXXX ",
+                "XssssXXRRRRRRXXS",
+                "XssssXRRRRRRRRXS",
+                "XssssXXRRRRRRXXS",
+                "XssssXXXXXXXXXXS",
+                "XssssssssssssssS",
+                " XssssssssssssX ",
+                "  XXssssssssXX  ",
+                "    XXssssXX    ",
+                "      XXXX      ",
+                "     KK  KK     ",
+                "    KK    KK    "
+            ],
+            enemy_ghost: [
+                "      WWWW      ",
+                "    WWWWWWWW    ",
+                "   WWWWWWWWWW   ",
+                "  WWWWWWWWWWWW  ",
+                " WWWWWWWWWWWWWW ",
+                "WWWWWWWWWWWWWWWW",
+                "WWWKKWWWWWWKKWWW",
+                "WWKKKKWWWWKKKKWW",
+                "WWKKKKWWWWKKKKWW",
+                "WWWWWWWWWWWWWWWW",
+                "WWWWWWWWWWWWWWWW",
+                " WWWWWWWWWWWWWW ",
+                "  WW  WW  WW  W ",
+                "   W   W   W    "
+            ],
+            enemy_slime: [
+                "      GGGG      ",
+                "    GGGGGGGG    ",
+                "   GGGGGGGGGG   ",
+                "  GGGGGGGGGGGG  ",
+                " GGGGGGGGGGGGGG ",
+                "GGGGGKGGGGGKGGGG",
+                "GGGGKKKGGGGKKKGG",
+                "GGGGGGGGGGGGGGGG",
+                " GGGGGGGGGGGGGG ",
+                "  GGGGGGGGGGGG  ",
+                "   GGGGGGGGGG   ",
+                "    GGGGGGGG    ",
+                "      GGGG      "
+            ]
+        };
+
+        function initGallery() {
+            const gallery = document.getElementById('gallery');
+            assets.forEach(asset => {
+                const card = document.createElement('div');
+                card.className = 'asset-card';
+                card.innerHTML = `
+                    <div class="canvas-wrapper">
+                        <canvas id="canvas-${asset.id}" width="${asset.size}" height="${asset.size}"></canvas>
+                    </div>
+                    <div class="asset-info">
+                        <h3>${asset.name}</h3>
+                        <span>${asset.type} (${asset.size}x${asset.size})</span>
+                        <button class="download-btn" onclick="downloadAsset('${asset.id}')">PNG 다운로드</button>
+                    </div>
+                `;
+                gallery.appendChild(card);
+                renderAsset(asset.id);
+            });
+        }
+
+        function renderAsset(id) {
+            const canvas = document.getElementById(`canvas-${id}`);
+            const ctx = canvas.getContext('2d');
+            const grid = grids[id];
+            if (!grid) return;
+
+            const gridH = grid.length;
+            const gridW = grid[0].length;
+            const pSize = Math.floor(canvas.width / Math.max(gridW, gridH));
+            const offsetX = (canvas.width - gridW * pSize) / 2;
+            const offsetY = (canvas.height - gridH * pSize) / 2;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            grid.forEach((row, ry) => {
+                row.split('').forEach((pixel, rx) => {
+                    if (pixel === ' ') return;
+                    ctx.fillStyle = colors[pixel] || '#ff00ff';
+                    ctx.fillRect(Math.floor(offsetX + rx * pSize), Math.floor(offsetY + ry * pSize), pSize, pSize);
+                });
+            });
+        }
+
+        function downloadAsset(id) {
+            const canvas = document.getElementById(`canvas-${id}`);
+            const link = document.createElement('a');
+            link.download = `${id}_hansooni.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        window.onload = initGallery;
+    </script>
+</body>
+
+</html>

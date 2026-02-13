@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <!-- Deep Mesh Gradient -->
+    <linearGradient id="mabuGrad4" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF5E5E;stop-opacity:1" /> <!-- Deep Coral -->
+      <stop offset="50%" style="stop-color:#FFA568;stop-opacity:1" /> <!-- Soft Peach -->
+      <stop offset="100%" style="stop-color:#00BFA5;stop-opacity:1" /> <!-- Tech Mint -->
+    </linearGradient>
+    
+    <!-- Subtle Inner Glow instead of drop shadow -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect width="800" height="400" fill="white"/>
+  
+  <!-- Sophisticated "M" Symbol (Infinity Loop Concept) -->
+  <g transform="translate(260, 100)">
+    <!-- Continuous Flow Line -->
+    <path d="M40,140 
+             Q40,40 100,80 
+             T160,140
+             T220,80
+             T280,140
+             L280,60
+             Q280,0 220,0
+             T160,60
+             T100,0
+             Q40,0 40,60
+             Z" 
+          fill="none" stroke="url(#mabuGrad4)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+          
+    <!-- Minimalist Points -->
+    <circle cx="100" cy="80" r="8" fill="white" stroke="#FF5E5E" stroke-width="3"/>
+    <circle cx="220" cy="80" r="8" fill="white" stroke="#00BFA5" stroke-width="3"/>
+  </g>
+
+  <!-- Typography: Sophisticated & Modern -->
+  <g transform="translate(400, 300)">
+    <text x="0" y="0" text-anchor="middle" font-family="'Malgun Gothic', 'Arial', sans-serif" font-weight="900" font-size="52" fill="#2d3436" letter-spacing="8">MABU</text>
+    <text x="0" y="40" text-anchor="middle" font-family="'Malgun Gothic', 'Arial', sans-serif" font-weight="300" font-size="20" fill="#636e72" letter-spacing="10">INTERACTIVE</text>
+  </g>
+  
+  <!-- Minimal Line -->
+  <rect x="350" y="360" width="100" height="2" fill="url(#mabuGrad4)"/>
+</svg>
