@@ -1,0 +1,12 @@
+node_modules/
+.env
+config.mjs
+프로젝트_문서/
+QA_AND_DEV_REPORT*.md
+QA_BUG_REPORT_FINAL.md
+DEV_INSTRUCTIONS.md
+peter_report.mjs
+slack_bot.mjs
+gemini_helper.mjs
+hansooni_studio.html
+게임실행.bat
