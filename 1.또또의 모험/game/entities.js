@@ -104,7 +104,7 @@ export function shoot() {
             state.bullets.push({ ...bulletData, x: p.x + p.width, y: p.y + p.height / 2 + 35, vy: 3.5 });
             break;
     }
-    sound.playShot();
+    sound.playShot(p.id);
 }
 
 export function fireCharacterChargeShot() {
@@ -161,7 +161,7 @@ export function fireCharacterChargeShot() {
             damage: 20 + (level * 5), hp: 999
         });
     }
-    sound.playExplosion();
+    sound.playChargeShot(charId);
 }
 
 export function spawnItem(x, y) {

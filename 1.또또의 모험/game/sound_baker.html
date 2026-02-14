@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Toto Sound Baker (Standalone)</title>
+    <style>
+        body {
+            background: #222;
+            color: #eee;
+            font-family: monospace;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #4caf50;
+        }
+
+        .category {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 20px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #4caf50;
+            border-color: #4caf50;
+            color: #000;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.recording {
+            background: #f44336;
+            border-color: #d32f2f;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        #log {
+            margin-top: 20px;
+            color: #aaa;
+            white-space: pre-wrap;
+            height: 150px;
+            overflow-y: auto;
+            background: #000;
+            padding: 10px;
+            border: 1px solid #333;
+        }
+
+        .warning {
+            color: #ff9800;
+            background: #332200;
+            padding: 10px;
+            border: 1px solid #ff9800;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎹 Toto Sound Baker (Standalone)</h1>
+    <div class="warning">
+        <strong>사용 안내:</strong><br>
+        1. 아래 "Initialize Audio Engine" 버튼을 클릭하세요.<br>
+        2. 각 사운드 버튼을 클릭하면 소리가 재생되고 자동으로 다운로드됩니다.<br>
+        3. 다운로드된 파일을 <code>game/assets/sound/</code> 폴더로 이동시키세요.
+    </div>
+
+    <div id="controls"></div>
+    <div id="log">Logs will appear here...</div>
+
+    <script>
+        // --- INLINED SOUND ENGINE (No dependencies) ---
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.isEnabled = false;
+                this.reverbNode = null;
+                this.bgmLoop = null;
+                this.currentBgmType = null;
+                this.beatCount = 0;
+                this.masterGain = null;
+                this.assets = {};
+                this.bgmSource = null;
+            }
+
+            async init() {
+                if (!this.ctx) {
+                    try {
+                        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.error("AudioContext not supported", e);
+                        return;
+                    }
+                }
+                if (this.ctx.state === 'suspended') await this.ctx.resume();
+
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.connect(this.ctx.destination);
+
+                // Unlock
+                const b = this.ctx.createBuffer(1, 1, 22050);
+                const s = this.ctx.createBufferSource();
+                s.buffer = b; s.connect(this.masterGain); s.start(0);
+
+                this.isEnabled = true;
+                this.reverbNode = await this.createReverb();
+                console.log("🔊 Mabu Sound Engine R&D Initialized");
+            }
+
+            // Simplified loadAssets for baker (we don't need to load files to record procedurals)
+            async loadAssets() { /* No-op for baker */ }
+            playBuffer(buffer) { /* No-op */ }
+
+            async createReverb() {
+                const duration = 2, decay = 2, rate = this.ctx.sampleRate, length = rate * duration;
+                const impulse = this.ctx.createBuffer(2, length, rate);
+                const left = impulse.getChannelData(0), right = impulse.getChannelData(1);
+                for (let i = 0; i < length; i++) {
+                    const n = i / length;
+                    left[i] = (Math.random() * 2 - 1) * Math.pow(1 - n, decay);
+                    right[i] = (Math.random() * 2 - 1) * Math.pow(1 - n, decay);
+                }
+                const convolver = this.ctx.createConvolver();
+                convolver.buffer = impulse;
+                return convolver;
+            }
+
+            playShot(charId = 'toto') {
+                if (!this.isEnabled) return;
+                const t = this.ctx.currentTime;
+                switch (charId) {
+                    case 'lulu':
+                        {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'sawtooth';
+                            osc.frequency.setValueAtTime(1200, t);
+                            osc.frequency.exponentialRampToValueAtTime(300, t + 0.1);
+                            gain.gain.setValueAtTime(0.1, t);
+                            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+                            osc.connect(gain); gain.connect(this.masterGain);
+                            osc.start(); osc.stop(t + 0.1);
+                        }
+                        break;
+                    case 'kaka':
+                        {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'square';
+                            osc.frequency.setValueAtTime(300, t);
+                            osc.frequency.exponentialRampToValueAtTime(50, t + 0.15);
+                            gain.gain.setValueAtTime(0.15, t);
+                            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+                            osc.connect(gain); gain.connect(this.masterGain);
+                            osc.start(); osc.stop(t + 0.15);
+                        }
+                        break;
+                    case 'pipi':
+                        {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(600, t);
+                            osc.frequency.linearRampToValueAtTime(800, t + 0.05);
+                            osc.frequency.linearRampToValueAtTime(400, t + 0.15);
+                            gain.gain.setValueAtTime(0.1, t);
+                            gain.gain.linearRampToValueAtTime(0, t + 0.15);
+                            osc.connect(gain); gain.connect(this.masterGain);
+                            osc.start(); osc.stop(t + 0.15);
+                        }
+                        break;
+                    case 'momo':
+                        {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(900, t);
+                            osc.frequency.exponentialRampToValueAtTime(1500, t + 0.05);
+                            gain.gain.setValueAtTime(0.1, t);
+                            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+                            osc.connect(gain); gain.connect(this.masterGain);
+                            osc.start(); osc.stop(t + 0.15);
+                        }
+                        break;
+                    case 'toto':
+                    default:
+                        {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'triangle';
+                            osc.frequency.setValueAtTime(880, t);
+                            osc.frequency.exponentialRampToValueAtTime(110, t + 0.15);
+                            gain.gain.setValueAtTime(0.1, t);
+                            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+                            osc.connect(gain); gain.connect(this.masterGain);
+                            osc.start(); osc.stop(t + 0.15);
+                        }
+                        break;
+                }
+            }
+
+            playChargeShot(charId) {
+                if (!this.isEnabled) return;
+                const t = this.ctx.currentTime;
+                switch (charId) {
+                    case 'toto':
+                        [880, 1100, 1320].forEach((f, i) => {
+                            this.genNote(f, 0.1, 'square', 0.1, this.masterGain);
+                            setTimeout(() => this.genNote(f * 1.5, 0.1, 'square', 0.1, this.masterGain), 50 + i * 30);
+                        });
+                        break;
+                    case 'lulu':
+                        {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'sawtooth';
+                            osc.frequency.setValueAtTime(400, t);
+                            osc.frequency.linearRampToValueAtTime(100, t + 1.0);
+                            gain.gain.setValueAtTime(0.2, t);
+                            gain.gain.linearRampToValueAtTime(0, t + 1.0);
+                            const lfo = this.ctx.createOscillator();
+                            lfo.frequency.value = 50;
+                            const lfoGain = this.ctx.createGain();
+                            lfoGain.gain.value = 200;
+                            lfo.connect(lfoGain);
+                            lfoGain.connect(osc.frequency);
+                            lfo.start(); lfo.stop(t + 1.0);
+                            osc.connect(gain); gain.connect(this.masterGain);
+                            osc.start(); osc.stop(t + 1.0);
+                        }
+                        break;
+                    case 'kaka':
+                        {
+                            const bufferSize = this.ctx.sampleRate * 1.5;
+                            const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                            const data = buffer.getChannelData(0);
+                            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                            const noise = this.ctx.createBufferSource();
+                            noise.buffer = buffer;
+                            const filter = this.ctx.createBiquadFilter();
+                            filter.type = 'lowpass';
+                            filter.frequency.setValueAtTime(500, t);
+                            filter.frequency.exponentialRampToValueAtTime(10, t + 1.5);
+                            const gain = this.ctx.createGain();
+                            gain.gain.setValueAtTime(0.5, t);
+                            gain.gain.exponentialRampToValueAtTime(0.01, t + 1.5);
+                            noise.connect(filter); filter.connect(gain); gain.connect(this.masterGain);
+                            noise.start();
+                        }
+                        break;
+                    case 'momo':
+                        [523, 659, 784, 1046, 1318, 1568].forEach((f, i) => {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.value = f;
+                            gain.gain.setValueAtTime(0, t + i * 0.05);
+                            gain.gain.linearRampToValueAtTime(0.1, t + i * 0.05 + 0.02);
+                            gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.05 + 0.3);
+                            osc.connect(gain); gain.connect(this.masterGain);
+                            osc.start(t + i * 0.05); osc.stop(t + i * 0.05 + 0.3);
+                        });
+                        break;
+                    case 'pipi':
+                        {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(200, t);
+                            osc.frequency.exponentialRampToValueAtTime(800, t + 0.2);
+                            osc.frequency.exponentialRampToValueAtTime(100, t + 0.8);
+                            gain.gain.setValueAtTime(0.3, t);
+                            gain.gain.linearRampToValueAtTime(0, t + 0.8);
+                            osc.connect(gain); gain.connect(this.masterGain);
+                            osc.start(); osc.stop(t + 0.8);
+                        }
+                        break;
+                    default:
+                        this.playExplosion();
+                }
+            }
+
+            playExplosion() {
+                if (!this.isEnabled) return;
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(100, t);
+                osc.frequency.exponentialRampToValueAtTime(40, t + 0.4);
+                gain.gain.setValueAtTime(0.3, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+                osc.connect(gain); gain.connect(this.masterGain);
+                osc.start(); osc.stop(t + 0.4);
+            }
+
+            playItemGet() {
+                if (!this.isEnabled) return;
+                const t = this.ctx.currentTime;
+                [523, 1046].forEach((f, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.setValueAtTime(f, t + i * 0.05);
+                    gain.gain.setValueAtTime(0.1, t + i * 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + i * 0.05 + 0.1);
+                    osc.connect(gain); gain.connect(this.masterGain);
+                    osc.start(t + i * 0.05); osc.stop(t + i * 0.05 + 0.1);
+                });
+            }
+
+            playSelect() {
+                if (!this.isEnabled) return;
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, t);
+                osc.frequency.exponentialRampToValueAtTime(880, t + 0.05);
+                gain.gain.setValueAtTime(0.05, t);
+                gain.gain.linearRampToValueAtTime(0, t + 0.05);
+                osc.connect(gain); gain.connect(this.masterGain);
+                osc.start(); osc.stop(t + 0.05);
+            }
+
+            playConfirm() {
+                if (!this.isEnabled) return;
+                const t = this.ctx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(f, t + i * 0.06);
+                    gain.gain.setValueAtTime(0.1, t + i * 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.06 + 0.3);
+                    osc.connect(gain); gain.connect(this.masterGain);
+                    osc.start(t + i * 0.06); osc.stop(t + i * 0.06 + 0.3);
+                });
+            }
+
+            playGameStart() {
+                if (!this.isEnabled) return;
+                const t = this.ctx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(f, t + i * 0.06);
+                    gain.gain.setValueAtTime(0.15, t + i * 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.06 + 0.4);
+                    osc.connect(gain); gain.connect(this.masterGain);
+                    osc.start(t + i * 0.06); osc.stop(t + i * 0.06 + 0.4);
+                });
+            }
+
+            startBGM(type = 'START') {
+                if (!this.isEnabled) return;
+                if (this.currentBgmType === type && this.bgmLoop) return;
+                this.stopBGM();
+                this.currentBgmType = type;
+                this.beatCount = 0;
+                const config = this.getBgmConfig(type);
+                const beatTime = 60 / config.tempo;
+                const masterGain = this.ctx.createGain();
+                masterGain.gain.value = config.volume;
+                if (this.reverbNode) {
+                    masterGain.connect(this.reverbNode);
+                    this.reverbNode.connect(this.masterGain);
+                }
+                masterGain.connect(this.masterGain);
+                this.bgmLoop = setInterval(() => {
+                    if (this.ctx.state === 'suspended') this.ctx.resume();
+                    const measure = Math.floor(this.beatCount / 4) % config.melody.length;
+                    const beat = this.beatCount % 4;
+                    if (beat === 0) {
+                        this.genNote(config.bass[measure % config.bass.length], beatTime * 1.5, 'sine', 0.2, masterGain);
+                    }
+                    const note = config.melody[measure][beat];
+                    if (note > 0) {
+                        this.genNote(note, 0.2, config.osc, 0.1, masterGain);
+                    }
+                    this.beatCount++;
+                }, beatTime * 1000);
+                console.log(`🎶 Playing BGM: ${type}`);
+            }
+
+            getBgmConfig(type) {
+                const themes = {
+                    'START': {
+                        tempo: 100, volume: 0.35, osc: 'triangle',
+                        bass: [130.81, 164.81, 196.00, 174.61],
+                        melody: [[392, 523, 659, 784], [329, 392, 523, 659], [392, 523, 659, 784], [440, 523, 659, 698]]
+                    },
+                    'SELECT': {
+                        tempo: 140, volume: 0.2, osc: 'square',
+                        bass: [196.00, 220.00],
+                        melody: [[392, 0, 440, 0], [493, 0, 523, 0]]
+                    },
+                    'STAGE_LOW': {
+                        tempo: 120, volume: 0.25, osc: 'triangle',
+                        bass: [130.81, 196.00, 220.00, 174.61],
+                        melody: [[261, 0, 329, 392], [196, 0, 220, 246]]
+                    },
+                    'STAGE_MID': {
+                        tempo: 140, volume: 0.25, osc: 'sawtooth',
+                        bass: [110.00, 130.81, 146.83, 123.47],
+                        melody: [[220, 220, 329, 329], [293, 293, 246, 246]]
+                    },
+                    'STAGE_HIGH': {
+                        tempo: 160, volume: 0.3, osc: 'square',
+                        bass: [87.31, 110.00, 116.54, 130.81],
+                        melody: [[349, 440, 466, 523], [698, 880, 932, 1046]]
+                    },
+                    'ENDING': {
+                        tempo: 80, volume: 0.4, osc: 'sine',
+                        bass: [130.81, 174.61, 196.00, 130.81],
+                        melody: [[523, 0, 0, 0], [698, 0, 0, 0], [784, 0, 0, 0], [1046, 0, 0, 0]]
+                    }
+                };
+                if (type.startsWith('STAGE_')) {
+                    const stage = parseInt(type.split('_')[1]);
+                    if (stage <= 3) return themes['STAGE_LOW'];
+                    if (stage <= 7) return themes['STAGE_MID'];
+                    return themes['STAGE_HIGH'];
+                }
+                return themes[type] || themes['STAGE_LOW'];
+            }
+
+            genNote(freq, dur, type, vol, dest) {
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type; osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(vol, t + 0.05);
+                gain.gain.linearRampToValueAtTime(0, t + dur);
+                osc.connect(gain); gain.connect(dest);
+                osc.start(); osc.stop(t + dur);
+            }
+
+            stopBGM() {
+                if (this.bgmLoop) { clearInterval(this.bgmLoop); this.bgmLoop = null; }
+            }
+        }
+
+        const sound = new SoundEngine();
+
+        // --- UI Logic ---
+        const SOUNDS = [
+            { cat: 'SFX - Shots', name: 'sfx_shot_toto', len: 500, action: () => sound.playShot('toto') },
+            { cat: 'SFX - Shots', name: 'sfx_shot_lulu', len: 500, action: () => sound.playShot('lulu') },
+            { cat: 'SFX - Shots', name: 'sfx_shot_kaka', len: 500, action: () => sound.playShot('kaka') },
+            { cat: 'SFX - Shots', name: 'sfx_shot_pipi', len: 500, action: () => sound.playShot('pipi') },
+            { cat: 'SFX - Shots', name: 'sfx_shot_momo', len: 500, action: () => sound.playShot('momo') },
+
+            { cat: 'SFX - Charge', name: 'sfx_charge_toto', len: 1500, action: () => sound.playChargeShot('toto') },
+            { cat: 'SFX - Charge', name: 'sfx_charge_lulu', len: 2000, action: () => sound.playChargeShot('lulu') },
+            { cat: 'SFX - Charge', name: 'sfx_charge_kaka', len: 2000, action: () => sound.playChargeShot('kaka') },
+            { cat: 'SFX - Charge', name: 'sfx_charge_pipi', len: 2000, action: () => sound.playChargeShot('pipi') },
+            { cat: 'SFX - Charge', name: 'sfx_charge_momo', len: 2000, action: () => sound.playChargeShot('momo') },
+
+            { cat: 'SFX - Common', name: 'sfx_explosion', len: 1000, action: () => sound.playExplosion() },
+            { cat: 'SFX - Common', name: 'sfx_item_get', len: 1000, action: () => sound.playItemGet() },
+            { cat: 'SFX - Common', name: 'sfx_select', len: 500, action: () => sound.playSelect() },
+            { cat: 'SFX - Common', name: 'sfx_confirm', len: 1000, action: () => sound.playConfirm() },
+            { cat: 'SFX - Common', name: 'sfx_game_start', len: 2000, action: () => sound.playGameStart() },
+
+            { cat: 'BGM', name: 'bgm_start', len: 10000, action: () => sound.startBGM('START') },
+            { cat: 'BGM', name: 'bgm_stage_low', len: 10000, action: () => sound.startBGM('STAGE_1') },
+            { cat: 'BGM', name: 'bgm_stage_mid', len: 10000, action: () => sound.startBGM('STAGE_4') },
+            { cat: 'BGM', name: 'bgm_stage_high', len: 10000, action: () => sound.startBGM('STAGE_8') },
+            { cat: 'BGM', name: 'bgm_ending', len: 10000, action: () => sound.startBGM('ENDING') },
+        ];
+
+        const logDiv = document.getElementById('log');
+        function log(msg) { logDiv.innerText += msg + '\n'; logDiv.scrollTop = logDiv.scrollHeight; }
+
+        let streamDest = null;
+
+        async function init() {
+            try {
+                await sound.init();
+                log("Sound Engine Initialized.");
+                if (!streamDest) {
+                    streamDest = sound.ctx.createMediaStreamDestination();
+                    sound.masterGain.connect(streamDest);
+                }
+                renderUI();
+                document.getElementById('init-btn').remove();
+            } catch (e) {
+                log("Error initializing: " + e);
+            }
+        }
+
+        function renderUI() {
+            const container = document.getElementById('controls');
+            const categories = {};
+            SOUNDS.forEach(s => {
+                if (!categories[s.cat]) categories[s.cat] = [];
+                categories[s.cat].push(s);
+            });
+
+            for (const cat in categories) {
+                const sect = document.createElement('div');
+                sect.className = 'category';
+                sect.innerHTML = `<h3>${cat}</h3>`;
+                const btnGroup = document.createElement('div');
+                btnGroup.className = 'btn-group';
+
+                categories[cat].forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.innerText = `💾 ${item.name}`;
+                    btn.onclick = () => bakeSound(item, btn);
+                    btnGroup.appendChild(btn);
+                });
+
+                sect.appendChild(btnGroup);
+                container.appendChild(sect);
+            }
+        }
+
+        async function bakeSound(item, btn) {
+            btn.disabled = true;
+            btn.classList.add('recording');
+            log(`Recording ${item.name}...`);
+            sound.stopBGM();
+
+            const chunks = [];
+            const rec = new MediaRecorder(streamDest.stream, { mimeType: 'audio/webm' });
+            rec.ondataavailable = e => chunks.push(e.data);
+            rec.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                download(blob, `${item.name}.mp3`);
+                btn.classList.remove('recording');
+                btn.disabled = false;
+                log(`Saved ${item.name}.mp3`);
+                sound.stopBGM();
+            };
+            rec.start();
+            item.action();
+            setTimeout(() => { rec.stop(); }, item.len);
+        }
+
+        function download(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        }
+
+        const startBtn = document.createElement('button');
+        startBtn.id = 'init-btn';
+        startBtn.innerText = "🔇 Initialize Audio Engine";
+        startBtn.style.fontSize = "1.5rem";
+        startBtn.onclick = init;
+        document.getElementById('controls').prepend(startBtn);
+
+    </script>
+</body>
+
+</html>
