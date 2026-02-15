@@ -395,28 +395,20 @@ export function drawPixelForestV2(ctx, CONFIG, state) {
     grad.addColorStop(0, style.skyTop); grad.addColorStop(1, style.skyBot);
     ctx.fillStyle = grad; ctx.fillRect(0, 0, CONFIG.SCREEN_WIDTH, CONFIG.SCREEN_HEIGHT);
 
-    // [New Stage 1 Theme] PixelSky Implementation
-    if (stage === 1) {
-        let layersDrawn = 0;
-        const drawLayer = (img, speed) => {
-            if (!img || !img.complete || img.naturalWidth === 0) return false;
-            const width = CONFIG.SCREEN_WIDTH;
-            let x = (bgOffset * speed) % width;
-            if (x > 0) x -= width;
-            x = Math.floor(x);
-            ctx.drawImage(img, x, 0, width + 1, CONFIG.SCREEN_HEIGHT);
-            ctx.drawImage(img, x + width, 0, width + 1, CONFIG.SCREEN_HEIGHT);
-            layersDrawn++;
-            return true;
-        };
-        drawLayer(BACKGROUND_IMAGES.layer01, 0.2);
-        drawLayer(BACKGROUND_IMAGES.layer02, 0.5);
-        drawLayer(BACKGROUND_IMAGES.layer03, 0.8);
+    // Helper: Draw Parallax Layer
+    const drawLayer = (img, speed, yOffset = 0, extraHeight = 0) => {
+        if (!img || !img.complete || img.naturalWidth === 0) return false;
+        const width = CONFIG.SCREEN_WIDTH;
+        let x = (bgOffset * speed) % width;
+        if (x > 0) x -= width;
+        x = Math.floor(x);
+        const h = CONFIG.SCREEN_HEIGHT + extraHeight;
+        ctx.drawImage(img, x, yOffset, width + 1, h);
+        ctx.drawImage(img, x + width, yOffset, width + 1, h);
+        return true;
+    };
 
-        if (layersDrawn > 0) return; // Only skip procedural if we actually drew PNG layers
-    }
-
-    // 2. Parallax Clouds
+    // 2. Parallax Clouds (Rendered *after* stage backgrounds but *before* God Rays for depth)
     const drawCloud = (cx, cy, scale, alpha) => {
         ctx.save();
         ctx.translate(cx, cy);
@@ -426,6 +418,39 @@ export function drawPixelForestV2(ctx, CONFIG, state) {
         drawRect(ctx, 10, 0, 20, 10); drawRect(ctx, -30, 5, 20, 10);
         ctx.restore();
     };
+
+    // [New Stage 1 Theme] PixelSky Implementation
+    if (stage === 1) {
+        let layersDrawn = false;
+        if (drawLayer(BACKGROUND_IMAGES.layer01, 0.2)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.layer02, 0.5)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.layer03, 0.8)) layersDrawn = true;
+
+        if (layersDrawn) return; // Only skip procedural if we actually drew PNG layers
+    } else if (stage === 2) {
+        // [Stage 2] Night Watch - 5 Layer Parallax
+        let layersDrawn = false;
+        if (drawLayer(BACKGROUND_IMAGES.s2_layer01, 0.2)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s2_layer02, 0.4)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s2_layer03, 0.6)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s2_layer04, 0.8)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s2_layer05, 1.0)) layersDrawn = true;
+
+        if (layersDrawn) return;
+    } else if (stage === 3) {
+        // [Stage 3] Sunset - 4 Layer Parallax with Adjustments to close gap
+        let layersDrawn = false;
+        // Layer 01: Sky - Default
+        if (drawLayer(BACKGROUND_IMAGES.s3_layer01, 0.2)) layersDrawn = true;
+        // Layer 02: Mid-distance - Move UP (-50) and Stretch (200) to cover top gap and meet bottom
+        if (drawLayer(BACKGROUND_IMAGES.s3_layer02, 0.3, -50, 200)) layersDrawn = true;
+        // Layer 03: Ground - Stretch UP to cover gap from bottom (yOffset -120, extraHeight +120)
+        if (drawLayer(BACKGROUND_IMAGES.s3_layer03, 0.5, -120, 120)) layersDrawn = true;
+        // Layer 04: Foreground - Default or slight adjust
+        if (drawLayer(BACKGROUND_IMAGES.s3_layer04, 0.7, -50, 50)) layersDrawn = true;
+
+        if (layersDrawn) return;
+    }
 
     const cloudSpacing = 500;
     const cloudCount = Math.ceil(CONFIG.SCREEN_WIDTH / cloudSpacing) + 2;
@@ -1537,151 +1562,606 @@ export function drawCharacterSelectionUI(ctx, CONFIG, characters, selectedIndex)
     ctx.restore();
 }
 
-// [World Map UI] Drawing
-// [World Map UI] RPG-Style Continental Drawing
+// [World Map UI] Tengai-Style RPG World Map
 export function drawWorldMap(ctx, CONFIG, state) {
     ctx.save();
-    // 1. Map Background (Antique Parchment Style)
-    ctx.fillStyle = '#e8d5b5';
-    ctx.fillRect(0, 0, CONFIG.SCREEN_WIDTH, CONFIG.SCREEN_HEIGHT);
+    const W = CONFIG.SCREEN_WIDTH;
+    const H = CONFIG.SCREEN_HEIGHT;
+    const t = Date.now() / 1000;
 
-    // Subtle Grid / Texture
-    ctx.strokeStyle = 'rgba(139, 69, 19, 0.1)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < CONFIG.SCREEN_WIDTH; i += 80) {
-        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, CONFIG.SCREEN_HEIGHT); ctx.stroke();
+    // ═══════════════════════════════════════════════════════
+    // 1. BACKGROUND — Fantasy Night Sky with Aurora & Depth
+    // ═══════════════════════════════════════════════════════
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+    skyGrad.addColorStop(0, '#05051a');
+    skyGrad.addColorStop(0.12, '#0a0a30');
+    skyGrad.addColorStop(0.28, '#14103f');
+    skyGrad.addColorStop(0.42, '#1c1555');
+    skyGrad.addColorStop(0.55, '#1a2040');
+    skyGrad.addColorStop(0.68, '#122a2a');
+    skyGrad.addColorStop(0.82, '#0e2218');
+    skyGrad.addColorStop(1, '#081510');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Aurora Borealis — soft flowing bands
+    for (let a = 0; a < 3; a++) {
+        const aY = 60 + a * 50;
+        const aGrad = ctx.createLinearGradient(0, aY - 30, 0, aY + 40);
+        const hue = [160, 200, 280][a];
+        aGrad.addColorStop(0, 'transparent');
+        aGrad.addColorStop(0.3, `hsla(${hue}, 70%, 50%, 0.06)`);
+        aGrad.addColorStop(0.5, `hsla(${hue}, 80%, 60%, 0.10)`);
+        aGrad.addColorStop(0.7, `hsla(${hue}, 70%, 50%, 0.05)`);
+        aGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = aGrad;
+        ctx.beginPath(); ctx.moveTo(0, aY - 30);
+        for (let x = 0; x <= W; x += 10) {
+            ctx.lineTo(x, aY + Math.sin(x * 0.008 + t * 0.3 + a * 2) * 25 + Math.sin(x * 0.003 + t * 0.15) * 15);
+        }
+        ctx.lineTo(W, aY + 40); ctx.lineTo(0, aY + 40); ctx.closePath(); ctx.fill();
     }
-    for (let i = 0; i < CONFIG.SCREEN_HEIGHT; i += 80) {
-        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(CONFIG.SCREEN_WIDTH, i); ctx.stroke();
+
+    // Nebula soft haze — colored patches
+    const drawNebula = (nx, ny, nr, col) => {
+        const ng = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
+        ng.addColorStop(0, col); ng.addColorStop(1, 'transparent');
+        ctx.fillStyle = ng; ctx.fillRect(nx - nr, ny - nr, nr * 2, nr * 2);
+    };
+    drawNebula(300, 100, 120, 'rgba(100, 50, 180, 0.06)');
+    drawNebula(900, 80, 150, 'rgba(40, 100, 160, 0.05)');
+    drawNebula(600, 150, 100, 'rgba(180, 60, 100, 0.04)');
+
+    // Multi-layer terrain with pixel shading
+    const terrainLayers = [
+        { y: 0.58, colors: ['rgba(18,50,35,0.3)', 'rgba(25,65,45,0.15)'] },
+        { y: 0.65, colors: ['rgba(22,60,40,0.5)', 'rgba(35,80,55,0.25)'] },
+        { y: 0.72, colors: ['rgba(18,50,30,0.65)', 'rgba(28,70,45,0.35)'] },
+        { y: 0.79, colors: ['rgba(14,40,25,0.8)', 'rgba(22,55,35,0.5)'] },
+        { y: 0.86, colors: ['rgba(10,30,18,0.9)', 'rgba(16,42,28,0.6)'] },
+    ];
+    terrainLayers.forEach((tl, li) => {
+        const baseY = H * tl.y;
+        // Dark base
+        ctx.fillStyle = tl.colors[0]; ctx.beginPath(); ctx.moveTo(0, H);
+        for (let x = 0; x <= W; x += 8) {
+            const h = Math.sin(x * 0.004 + li * 1.5) * 28 + Math.sin(x * 0.011 + li) * 14
+                + Math.sin(x * 0.002 - li * 0.7) * 18 + Math.cos(x * 0.007 + li * 3) * 8;
+            ctx.lineTo(x, baseY + h);
+        }
+        ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+        // Highlight edge
+        ctx.fillStyle = tl.colors[1]; ctx.beginPath(); ctx.moveTo(0, H);
+        for (let x = 0; x <= W; x += 8) {
+            const h = Math.sin(x * 0.004 + li * 1.5) * 28 + Math.sin(x * 0.011 + li) * 14
+                + Math.sin(x * 0.002 - li * 0.7) * 18 + Math.cos(x * 0.007 + li * 3) * 8;
+            ctx.lineTo(x, baseY + h + 3);
+        }
+        ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+    });
+
+    // ═══════════════════════════════════════════════════════
+    // 2. STARS — Rich Starfield with Shooting Stars
+    // ═══════════════════════════════════════════════════════
+    const starSeed = [
+        37, 71, 113, 157, 199, 241, 283, 337, 379, 421, 463, 509, 557, 601, 643,
+        691, 733, 787, 829, 877, 919, 967, 1013, 1061, 1103, 1151, 53, 97, 139,
+        181, 223, 269, 311, 353, 397, 439, 487, 523, 571, 613, 659, 701, 751,
+        797, 839, 883, 929, 971, 1019, 1067, 1109, 23, 67, 109, 151, 193, 239,
+        277, 319, 367, 409, 457, 499, 547, 593, 637, 683, 727, 773, 811, 859
+    ];
+    const starColors = ['#ffffff', '#ffe0b2', '#b3e5fc', '#f8bbd0', '#c5cae9', '#dcedc8'];
+    starSeed.forEach((s, i) => {
+        const sx = (s * 7 + i * 31) % W;
+        const sy = (s * 3 + i * 13) % (H * 0.52);
+        const brightness = 0.2 + 0.8 * Math.abs(Math.sin(t * (0.5 + i * 0.07) + s));
+        const size = (i % 5 === 0) ? 3 : (i % 3 === 0) ? 2 : 1;
+        ctx.globalAlpha = brightness * (1 - sy / (H * 0.55));
+        ctx.fillStyle = starColors[i % starColors.length];
+        ctx.fillRect(sx, sy, size, size);
+        // Cross sparkle on bright large stars
+        if (size >= 2 && brightness > 0.85) {
+            ctx.globalAlpha = brightness * 0.4;
+            ctx.fillRect(sx - 1, sy + size / 2, size + 2, 1);
+            ctx.fillRect(sx + size / 2, sy - 1, 1, size + 2);
+        }
+    });
+    // Shooting star
+    const shootT = (t * 0.4) % 8;
+    if (shootT < 1) {
+        const sx = 200 + shootT * 400, sy = 30 + shootT * 80;
+        ctx.globalAlpha = 1 - shootT;
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx - 30, sy - 8); ctx.stroke();
+        ctx.globalAlpha = (1 - shootT) * 0.3;
+        ctx.beginPath(); ctx.moveTo(sx - 30, sy - 8); ctx.lineTo(sx - 60, sy - 14); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // ═══════════════════════════════════════════════════════
+    // 3. TERRAIN DECORATIONS — High-Quality Pixel Art
+    // ═══════════════════════════════════════════════════════
+    // Zone 1-2: Enchanted Forest — multi-shade pixel trees
+    const drawPixelTree = (tx, ty, s = 1, variant = 0) => {
+        // Trunk with bark shading
+        ctx.fillStyle = '#3e2723'; ctx.fillRect(tx - 2 * s, ty, 4 * s, 10 * s);
+        ctx.fillStyle = '#4e342e'; ctx.fillRect(tx - 1 * s, ty, 2 * s, 10 * s);
+        // Canopy layers (3-tone shading)
+        const colors = variant === 0
+            ? ['#1b5e20', '#2e7d32', '#43a047', '#66bb6a'] // green
+            : ['#0d47a1', '#1565c0', '#1e88e5', '#42a5f5']; // night-blue
+        ctx.fillStyle = colors[0]; ctx.beginPath();
+        ctx.moveTo(tx, ty - 32 * s); ctx.lineTo(tx - 14 * s, ty - 4 * s); ctx.lineTo(tx + 14 * s, ty - 4 * s); ctx.fill();
+        ctx.fillStyle = colors[1]; ctx.beginPath();
+        ctx.moveTo(tx, ty - 28 * s); ctx.lineTo(tx - 11 * s, ty - 6 * s); ctx.lineTo(tx + 8 * s, ty - 8 * s); ctx.fill();
+        ctx.fillStyle = colors[2]; ctx.beginPath();
+        ctx.moveTo(tx, ty - 24 * s); ctx.lineTo(tx - 8 * s, ty - 8 * s); ctx.lineTo(tx + 5 * s, ty - 10 * s); ctx.fill();
+        // Highlight edge
+        ctx.fillStyle = colors[3]; ctx.globalAlpha = 0.5;
+        ctx.fillRect(tx - 2 * s, ty - 26 * s, 3 * s, 3 * s);
+        ctx.globalAlpha = 1;
+    };
+    [[60, 600, 1, 0], [110, 590, 1.2, 0], [160, 580, 0.9, 0], [210, 595, 1.1, 0],
+    [260, 575, 1, 1], [310, 540, 0.8, 1], [140, 615, 0.7, 0], [90, 625, 0.9, 0],
+    [340, 555, 1, 1], [185, 560, 0.6, 0], [40, 610, 0.8, 0], [280, 560, 1, 1]
+    ].forEach(([x, y, s, v]) => drawPixelTree(x, y, s, v));
+    // Firefly particles in forest zone
+    for (let f = 0; f < 8; f++) {
+        const fx = 80 + (f * 37) % 280, fy = 540 + (f * 23) % 80;
+        const fb = 0.3 + 0.7 * Math.abs(Math.sin(t * 2 + f * 1.5));
+        ctx.globalAlpha = fb * 0.6; ctx.fillStyle = '#c6ff00';
+        ctx.fillRect(fx, fy + Math.sin(t * 1.5 + f) * 5, 2, 2);
+    }
+    ctx.globalAlpha = 1;
+
+    // Zone 3-4: Canyon — layered rock with shading
+    const drawRock = (rx, ry, rw, rh) => {
+        ctx.fillStyle = '#3e2723'; ctx.beginPath(); // Shadow
+        ctx.moveTo(rx, ry); ctx.lineTo(rx - rw / 2, ry + rh); ctx.lineTo(rx + rw / 2, ry + rh); ctx.fill();
+        ctx.fillStyle = '#5d4037'; ctx.beginPath(); // Mid
+        ctx.moveTo(rx - 1, ry + 2); ctx.lineTo(rx - rw / 2 + 3, ry + rh); ctx.lineTo(rx + rw / 2 - 2, ry + rh); ctx.fill();
+        ctx.fillStyle = '#795548'; ctx.beginPath(); // Highlight face
+        ctx.moveTo(rx, ry + 3); ctx.lineTo(rx + rw / 4, ry + rh * 0.6); ctx.lineTo(rx + rw / 2 - 2, ry + rh); ctx.fill();
+        ctx.fillStyle = '#8d6e63'; ctx.globalAlpha = 0.4; // Top highlight
+        ctx.fillRect(rx - 2, ry + 2, 4, 3); ctx.globalAlpha = 1;
+    };
+    drawRock(460, 530, 35, 40); drawRock(510, 545, 22, 28); drawRock(540, 535, 18, 22);
+    drawRock(610, 420, 28, 32); drawRock(570, 460, 20, 24); drawRock(590, 440, 15, 18);
+    // Sand/dust particles
+    for (let d = 0; d < 5; d++) {
+        ctx.globalAlpha = 0.15; ctx.fillStyle = '#ffab91';
+        const dx = 460 + d * 35, dy = 510 + Math.sin(t * 0.5 + d) * 8;
+        ctx.fillRect(dx, dy, 3, 2); ctx.globalAlpha = 1;
     }
 
-    // 2. Continents / Regions (Enhanced with Borders)
-    const drawRegion = (x, y, w, h, color, name, decoration = 'none') => {
-        // Shadow/Depth
-        ctx.fillStyle = 'rgba(0,0,0,0.1)';
-        ctx.beginPath(); ctx.ellipse(x + 5, y + 5, w, h, 0, 0, Math.PI * 2); ctx.fill();
-
-        // Base
-        ctx.fillStyle = color;
-        ctx.beginPath(); ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 3; ctx.stroke();
-
-        // Label Decoration
-        ctx.fillStyle = '#4e342e';
-        ctx.font = 'italic bold 22px "Malgun Gothic"';
-        ctx.textAlign = 'center';
-        ctx.fillText(name, x, y - h - 15);
-
-        // Simple Decoration
-        if (decoration === 'mountains') {
-            ctx.fillStyle = 'rgba(255,255,255,0.3)';
-            ctx.beginPath(); ctx.moveTo(x - 30, y); ctx.lineTo(x, y - 40); ctx.lineTo(x + 30, y); ctx.fill();
-        } else if (decoration === 'waves') {
-            ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2;
-            for (let i = -2; i <= 2; i++) {
-                ctx.beginPath(); ctx.arc(x + i * 20, y, 10, 0, Math.PI); ctx.stroke();
-            }
+    // Zone 5-6: Mountains with 3-tone pixel shading + lava glow
+    const drawMountain = (mx, my, mw, mh, c1, c2, c3, snow) => {
+        ctx.fillStyle = c1; ctx.beginPath(); // Dark face
+        ctx.moveTo(mx, my - mh); ctx.lineTo(mx - mw / 2, my); ctx.lineTo(mx, my); ctx.fill();
+        ctx.fillStyle = c2; ctx.beginPath(); // Mid face
+        ctx.moveTo(mx, my - mh); ctx.lineTo(mx + mw / 2, my); ctx.lineTo(mx, my); ctx.fill();
+        ctx.fillStyle = c3; ctx.beginPath(); // Light ridge
+        ctx.moveTo(mx, my - mh); ctx.lineTo(mx + mw / 8, my - mh * 0.4); ctx.lineTo(mx, my - mh * 0.3); ctx.fill();
+        if (snow) {
+            ctx.fillStyle = snow; ctx.beginPath();
+            ctx.moveTo(mx, my - mh); ctx.lineTo(mx - mw / 7, my - mh * 0.65); ctx.lineTo(mx + mw / 8, my - mh * 0.6); ctx.fill();
         }
     };
+    drawMountain(490, 370, 60, 65, '#37474f', '#546e7a', '#607d8b', '#eceff1');
+    drawMountain(560, 390, 45, 45, '#455a64', '#607d8b', '#78909c', '#e0e0e0');
+    drawMountain(720, 410, 55, 55, '#4e342e', '#6d4c41', '#8d6e63', null);
+    // Lava glow between mountains
+    const lavaGlow = ctx.createRadialGradient(680, 420, 5, 680, 420, 40);
+    lavaGlow.addColorStop(0, 'rgba(255,87,34,0.25)'); lavaGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = lavaGlow; ctx.fillRect(640, 380, 80, 80);
+    // Lava dots
+    for (let l = 0; l < 4; l++) {
+        ctx.fillStyle = l % 2 === 0 ? '#ff5722' : '#ff9800'; ctx.globalAlpha = 0.5 + Math.sin(t * 3 + l) * 0.3;
+        ctx.fillRect(665 + l * 8, 415 + Math.sin(t * 2 + l) * 3, 2, 2);
+    } ctx.globalAlpha = 1;
 
-    drawRegion(250, 480, 220, 160, '#81c784', "VERDANT FOREST", 'mountains');
-    drawRegion(600, 450, 200, 130, '#64b5f6', "AZURE OCEAN", 'waves');
-    drawRegion(920, 380, 240, 180, '#ffab91', "IRON VALLEY", 'mountains');
-    drawRegion(1150, 200, 160, 140, '#b2ebf2', "SKY KINGDOM");
+    // Zone 7-8: Factory — detailed gears with teeth + toxic smoke
+    const drawGear = (gx, gy, gr, teeth) => {
+        ctx.save(); ctx.translate(gx, gy); ctx.rotate(t * 0.4 * (teeth > 7 ? -1 : 1));
+        ctx.strokeStyle = '#5d4037'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(0, 0, gr, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = '#4e342e'; ctx.beginPath(); ctx.arc(0, 0, gr * 0.3, 0, Math.PI * 2); ctx.fill();
+        for (let a = 0; a < teeth; a++) {
+            const ang = (a / teeth) * Math.PI * 2;
+            ctx.fillStyle = '#6d4c41';
+            ctx.fillRect(Math.cos(ang) * gr - 3, Math.sin(ang) * gr - 3, 6, 6);
+        }
+        ctx.restore();
+    };
+    drawGear(850, 465, 18, 8); drawGear(880, 445, 12, 6); drawGear(920, 475, 14, 7);
+    drawGear(960, 450, 10, 6); drawGear(940, 420, 8, 5);
+    // Toxic green smoke
+    for (let s = 0; s < 6; s++) {
+        const sx = 880 + s * 18, sy = 400 - s * 8 + Math.sin(t + s) * 6;
+        ctx.globalAlpha = 0.08 - s * 0.01; ctx.fillStyle = '#76ff03';
+        ctx.beginPath(); ctx.arc(sx, sy, 10 + s * 3, 0, Math.PI * 2); ctx.fill();
+    } ctx.globalAlpha = 1;
 
-    // 3. Map Decorations (Compass Rose)
-    const cx = 150, cy = 150;
-    ctx.strokeStyle = '#5d4037'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(cx, cy - 40); ctx.lineTo(cx, cy + 40); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx - 40, cy); ctx.lineTo(cx + 40, cy); ctx.stroke();
-    ctx.fillStyle = '#5d4037'; ctx.font = 'bold 16px Arial';
-    ctx.fillText("N", cx, cy - 45); ctx.fillText("S", cx, cy + 55);
-    ctx.fillText("W", cx - 50, cy + 5); ctx.fillText("E", cx + 50, cy + 5);
+    // Zone 9-10: Sky Fortress — volumetric clouds + golden castle
+    const drawCloud = (cx, cy, cw, alpha = 0.2) => {
+        const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, cw);
+        cg.addColorStop(0, `rgba(180,200,220,${alpha})`); cg.addColorStop(0.6, `rgba(150,170,200,${alpha * 0.5})`);
+        cg.addColorStop(1, 'transparent');
+        ctx.fillStyle = cg;
+        ctx.beginPath(); ctx.ellipse(cx, cy, cw, cw * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(cx - cw * 0.35, cy + 4, cw * 0.5, cw * 0.25, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(cx + cw * 0.4, cy + 2, cw * 0.55, cw * 0.25, 0, 0, Math.PI * 2); ctx.fill();
+    };
+    drawCloud(1020, 210, 45, 0.15); drawCloud(1100, 160, 50, 0.2);
+    drawCloud(1180, 130, 35, 0.18); drawCloud(1220, 180, 30, 0.12);
+    // Golden castle spire with pixel shading
+    ctx.fillStyle = '#5D4037'; ctx.fillRect(1188, 95, 24, 55); // Tower base dark
+    ctx.fillStyle = '#795548'; ctx.fillRect(1190, 95, 20, 55); // Tower mid
+    ctx.fillStyle = '#8d6e63'; ctx.fillRect(1192, 95, 8, 55);  // Tower highlight
+    // Spire roof
+    ctx.fillStyle = '#FFA000'; ctx.beginPath();
+    ctx.moveTo(1200, 60); ctx.lineTo(1186, 95); ctx.lineTo(1214, 95); ctx.fill();
+    ctx.fillStyle = '#FFD700'; ctx.beginPath();
+    ctx.moveTo(1200, 60); ctx.lineTo(1200, 95); ctx.lineTo(1214, 95); ctx.fill();
+    // Crown ornament
+    ctx.fillStyle = '#FFEB3B'; ctx.fillRect(1197, 56, 6, 6);
+    // Castle glow
+    const castleGlow = ctx.createRadialGradient(1200, 100, 5, 1200, 100, 60);
+    castleGlow.addColorStop(0, 'rgba(255,215,0,0.15)'); castleGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = castleGlow; ctx.fillRect(1140, 40, 120, 120);
 
-    // 4. Stage Node Coordinates (10 Stages) - RPG Path
-    const stageNodes = [
-        { x: 150, y: 580 }, { x: 280, y: 480 }, { x: 420, y: 530 }, // Forest
-        { x: 580, y: 450 }, { x: 740, y: 490 }, // Ocean
-        { x: 880, y: 410 }, { x: 980, y: 470 }, { x: 1080, y: 350 }, // Valley
-        { x: 1160, y: 220 }, { x: 1240, y: 140 } // Sky/Space
+    // ═══════════════════════════════════════════════════════
+    // 4. STAGE DATA — Theme Colors, Names, Coordinates
+    // ═══════════════════════════════════════════════════════
+    const stageData = [
+        { x: 150, y: 580, color: '#81C784', name: '평화로운 숲', glow: '#A5D6A7' },
+        { x: 300, y: 500, color: '#311B92', name: '밤의 숲', glow: '#7C4DFF' },
+        { x: 480, y: 550, color: '#FF6D00', name: '붉은 황혼', glow: '#FFAB40' },
+        { x: 620, y: 430, color: '#4FC3F7', name: '바람의 계곡', glow: '#81D4FA' },
+        { x: 500, y: 320, color: '#B3E5FC', name: '얼음 왕국', glow: '#E1F5FE' },
+        { x: 680, y: 380, color: '#D32F2F', name: '불타는 대지', glow: '#EF5350' },
+        { x: 850, y: 450, color: '#795548', name: '고철 처리장', glow: '#A1887F' },
+        { x: 950, y: 340, color: '#76FF03', name: '독극물 연구소', glow: '#B2FF59' },
+        { x: 1080, y: 250, color: '#546E7A', name: '스카이 포트리스', glow: '#90A4AE' },
+        { x: 1180, y: 130, color: '#FFD700', name: '황제의 알현실', glow: '#FFECB3' },
     ];
 
-    // 5. Draw Path Lines (Dash Style)
-    ctx.setLineDash([8, 8]);
-    ctx.strokeStyle = '#795548';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(stageNodes[0].x, stageNodes[0].y);
-    for (let i = 1; i < stageNodes.length; i++) {
-        ctx.lineTo(stageNodes[i].x, stageNodes[i].y);
-    }
-    ctx.stroke();
-    ctx.setLineDash([]);
+    // ═══════════════════════════════════════════════════════
+    // 5. PATH — Premium Dual-Line Golden Path
+    // ═══════════════════════════════════════════════════════
+    for (let i = 0; i < stageData.length - 1; i++) {
+        const from = stageData[i];
+        const to = stageData[i + 1];
+        const stageNum = i + 1;
+        const isCleared = stageNum <= state.currentStage;
+        const midX = (from.x + to.x) / 2;
+        const midY = (from.y + to.y) / 2 - 25;
 
-    // 6. Draw Nodes
-    stageNodes.forEach((node, i) => {
+        if (isCleared) {
+            // Glow underlay
+            ctx.setLineDash([]); ctx.lineWidth = 8;
+            ctx.strokeStyle = 'rgba(255,213,79,0.15)';
+            ctx.beginPath(); ctx.moveTo(from.x, from.y);
+            ctx.quadraticCurveTo(midX, midY, to.x, to.y); ctx.stroke();
+            // Main path
+            ctx.strokeStyle = '#FFD54F'; ctx.lineWidth = 3;
+            ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(255,213,79,0.4)';
+            ctx.beginPath(); ctx.moveTo(from.x, from.y);
+            ctx.quadraticCurveTo(midX, midY, to.x, to.y); ctx.stroke();
+            // Highlight line
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(from.x, from.y - 2);
+            ctx.quadraticCurveTo(midX, midY - 2, to.x, to.y - 2); ctx.stroke();
+            ctx.shadowBlur = 0;
+            // Sparkle particles along cleared path
+            for (let p = 0; p < 3; p++) {
+                const pt = (p + 1) / 4;
+                const px = from.x + (to.x - from.x) * pt;
+                const py = from.y + (to.y - from.y) * pt - 15 * Math.sin(pt * Math.PI);
+                const sparkle = 0.3 + 0.7 * Math.abs(Math.sin(t * 3 + p + i));
+                ctx.globalAlpha = sparkle * 0.6; ctx.fillStyle = '#fff';
+                ctx.fillRect(px - 1, py - 1, 2, 2);
+            }
+            ctx.globalAlpha = 1;
+        } else {
+            ctx.setLineDash([5, 10]);
+            ctx.strokeStyle = 'rgba(255,213,79,0.15)'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(from.x, from.y);
+            ctx.quadraticCurveTo(midX, midY, to.x, to.y); ctx.stroke();
+        }
+    }
+    ctx.setLineDash([]); ctx.shadowBlur = 0;
+
+    // ═══════════════════════════════════════════════════════
+    // 6. STAGE NODES — Premium Pixel-Art Styled
+    // ═══════════════════════════════════════════════════════
+    stageData.forEach((node, i) => {
         const stageNum = i + 1;
         const isActive = stageNum <= state.currentStage;
         const isNext = stageNum === state.currentStage + 1;
+        const isLocked = !isActive && !isNext;
+        const nodeR = 24;
 
-        if (isNext) { // Glow for next
-            ctx.shadowBlur = 20; ctx.shadowColor = '#fff';
-            ctx.fillStyle = 'rgba(255,255,255,0.8)';
-            ctx.beginPath(); ctx.arc(node.x, node.y, 24, 0, Math.PI * 2); ctx.fill();
-            ctx.shadowBlur = 0;
+        // === LOCKED STATE ===
+        if (isLocked) {
+            // Shadowed base
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath(); ctx.arc(node.x + 2, node.y + 2, nodeR, 0, Math.PI * 2); ctx.fill();
+            // Gradient node body
+            const lockGrad = ctx.createRadialGradient(node.x - 4, node.y - 4, 2, node.x, node.y, nodeR);
+            lockGrad.addColorStop(0, '#555'); lockGrad.addColorStop(1, '#2a2a2a');
+            ctx.fillStyle = lockGrad;
+            ctx.beginPath(); ctx.arc(node.x, node.y, nodeR, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#4a4a4a'; ctx.lineWidth = 2; ctx.stroke();
+            // Inner rim
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(node.x, node.y, nodeR - 3, 0, Math.PI * 2); ctx.stroke();
+            // Lock body
+            ctx.fillStyle = '#757575'; ctx.fillRect(node.x - 6, node.y - 1, 12, 9);
+            ctx.fillStyle = '#616161'; ctx.fillRect(node.x - 5, node.y, 10, 7);
+            // Lock shackle
+            ctx.strokeStyle = '#9e9e9e'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.arc(node.x, node.y - 4, 5, Math.PI, 0); ctx.stroke();
+            ctx.lineCap = 'butt';
+            // Keyhole
+            ctx.fillStyle = '#3a3a3a'; ctx.beginPath(); ctx.arc(node.x, node.y + 3, 2, 0, Math.PI * 2); ctx.fill();
+            // Label
+            ctx.fillStyle = '#555'; ctx.font = 'bold 10px "Malgun Gothic"'; ctx.textAlign = 'center';
+            ctx.fillText('???', node.x, node.y + nodeR + 15);
+            return;
         }
 
-        ctx.fillStyle = isActive ? '#388e3c' : (isNext ? '#fbc02d' : '#bdbdbd');
-        ctx.beginPath(); ctx.arc(node.x, node.y, 18, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+        // === NEXT STAGE (Premium Pulse Glow) ===
+        if (isNext) {
+            const pulse = 0.5 + 0.5 * Math.sin(t * 3);
+            const pulse2 = 0.5 + 0.5 * Math.sin(t * 5 + 1);
+            // Outer aura rings
+            ctx.globalAlpha = 0.06 + pulse2 * 0.06;
+            ctx.strokeStyle = node.glow; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(node.x, node.y, nodeR + 20, 0, Math.PI * 2); ctx.stroke();
+            ctx.globalAlpha = 0.1 + pulse * 0.1;
+            ctx.beginPath(); ctx.arc(node.x, node.y, nodeR + 14, 0, Math.PI * 2); ctx.stroke();
+            ctx.globalAlpha = 1;
+            // Glow fill
+            ctx.shadowBlur = 28 + pulse * 18; ctx.shadowColor = node.glow;
+            ctx.fillStyle = `rgba(255,255,255,${0.12 + pulse * 0.12})`;
+            ctx.beginPath(); ctx.arc(node.x, node.y, nodeR + 8, 0, Math.PI * 2); ctx.fill();
+            ctx.shadowBlur = 0;
+            // Node gradient body
+            const nextGrad = ctx.createRadialGradient(node.x - 5, node.y - 5, 2, node.x, node.y, nodeR);
+            nextGrad.addColorStop(0, node.glow); nextGrad.addColorStop(0.7, node.color); nextGrad.addColorStop(1, node.color);
+            ctx.fillStyle = nextGrad;
+            ctx.beginPath(); ctx.arc(node.x, node.y, nodeR, 0, Math.PI * 2); ctx.fill();
+            // Double border
+            ctx.strokeStyle = '#FFEB3B'; ctx.lineWidth = 3; ctx.stroke();
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(node.x, node.y, nodeR - 3, 0, Math.PI * 2); ctx.stroke();
+            // Glossy highlight
+            ctx.globalAlpha = 0.25; ctx.fillStyle = '#fff';
+            ctx.beginPath(); ctx.ellipse(node.x - 3, node.y - 8, 10, 5, -0.3, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1;
+            // Stage number
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 15px Arial'; ctx.textAlign = 'center';
+            ctx.fillText(stageNum, node.x, node.y + 5);
+            // Label with bg
+            const lbl = node.name; const lblW = ctx.measureText(lbl).width + 12;
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(node.x - lblW / 2, node.y + nodeR + 5, lblW, 16);
+            ctx.fillStyle = '#FFEB3B'; ctx.font = 'bold 11px "Malgun Gothic"';
+            ctx.fillText(lbl, node.x, node.y + nodeR + 17);
+            return;
+        }
 
-        ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
-        ctx.fillText(stageNum, node.x, node.y + 5);
+        // === CLEARED STATE ===
+        if (isActive) {
+            // Drop shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.beginPath(); ctx.arc(node.x + 1, node.y + 2, nodeR, 0, Math.PI * 2); ctx.fill();
+            // Ambient glow
+            ctx.shadowBlur = 14; ctx.shadowColor = node.glow;
+            // Gradient body
+            const actGrad = ctx.createRadialGradient(node.x - 4, node.y - 4, 2, node.x, node.y, nodeR);
+            actGrad.addColorStop(0, node.glow); actGrad.addColorStop(0.6, node.color);
+            actGrad.addColorStop(1, node.color);
+            ctx.fillStyle = actGrad;
+            ctx.beginPath(); ctx.arc(node.x, node.y, nodeR, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#FFD54F'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.shadowBlur = 0;
+            // Inner rim
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(node.x, node.y, nodeR - 3, 0, Math.PI * 2); ctx.stroke();
+            // Glossy highlight
+            ctx.globalAlpha = 0.2; ctx.fillStyle = '#fff';
+            ctx.beginPath(); ctx.ellipse(node.x - 3, node.y - 8, 9, 4, -0.3, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1;
+            // Check mark
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(node.x - 7, node.y + 1);
+            ctx.lineTo(node.x - 2, node.y + 6); ctx.lineTo(node.x + 8, node.y - 5); ctx.stroke();
+            ctx.lineCap = 'butt';
+            // Label with bg
+            const lbl = node.name; ctx.font = '11px "Malgun Gothic"';
+            const lblW = ctx.measureText(lbl).width + 10;
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.fillRect(node.x - lblW / 2, node.y + nodeR + 3, lblW, 15);
+            ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.textAlign = 'center';
+            ctx.fillText(lbl, node.x, node.y + nodeR + 14);
+        }
     });
 
-    // 7. Map Title (Calligraphy Style Feel)
-    ctx.fillStyle = '#3e2723';
-    ctx.font = '900 52px "Malgun Gothic"';
-    ctx.textAlign = 'left';
-    ctx.fillText("MAP OF ADVENTURE", 80, 80);
+    // ═══════════════════════════════════════════════════════
+    // 7. TITLE — Premium Embossed Title
+    // ═══════════════════════════════════════════════════════
+    ctx.textAlign = 'center';
+    // Decorative lines
+    ctx.strokeStyle = 'rgba(255,213,79,0.2)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(W / 2 - 180, 68); ctx.lineTo(W / 2 - 50, 68); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W / 2 + 50, 68); ctx.lineTo(W / 2 + 180, 68); ctx.stroke();
+    // Diamond ornaments
+    ctx.fillStyle = 'rgba(255,213,79,0.3)'; ctx.save();
+    ctx.translate(W / 2 - 185, 68); ctx.rotate(Math.PI / 4); ctx.fillRect(-3, -3, 6, 6); ctx.restore();
+    ctx.save(); ctx.translate(W / 2 + 185, 68); ctx.rotate(Math.PI / 4); ctx.fillRect(-3, -3, 6, 6); ctx.restore();
+    // Title shadow (dark emboss)
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.font = '900 44px "Malgun Gothic"';
+    ctx.fillText('또또의 모험', W / 2 + 2, 52 + 2);
+    // Title glow
+    ctx.shadowBlur = 25; ctx.shadowColor = 'rgba(255,215,0,0.7)';
+    const titleGrad = ctx.createLinearGradient(W / 2 - 200, 20, W / 2 + 200, 60);
+    titleGrad.addColorStop(0, '#FFF176'); titleGrad.addColorStop(0.3, '#FFD54F');
+    titleGrad.addColorStop(0.7, '#FFA000'); titleGrad.addColorStop(1, '#FF8F00');
+    ctx.fillStyle = titleGrad; ctx.font = '900 44px "Malgun Gothic"';
+    ctx.fillText('또또의 모험', W / 2, 52);
+    // Title highlight
+    ctx.shadowBlur = 0; ctx.globalAlpha = 0.2; ctx.fillStyle = '#fff';
+    ctx.font = '900 44px "Malgun Gothic"';
+    ctx.fillText('또또의 모험', W / 2, 51); ctx.globalAlpha = 1;
+    // Subtitle
+    ctx.fillStyle = 'rgba(200,210,225,0.6)'; ctx.font = '600 13px Arial';
+    ctx.letterSpacing = '6px';
+    ctx.fillText('─  S T A G E   S E L E C T  ─', W / 2, 82);
 
-    // 8. Player Icon (Mini Toto)
+    // ═══════════════════════════════════════════════════════
+    // 8. PLAYER ICON (Mini Toto)
+    // ═══════════════════════════════════════════════════════
     const progress = state.mapProgress || 0;
     const currentIdx = state.currentStage - 1;
-    const nextIdx = Math.min(state.currentStage, stageNodes.length - 1);
+    const nextIdx = Math.min(state.currentStage, stageData.length - 1);
 
     if (currentIdx >= 0) {
-        const start = stageNodes[currentIdx];
-        const end = stageNodes[nextIdx];
+        const start = stageData[currentIdx];
+        const end = stageData[nextIdx];
         const currentX = start.x + (end.x - start.x) * progress;
         const currentY = start.y + (end.y - start.y) * progress;
-        const bounceY = currentY - 35 - Math.abs(Math.sin(progress * Math.PI)) * 45;
+        const bounceY = currentY - 40 - Math.abs(Math.sin(progress * Math.PI)) * 45;
+        const hoverOffset = Math.sin(t * 4) * 3;
 
-        ctx.shadowBlur = 15; ctx.shadowColor = 'rgba(0,0,0,0.4)';
-        drawPixelTotoV5(ctx, currentX - 25, bounceY - 25, 50, 50);
+        // Shadow on ground
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.beginPath();
+        ctx.ellipse(currentX, currentY - 5, 18, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Character
+        ctx.shadowBlur = 15; ctx.shadowColor = 'rgba(255, 215, 0, 0.5)';
+        drawPixelTotoV5(ctx, currentX - 25, bounceY - 25 + hoverOffset, 50, 50);
         ctx.shadowBlur = 0;
     }
 
-    // 9. 'GO' BUTTON (Appears when Ready)
-    if (state.isWorldMapReady) {
-        const btnX = CONFIG.SCREEN_WIDTH / 2;
-        const btnY = CONFIG.SCREEN_HEIGHT - 100;
-
-        // Button Shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
-        ctx.fillRect(btnX - 145, btnY - 35, 300, 80);
-
-        // Button Body
-        ctx.fillStyle = (Date.now() % 1000 < 500) ? '#ffeb3b' : '#fbc02d';
-        ctx.fillRect(btnX - 150, btnY - 40, 300, 80);
-        ctx.strokeStyle = '#3e2723'; ctx.lineWidth = 5;
-        ctx.strokeRect(btnX - 150, btnY - 40, 300, 80);
-
-        ctx.fillStyle = '#3e2723';
-        ctx.font = 'bold 28px "Malgun Gothic"';
-        ctx.textAlign = 'center';
-        ctx.fillText("START STAGE " + (state.currentStage + 1), btnX, btnY + 10);
+    // ═══════════════════════════════════════════════════════
+    // 9. STAGE INFO — Premium Info Bar
+    // ═══════════════════════════════════════════════════════
+    const currentStageInfo = stageData[Math.min(state.currentStage, stageData.length - 1)];
+    if (currentStageInfo) {
+        const infoW = 280, infoH = 40;
+        const infoX = 18, infoY = H - 58;
+        // Gradient background
+        const infoBg = ctx.createLinearGradient(infoX, infoY, infoX + infoW, infoY);
+        infoBg.addColorStop(0, 'rgba(0,0,0,0.55)'); infoBg.addColorStop(1, 'rgba(0,0,0,0.2)');
+        ctx.fillStyle = infoBg; ctx.fillRect(infoX, infoY, infoW, infoH);
+        // Border gradient
+        ctx.strokeStyle = 'rgba(255,213,79,0.35)'; ctx.lineWidth = 1;
+        ctx.strokeRect(infoX, infoY, infoW, infoH);
+        // Left accent bar
+        ctx.fillStyle = currentStageInfo.color; ctx.fillRect(infoX, infoY, 3, infoH);
+        // Text
+        ctx.fillStyle = '#FFD54F'; ctx.font = 'bold 13px "Malgun Gothic"'; ctx.textAlign = 'left';
+        ctx.fillText(`STAGE ${state.currentStage + 1}`, infoX + 12, infoY + 17);
+        ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.font = '12px "Malgun Gothic"';
+        ctx.fillText(`▸ ${currentStageInfo.name}`, infoX + 85, infoY + 17);
+        // Progress dots
+        for (let d = 0; d < 10; d++) {
+            ctx.fillStyle = d <= state.currentStage ? '#FFD54F' : 'rgba(255,255,255,0.15)';
+            ctx.fillRect(infoX + 12 + d * 14, infoY + 28, 8, 4);
+        }
     }
+
+    // ═══════════════════════════════════════════════════════
+    // 10. GO BUTTON — Premium Styled
+    // ═══════════════════════════════════════════════════════
+    if (state.isWorldMapReady) {
+        const btnX = W / 2;
+        const btnY = H - 100;
+        const btnW = 280, btnH = 56;
+        const pulse = 0.5 + 0.5 * Math.sin(t * 4);
+        const r = 14;
+
+        // Pulsing outer ring
+        ctx.globalAlpha = 0.15 + pulse * 0.15;
+        ctx.strokeStyle = '#FFD54F'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(btnX - btnW / 2 - 4 + r, btnY - btnH / 2 - 4);
+        ctx.arcTo(btnX + btnW / 2 + 4, btnY - btnH / 2 - 4, btnX + btnW / 2 + 4, btnY + btnH / 2 + 4, r);
+        ctx.arcTo(btnX + btnW / 2 + 4, btnY + btnH / 2 + 4, btnX - btnW / 2 - 4, btnY + btnH / 2 + 4, r);
+        ctx.arcTo(btnX - btnW / 2 - 4, btnY + btnH / 2 + 4, btnX - btnW / 2 - 4, btnY - btnH / 2 - 4, r);
+        ctx.arcTo(btnX - btnW / 2 - 4, btnY - btnH / 2 - 4, btnX + btnW / 2 + 4, btnY - btnH / 2 - 4, r);
+        ctx.closePath(); ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        // Button shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.beginPath();
+        ctx.moveTo(btnX - btnW / 2 + r, btnY - btnH / 2 + 3);
+        ctx.arcTo(btnX + btnW / 2 + 2, btnY - btnH / 2 + 3, btnX + btnW / 2 + 2, btnY + btnH / 2 + 3, r);
+        ctx.arcTo(btnX + btnW / 2 + 2, btnY + btnH / 2 + 3, btnX - btnW / 2, btnY + btnH / 2 + 3, r);
+        ctx.arcTo(btnX - btnW / 2, btnY + btnH / 2 + 3, btnX - btnW / 2, btnY - btnH / 2 + 3, r);
+        ctx.arcTo(btnX - btnW / 2, btnY - btnH / 2 + 3, btnX + btnW / 2 + 2, btnY - btnH / 2 + 3, r);
+        ctx.closePath(); ctx.fill();
+
+        // Button glow
+        ctx.shadowBlur = 22 + pulse * 16;
+        ctx.shadowColor = 'rgba(255,235,59,0.55)';
+
+        // Button body gradient
+        const btnGrad = ctx.createLinearGradient(btnX, btnY - btnH / 2, btnX, btnY + btnH / 2);
+        btnGrad.addColorStop(0, '#FFF176');
+        btnGrad.addColorStop(0.3, '#FFEB3B');
+        btnGrad.addColorStop(0.7, '#FFC107');
+        btnGrad.addColorStop(1, '#FFA000');
+        ctx.fillStyle = btnGrad;
+
+        // Rounded rect body
+        ctx.beginPath();
+        ctx.moveTo(btnX - btnW / 2 + r, btnY - btnH / 2);
+        ctx.arcTo(btnX + btnW / 2, btnY - btnH / 2, btnX + btnW / 2, btnY + btnH / 2, r);
+        ctx.arcTo(btnX + btnW / 2, btnY + btnH / 2, btnX - btnW / 2, btnY + btnH / 2, r);
+        ctx.arcTo(btnX - btnW / 2, btnY + btnH / 2, btnX - btnW / 2, btnY - btnH / 2, r);
+        ctx.arcTo(btnX - btnW / 2, btnY - btnH / 2, btnX + btnW / 2, btnY - btnH / 2, r);
+        ctx.closePath();
+        ctx.fill();
+
+        // Border
+        ctx.strokeStyle = '#8D6E63'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Inner glossy highlight
+        ctx.globalAlpha = 0.25; ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.ellipse(btnX, btnY - btnH / 4, btnW / 2 - 10, btnH / 4, 0, 0, Math.PI * 2);
+        ctx.fill(); ctx.globalAlpha = 1;
+
+        // Text shadow
+        ctx.fillStyle = 'rgba(120,80,0,0.5)'; ctx.font = 'bold 22px "Malgun Gothic"';
+        ctx.textAlign = 'center';
+        ctx.fillText(`▶  START STAGE ${state.currentStage + 1}`, btnX + 1, btnY + 8 + 1);
+        // Text
+        ctx.fillStyle = '#3e2723'; ctx.font = 'bold 22px "Malgun Gothic"';
+        ctx.fillText(`▶  START STAGE ${state.currentStage + 1}`, btnX, btnY + 8);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // 11. ATMOSPHERIC FOG OVERLAY
+    // ═══════════════════════════════════════════════════════
+    // Subtle top-down vignette
+    const vignetteTop = ctx.createLinearGradient(0, 0, 0, 80);
+    vignetteTop.addColorStop(0, 'rgba(5,5,20,0.4)');
+    vignetteTop.addColorStop(1, 'transparent');
+    ctx.fillStyle = vignetteTop; ctx.fillRect(0, 0, W, 80);
+    // Bottom vignette
+    const vignetteBot = ctx.createLinearGradient(0, H - 60, 0, H);
+    vignetteBot.addColorStop(0, 'transparent');
+    vignetteBot.addColorStop(1, 'rgba(5,5,10,0.5)');
+    ctx.fillStyle = vignetteBot; ctx.fillRect(0, H - 60, W, 60);
 
     ctx.restore();
 }
+

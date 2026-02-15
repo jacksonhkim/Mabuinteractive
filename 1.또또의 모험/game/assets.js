@@ -76,6 +76,20 @@ export const BACKGROUND_IMAGES = {
 BACKGROUND_IMAGES.layer01.src = 'assets/background/bg_PixelSky_layer01.png';
 BACKGROUND_IMAGES.layer02.src = 'assets/background/bg_PixelSky_layer02.png';
 BACKGROUND_IMAGES.layer03.src = 'assets/background/bg_PixelSky_layer03.png';
+
+// Stage 2 Assets (Night Watch)
+BACKGROUND_IMAGES.s2_layer01 = new Image(); BACKGROUND_IMAGES.s2_layer01.src = 'assets/background/bg_stage2_layer01.png';
+BACKGROUND_IMAGES.s2_layer02 = new Image(); BACKGROUND_IMAGES.s2_layer02.src = 'assets/background/bg_stage2_layer02.png';
+BACKGROUND_IMAGES.s2_layer03 = new Image(); BACKGROUND_IMAGES.s2_layer03.src = 'assets/background/bg_stage2_layer03.png';
+BACKGROUND_IMAGES.s2_layer04 = new Image(); BACKGROUND_IMAGES.s2_layer04.src = 'assets/background/bg_stage2_layer04.png';
+BACKGROUND_IMAGES.s2_layer05 = new Image(); BACKGROUND_IMAGES.s2_layer05.src = 'assets/background/bg_stage2_layer05.png';
+
+// Stage 3 Assets (Sunset)
+BACKGROUND_IMAGES.s3_layer01 = new Image(); BACKGROUND_IMAGES.s3_layer01.src = 'assets/background/bg_stage3_layer01.png';
+BACKGROUND_IMAGES.s3_layer02 = new Image(); BACKGROUND_IMAGES.s3_layer02.src = 'assets/background/bg_stage3_layer02.png';
+BACKGROUND_IMAGES.s3_layer03 = new Image(); BACKGROUND_IMAGES.s3_layer03.src = 'assets/background/bg_stage3_layer03.png';
+BACKGROUND_IMAGES.s3_layer04 = new Image(); BACKGROUND_IMAGES.s3_layer04.src = 'assets/background/bg_stage3_layer04.png';
+
 BACKGROUND_IMAGES.bgStart = new Image();
 BACKGROUND_IMAGES.bgStart.src = 'assets/background/bg_start.png';
 BACKGROUND_IMAGES.bgCharSelect = new Image();

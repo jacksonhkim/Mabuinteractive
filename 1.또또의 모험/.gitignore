@@ -9,4 +9,6 @@ peter_report.mjs
 slack_bot.mjs
 gemini_helper.mjs
 hansooni_studio.html
-게임실행.bat
+*_baker.html
+build_standalone.js
+game/assets/sound/
