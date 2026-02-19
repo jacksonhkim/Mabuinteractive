@@ -36,20 +36,27 @@ export function drawGameOverScreen(ctx) {
     ctx.fillStyle = 'rgba(0,0,0,0.85)';
     ctx.fillRect(0, 0, CONFIG.SCREEN_WIDTH, CONFIG.SCREEN_HEIGHT);
 
-    ctx.font = '900 80px sans-serif';
+    // Proportional scaling based on canvas width
+    const sw = CONFIG.SCREEN_WIDTH;
+    const sh = CONFIG.SCREEN_HEIGHT;
+    const titleSize = Math.round(sw * 0.0625); // ~80px at 1280
+    const btnFontSize = Math.round(sw * 0.019); // ~24px at 1280
+
+    ctx.font = `900 ${titleSize}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ff5252';
     ctx.shadowColor = '#000';
     ctx.shadowBlur = 15;
-    ctx.fillText("GAME OVER", CONFIG.SCREEN_WIDTH / 2, CONFIG.SCREEN_HEIGHT / 2 - 80);
+    ctx.fillText("GAME OVER", sw / 2, sh / 2 - sh * 0.11);
 
     ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
 
-    // Draw Buttons
-    const btnW = 400;
-    const btnH = 60;
-    const centerX = CONFIG.SCREEN_WIDTH / 2;
-    const centerY = CONFIG.SCREEN_HEIGHT / 2 + 20;
+    // Draw Buttons — proportional
+    const btnW = Math.round(sw * 0.3125); // ~400 at 1280
+    const btnH = Math.round(sh * 0.083);  // ~60 at 720
+    const centerX = sw / 2;
+    const centerY = sh / 2 + sh * 0.028;
 
     // Continue Button
     ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
@@ -58,22 +65,24 @@ export function drawGameOverScreen(ctx) {
     ctx.strokeRect(centerX - btnW / 2, centerY, btnW, btnH);
     ctx.fillRect(centerX - btnW / 2, centerY, btnW, btnH);
 
-    ctx.font = 'bold 24px sans-serif';
+    ctx.font = `bold ${btnFontSize}px sans-serif`;
     ctx.fillStyle = '#fff';
-    ctx.fillText("CONTINUE (CHANGE HERO)", centerX, centerY + 38);
+    ctx.fillText("CONTINUE (CHANGE HERO)", centerX, centerY + btnH * 0.63);
 
     // Quit Button
+    const quitY = centerY + btnH + sh * 0.028;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.strokeStyle = '#ff5252';
-    ctx.strokeRect(centerX - btnW / 2, centerY + 80, btnW, btnH);
-    ctx.fillRect(centerX - btnW / 2, centerY + 80, btnW, btnH);
+    ctx.strokeRect(centerX - btnW / 2, quitY, btnW, btnH);
+    ctx.fillRect(centerX - btnW / 2, quitY, btnW, btnH);
 
     ctx.fillStyle = '#ccc';
-    ctx.fillText("QUIT TO MENU", centerX, centerY + 118);
+    ctx.fillText("QUIT TO MENU", centerX, quitY + btnH * 0.63);
 }
 
 export function drawStageClear(ctx) {
-    ctx.font = 'bold 80px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffeb3b';
+    const fontSize = Math.round(CONFIG.SCREEN_WIDTH * 0.0625);
+    ctx.font = `bold ${fontSize}px sans-serif`; ctx.textAlign = 'center'; ctx.fillStyle = '#ffeb3b';
     ctx.fillText("STAGE " + state.currentStage + " CLEAR!", CONFIG.SCREEN_WIDTH / 2, CONFIG.SCREEN_HEIGHT / 2);
 }
 
@@ -93,22 +102,27 @@ export function drawCharacterSelectionUI(ctx, selectedIndex) {
         ctx.fillRect(0, 0, CONFIG.SCREEN_WIDTH, CONFIG.SCREEN_HEIGHT);
     }
 
-    // 2. Title
+    // 2. Title — proportional sizing
+    const sw = CONFIG.SCREEN_WIDTH;
+    const sh = CONFIG.SCREEN_HEIGHT;
+    const titleFontSize = Math.round(sw * 0.031); // ~40 at 1280
+
     ctx.textAlign = 'center';
     ctx.fillStyle = '#FFD700';
-    ctx.font = 'bold 40px "Malgun Gothic", sans-serif';
+    ctx.font = `bold ${titleFontSize}px "Malgun Gothic", sans-serif`;
     ctx.shadowColor = '#FF8F00';
     ctx.shadowBlur = 10;
-    ctx.fillText("CHOOSE YOUR HERO", CONFIG.SCREEN_WIDTH / 2, 80);
-    ctx.shadowBlur = 0; // Reset shadow
+    ctx.fillText("CHOOSE YOUR HERO", sw / 2, sh * 0.11);
+    ctx.shadowBlur = 0;
 
-    // 3. Draw Character Cards
-    const cardW = 160;
-    const cardH = 240;
-    const gap = 20;
+    // 3. Draw Character Cards — proportional to canvas
+    const cardW = Math.round(sw * 0.125);  // ~160 at 1280
+    const cardH = Math.round(sh * 0.333);  // ~240 at 720
+    const gap = Math.round(sw * 0.016);    // ~20 at 1280
+    const spriteSize = Math.round(cardW * 0.8); // character sprite size
     const totalW = CHARACTERS.length * cardW + (CHARACTERS.length - 1) * gap;
-    const startX = (CONFIG.SCREEN_WIDTH - totalW) / 2;
-    const startY = CONFIG.SCREEN_HEIGHT / 2 - cardH / 2;
+    const startX = (sw - totalW) / 2;
+    const startY = sh / 2 - cardH / 2;
 
     CHARACTERS.forEach((char, i) => {
         const x = startX + i * (cardW + gap);
@@ -133,38 +147,41 @@ export function drawCharacterSelectionUI(ctx, selectedIndex) {
 
         // Character Preview (Center of Card)
         const cx = x + cardW / 2;
-        const cy = y + 80;
+        const cy = y + cardH * 0.33;
+        const halfSprite = spriteSize / 2;
 
         // Draw Character Sprite
-        if (char.id === 'toto') drawPixelTotoV5(ctx, cx - 64, cy - 64, 128, 128);
-        else if (char.id === 'lulu') { if (typeof drawPixelLuluV2 === 'function') drawPixelLuluV2(ctx, cx - 64, cy - 64, 128, 128); }
-        else if (char.id === 'kaka') { if (typeof drawPixelKakaV2 === 'function') drawPixelKakaV2(ctx, cx - 64, cy - 64, 128, 128); }
-        else if (char.id === 'momo') { if (typeof drawPixelMomoV2 === 'function') drawPixelMomoV2(ctx, cx - 64, cy - 64, 128, 128); }
-        else if (char.id === 'pipi') { if (typeof drawPixelPipiV2 === 'function') drawPixelPipiV2(ctx, cx - 64, cy - 64, 128, 128); }
+        if (char.id === 'toto') drawPixelTotoV5(ctx, cx - halfSprite, cy - halfSprite, spriteSize, spriteSize);
+        else if (char.id === 'lulu') { if (typeof drawPixelLuluV2 === 'function') drawPixelLuluV2(ctx, cx - halfSprite, cy - halfSprite, spriteSize, spriteSize); }
+        else if (char.id === 'kaka') { if (typeof drawPixelKakaV2 === 'function') drawPixelKakaV2(ctx, cx - halfSprite, cy - halfSprite, spriteSize, spriteSize); }
+        else if (char.id === 'momo') { if (typeof drawPixelMomoV2 === 'function') drawPixelMomoV2(ctx, cx - halfSprite, cy - halfSprite, spriteSize, spriteSize); }
+        else if (char.id === 'pipi') { if (typeof drawPixelPipiV2 === 'function') drawPixelPipiV2(ctx, cx - halfSprite, cy - halfSprite, spriteSize, spriteSize); }
         else {
-            // Fallback circle
             ctx.fillStyle = char.color;
-            ctx.beginPath(); ctx.arc(cx, cy, 20, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx, cy, cardW * 0.125, 0, Math.PI * 2); ctx.fill();
         }
 
         // Name
+        const nameFontSize = Math.round(cardW * 0.125); // ~20 at 160
         ctx.fillStyle = isSelected ? '#fff' : '#aaa';
-        ctx.font = 'bold 20px "Malgun Gothic", sans-serif';
-        ctx.fillText(char.name, cx, y + 160);
+        ctx.font = `bold ${nameFontSize}px "Malgun Gothic", sans-serif`;
+        ctx.fillText(char.name, cx, y + cardH * 0.67);
 
         // Stats Text
-        ctx.font = '14px "Malgun Gothic", sans-serif';
+        const statFontSize = Math.round(cardW * 0.088); // ~14 at 160
+        ctx.font = `${statFontSize}px "Malgun Gothic", sans-serif`;
         ctx.fillStyle = '#ccc';
-        ctx.fillText(`Speed: ${char.speed}`, cx, y + 190);
-        ctx.fillText(`Power: ${char.power}`, cx, y + 210);
+        ctx.fillText(`Speed: ${char.speed}`, cx, y + cardH * 0.79);
+        ctx.fillText(`Power: ${char.power}`, cx, y + cardH * 0.875);
 
         if (isSelected) ctx.restore();
     });
 
     // 4. Instructions
+    const instrFontSize = Math.round(sw * 0.014); // ~18 at 1280
     ctx.fillStyle = '#00E676';
-    ctx.font = '18px "Malgun Gothic", sans-serif';
-    ctx.fillText("← / →  Select   |   SPACE  Confirm", CONFIG.SCREEN_WIDTH / 2, CONFIG.SCREEN_HEIGHT - 60);
+    ctx.font = `${instrFontSize}px "Malgun Gothic", sans-serif`;
+    ctx.fillText("← / →  Select   |   SPACE  Confirm", sw / 2, sh - sh * 0.083);
 
     ctx.restore();
 }
@@ -294,37 +311,37 @@ export function showCreditsScreen() {
     creditDiv.style.overflowY = 'auto';
 
     const content = `
-        <h1 style="color: #ffd700; font-size: 40px; margin-bottom: 50px; text-shadow: 4px 4px #e65100;">THE ADVENTURE OF TOTO</h1>
-        <h2 style="color: #00e676; margin-bottom: 40px; font-size: 24px; text-transform: uppercase; letter-spacing: 2px;">Mission Accomplished</h2>
+        <h1 style="color: #ffd700; font-size: clamp(22px, 5vw, 40px); margin-bottom: clamp(20px, 5vh, 50px); text-shadow: 4px 4px #e65100;">THE ADVENTURE OF TOTO</h1>
+        <h2 style="color: #00e676; margin-bottom: clamp(15px, 4vh, 40px); font-size: clamp(14px, 3vw, 24px); text-transform: uppercase; letter-spacing: 2px;">Mission Accomplished</h2>
         
-        <div style="font-size: 16px; line-height: 2.5; margin-bottom: 40px;">
-            <p style="color: #bdbdbd; font-size: 14px; margin-bottom: 20px;">- CREDITS -</p>
+        <div style="font-size: clamp(10px, 2vw, 16px); line-height: 2.2; margin-bottom: clamp(15px, 4vh, 40px);">
+            <p style="color: #bdbdbd; font-size: clamp(9px, 1.8vw, 14px); margin-bottom: clamp(10px, 2vh, 20px);">- CREDITS -</p>
             
-            <div style="margin-bottom: 30px;">
+            <div style="margin-bottom: clamp(12px, 3vh, 30px);">
                 <p style="color: #fff; font-weight: bold;">[ Executive Producer ]</p>
-                <p style="color: #29b6f6; font-size: 20px;">PETER (PM)</p>
+                <p style="color: #29b6f6; font-size: clamp(12px, 2.5vw, 20px);">PETER (PM)</p>
             </div>
 
-            <div style="margin-bottom: 30px;">
+            <div style="margin-bottom: clamp(12px, 3vh, 30px);">
                 <p style="color: #fff; font-weight: bold;">[ Game Design ]</p>
-                <p style="color: #ba68c8; font-size: 20px;">BO (Planning Leader)</p>
+                <p style="color: #ba68c8; font-size: clamp(12px, 2.5vw, 20px);">BO (Planning Leader)</p>
             </div>
 
-            <div style="margin-bottom: 30px;">
+            <div style="margin-bottom: clamp(12px, 3vh, 30px);">
                 <p style="color: #fff; font-weight: bold;">[ Art Direction ]</p>
-                <p style="color: #ff4081; font-size: 20px;">HANSOONI (AD)</p>
+                <p style="color: #ff4081; font-size: clamp(12px, 2.5vw, 20px);">HANSOONI (AD)</p>
             </div>
 
-            <div style="margin-bottom: 30px;">
+            <div style="margin-bottom: clamp(12px, 3vh, 30px);">
                 <p style="color: #fff; font-weight: bold;">[ Lead Programmer ]</p>
-                <p style="color: #ff9800; font-size: 20px;">TTOTTO (Tech Lead)</p>
+                <p style="color: #ff9800; font-size: clamp(12px, 2.5vw, 20px);">TTOTTO (Tech Lead)</p>
             </div>
         </div>
 
-        <h3 style="color: #ffff00; font-size: 22px; margin-bottom: 40px; animation: blink 1s infinite;">Thank you for playing!</h3>
+        <h3 style="color: #ffff00; font-size: clamp(14px, 3vw, 22px); margin-bottom: clamp(15px, 4vh, 40px); animation: blink 1s infinite;">Thank you for playing!</h3>
         
         <button onclick="handleRestart()" 
-            style="padding: 20px 40px; font-family: inherit; font-size: 18px; cursor: pointer; 
+            style="padding: clamp(10px, 2vh, 20px) clamp(20px, 4vw, 40px); font-family: inherit; font-size: clamp(12px, 2.5vw, 18px); cursor: pointer; 
             background: #fff; color: #000; border: none; font-weight: bold; border-radius: 8px; 
             box-shadow: 0 4px 10px rgba(255,255,255,0.3); transition: transform 0.2s;">
             PLAY AGAIN

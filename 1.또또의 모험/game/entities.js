@@ -449,7 +449,7 @@ export function updateBoss() {
     for (let i = state.bullets.length - 1; i >= 0; i--) {
         const bull = state.bullets[i];
         if (bull.x < b.x + b.width && bull.x + bull.width > b.x &&
-            bull.y < b.y + b.height && bull.y + b.height > b.y) {
+            bull.y < b.y + b.height && bull.y + bull.height > b.y) {
 
             if (b.hitTimer && b.hitTimer > 0) continue;
             const damage = bull.isChargeShot ? 10 : 1;
@@ -468,7 +468,7 @@ export function updateBoss() {
             if (b.hp <= 0) {
                 state.score += 5000;
                 createExplosion(b.x + b.width / 2, b.y + b.height / 2, '#ffcc00');
-                if (b.type === 10) { state.gameActive = false; startEndingSequence(); return; }
+                if (b.type === 10) { state.gameActive = false; const cvs = document.getElementById('gameCanvas'); startEndingSequence(cvs.getContext('2d')); return; }
                 state.boss = null;
                 state.stageCleared = true;
                 state.stageTransitionTimer = 180;

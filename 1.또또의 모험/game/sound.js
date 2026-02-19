@@ -64,7 +64,7 @@ class SoundEngine {
 
         const promises = Object.entries(fileMap).map(async ([key, filename]) => {
             try {
-                const res = await fetch(`game/assets/sound/${filename}`);
+                const res = await fetch(`assets/sound/${filename}`);
                 if (!res.ok) return; // Silent fail for missing files
                 const arrayBuffer = await res.arrayBuffer();
                 const audioBuffer = await this.ctx.decodeAudioData(arrayBuffer);
@@ -298,6 +298,21 @@ class SoundEngine {
             gain.gain.exponentialRampToValueAtTime(0.01, t + i * 0.05 + 0.1);
             osc.connect(gain); gain.connect(this.masterGain);
             osc.start(t + i * 0.05); osc.stop(t + i * 0.05 + 0.1);
+        });
+    }
+
+    playPowerUp() {
+        if (!this.isEnabled) return;
+        const t = this.ctx.currentTime;
+        [523, 659, 784, 1046].forEach((f, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(f, t + i * 0.06);
+            gain.gain.setValueAtTime(0.12, t + i * 0.06);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.06 + 0.25);
+            osc.connect(gain); gain.connect(this.masterGain);
+            osc.start(t + i * 0.06); osc.stop(t + i * 0.06 + 0.25);
         });
     }
 

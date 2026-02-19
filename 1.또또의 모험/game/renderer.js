@@ -130,9 +130,10 @@ export function draw(ctx, state) {
         else if (b.type === 10) drawPixelEmperorV(ctx, b.x, b.y, b.width, b.height);
         else drawPixelBossBuzzV2(ctx, b.x, b.y, b.width, b.height);
 
-        const hpBarW = 400; const currentW = (b.hp / b.maxHp) * hpBarW;
-        ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(CONFIG.SCREEN_WIDTH / 2 - hpBarW / 2, 40, hpBarW, 10);
-        ctx.fillStyle = '#ff5252'; ctx.fillRect(CONFIG.SCREEN_WIDTH / 2 - hpBarW / 2, 40, currentW, 10);
+        const hpBarW = Math.round(CONFIG.SCREEN_WIDTH * 0.3125); const currentW = (b.hp / b.maxHp) * hpBarW;
+        const hpBarY = Math.round(CONFIG.SCREEN_HEIGHT * 0.056);
+        ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(CONFIG.SCREEN_WIDTH / 2 - hpBarW / 2, hpBarY, hpBarW, 10);
+        ctx.fillStyle = '#ff5252'; ctx.fillRect(CONFIG.SCREEN_WIDTH / 2 - hpBarW / 2, hpBarY, currentW, 10);
     }
 
     let shouldDrawPlayer = true;
@@ -171,16 +172,20 @@ export function draw(ctx, state) {
     if (state.isDialogueActive) {
         const dialogues = STAGE_DIALOGUES[state.currentStage];
         const d = (dialogues && dialogues[state.dialogueIndex]);
+        const portraitSize = Math.round(CONFIG.SCREEN_HEIGHT * 0.25);
+        const portraitY = CONFIG.SCREEN_HEIGHT - portraitSize - Math.round(CONFIG.SCREEN_HEIGHT * 0.097);
         if (d) {
             if (d.name === '또또' || d.name === CHARACTERS[state.selectedCharIndex].name) {
                 const charId = state.player.id;
-                if (charId === 'toto') drawPixelTotoPortrait(ctx, 200, CONFIG.SCREEN_HEIGHT - 250, 180);
-                else if (charId === 'lulu') drawPixelLuluPortrait(ctx, 200, CONFIG.SCREEN_HEIGHT - 250, 180);
-                else if (charId === 'kaka') drawPixelKakaPortrait(ctx, 200, CONFIG.SCREEN_HEIGHT - 250, 180);
-                else if (charId === 'momo') drawPixelMomoPortrait(ctx, 200, CONFIG.SCREEN_HEIGHT - 250, 180);
-                else if (charId === 'pipi') drawPixelPipiPortrait(ctx, 200, CONFIG.SCREEN_HEIGHT - 250, 180);
+                const pX = Math.round(CONFIG.SCREEN_WIDTH * 0.156);
+                if (charId === 'toto') drawPixelTotoPortrait(ctx, pX, portraitY, portraitSize);
+                else if (charId === 'lulu') drawPixelLuluPortrait(ctx, pX, portraitY, portraitSize);
+                else if (charId === 'kaka') drawPixelKakaPortrait(ctx, pX, portraitY, portraitSize);
+                else if (charId === 'momo') drawPixelMomoPortrait(ctx, pX, portraitY, portraitSize);
+                else if (charId === 'pipi') drawPixelPipiPortrait(ctx, pX, portraitY, portraitSize);
             } else if (d.name === '요정') {
-                drawPixelFairyPortrait(ctx, CONFIG.SCREEN_WIDTH - 200, CONFIG.SCREEN_HEIGHT - 250, 180);
+                const fX = CONFIG.SCREEN_WIDTH - Math.round(CONFIG.SCREEN_WIDTH * 0.156);
+                drawPixelFairyPortrait(ctx, fX, portraitY, portraitSize);
             }
         }
     }

@@ -91,36 +91,66 @@ window.handleRestart = () => {
 
     // [Bug Fix] Interaction listener lost after restart
     window.addEventListener('click', startGame, { once: true });
+    window.addEventListener('touchstart', startGame, { once: true });
 };
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-// Canvas Resize
+// Canvas Resize — iPhone Full Screen Support
 canvas.width = CONFIG.SCREEN_WIDTH;
 canvas.height = CONFIG.SCREEN_HEIGHT;
 
-function resizeCanvas() {
-    const scale = Math.min(
-        window.innerWidth / CONFIG.SCREEN_WIDTH,
-        window.innerHeight / CONFIG.SCREEN_HEIGHT
-    );
-    canvas.style.width = `${CONFIG.SCREEN_WIDTH * scale}px`;
-    canvas.style.height = `${CONFIG.SCREEN_HEIGHT * scale}px`;
+function getViewportSize() {
+    // Use visualViewport API for accurate size (handles iOS Safari address bar)
+    if (window.visualViewport) {
+        return { w: window.visualViewport.width, h: window.visualViewport.height };
+    }
+    return { w: window.innerWidth, h: window.innerHeight };
+}
 
+function resizeCanvas() {
+    const vp = getViewportSize();
+    const vpW = vp.w;
+    const vpH = vp.h;
+
+    // Calculate scale to fill entire viewport (no black bars)
+    const scale = Math.min(vpW / CONFIG.SCREEN_WIDTH, vpH / CONFIG.SCREEN_HEIGHT);
+
+    const scaledW = CONFIG.SCREEN_WIDTH * scale;
+    const scaledH = CONFIG.SCREEN_HEIGHT * scale;
+
+    // Apply to canvas display size
+    canvas.style.width = `${scaledW}px`;
+    canvas.style.height = `${scaledH}px`;
+
+    // Center in container
+    const container = document.getElementById('game-container');
+    if (container) {
+        container.style.width = `${vpW}px`;
+        container.style.height = `${vpH}px`;
+    }
+
+    // Scale UI overlays — fill viewport so CSS media queries apply correctly
     const ui = document.getElementById('ui-layer');
     const startScreen = document.getElementById('start-screen');
     [ui, startScreen].forEach(el => {
         if (el) {
-            el.style.width = `${CONFIG.SCREEN_WIDTH}px`;
-            el.style.height = `${CONFIG.SCREEN_HEIGHT}px`;
-            el.style.transform = `scale(${scale})`;
-            el.style.transformOrigin = 'top left';
+            el.style.width = `${vpW}px`;
+            el.style.height = `${vpH}px`;
+            el.style.transform = '';
+            el.style.transformOrigin = '';
         }
     });
 }
+
+// Listen to multiple resize events for robust iPhone support
 window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 100));
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', resizeCanvas);
+}
 resizeCanvas();
 
 // Input Handling
@@ -330,8 +360,11 @@ async function startGame() {
         // [Optimization] If it's a touch on a control button, don't trigger global action
         if (e.target.closest('.control-group')) return;
 
-        if (state.isWorldMapActive && state.isWorldMapReady && (e.code === 'Space' || e.code === 'Enter')) {
-            window.goNextStage();
+        // [BUG-02 Fix] Touch events have no e.code — use type check
+        if (state.isWorldMapActive && state.isWorldMapReady) {
+            if (e.type === 'touchstart' || e.code === 'Space' || e.code === 'Enter') {
+                window.goNextStage();
+            }
         }
         if (state.isSelectingCharacter) {
             // Character Card Click Logic
@@ -345,9 +378,9 @@ async function startGame() {
             const canvasX = (clientX - rect.left) * scaleX;
             const canvasY = (clientY - rect.top) * scaleY;
 
-            const cardW = 160;
-            const cardH = 240;
-            const gap = 20;
+            const cardW = Math.round(CONFIG.SCREEN_WIDTH * 0.125);
+            const cardH = Math.round(CONFIG.SCREEN_HEIGHT * 0.333);
+            const gap = Math.round(CONFIG.SCREEN_WIDTH * 0.016);
             const totalW = CHARACTERS.length * cardW + (CHARACTERS.length - 1) * gap;
             const startX = (CONFIG.SCREEN_WIDTH - totalW) / 2;
             const startY = CONFIG.SCREEN_HEIGHT / 2 - cardH / 2;
@@ -391,10 +424,10 @@ async function startGame() {
             const canvasX = (clientX - rect.left) * scaleX;
             const canvasY = (clientY - rect.top) * scaleY;
 
-            const btnW = 400;
-            const btnH = 60;
+            const btnW = Math.round(CONFIG.SCREEN_WIDTH * 0.3125);
+            const btnH = Math.round(CONFIG.SCREEN_HEIGHT * 0.083);
             const centerX = CONFIG.SCREEN_WIDTH / 2;
-            const centerY = CONFIG.SCREEN_HEIGHT / 2 + 20;
+            const centerY = CONFIG.SCREEN_HEIGHT / 2 + CONFIG.SCREEN_HEIGHT * 0.028;
 
             // 1. Continue Button (Character Select)
             if (canvasX >= centerX - btnW / 2 && canvasX <= centerX + btnW / 2 &&
@@ -408,13 +441,20 @@ async function startGame() {
             }
 
             // 2. Quit Button
+            const quitY = centerY + btnH + CONFIG.SCREEN_HEIGHT * 0.028;
             if (canvasX >= centerX - btnW / 2 && canvasX <= centerX + btnW / 2 &&
-                canvasY >= centerY + 80 && canvasY <= centerY + 80 + btnH) {
+                canvasY >= quitY && canvasY <= quitY + btnH) {
                 window.handleRestart();
                 return;
             }
         }
     };
+    // [BUG-07 Fix] Remove previous listeners to prevent accumulation
+    if (window._handleGlobalAction) {
+        window.removeEventListener('click', window._handleGlobalAction);
+        window.removeEventListener('touchstart', window._handleGlobalAction);
+    }
+    window._handleGlobalAction = handleGlobalAction;
     window.addEventListener('click', handleGlobalAction);
     window.addEventListener('touchstart', handleGlobalAction);
 }
