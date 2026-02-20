@@ -34,10 +34,20 @@ export function drawPixelForestV2(ctx, CONFIG, state) {
             skyTop: '#0d47a1', skyBot: '#42a5f5', sunColor: 'rgba(255, 255, 255, 0.2)',
             treeColor: (c) => `rgba(255, 255, 255, ${c * 0.3})`, groundColor: '#1565c0',
             detailColor: '#1e88e5', accentColor: '#bbdefb', godRays: false
+        },
+        5: { // 메탈/우주 요새 (Stage 5)
+            skyTop: '#0d1117', skyBot: '#21262d', sunColor: 'rgba(56, 139, 253, 0.1)',
+            treeColor: (c) => `rgba(48, 54, 61, ${c})`, groundColor: '#161b22',
+            detailColor: '#30363d', accentColor: '#58a6ff', godRays: false
+        },
+        6: { // 용암/지옥 (Stage 6)
+            skyTop: '#4a148c', skyBot: '#b71c1c', sunColor: 'rgba(255, 82, 82, 0.2)',
+            treeColor: (c) => `rgba(62, 39, 35, ${c})`, groundColor: '#212121',
+            detailColor: '#4e342e', accentColor: '#d84315', godRays: true
         }
     };
 
-    const style = envStyles[stage] || envStyles[stage % 4 || 1];
+    const style = envStyles[stage] || envStyles[stage % 6 || 1];
 
     // ── 1. 하늘 그라디언트 ──
     const grad = ctx.createLinearGradient(0, 0, 0, CONFIG.SCREEN_HEIGHT);
@@ -84,6 +94,18 @@ export function drawPixelForestV2(ctx, CONFIG, state) {
         if (drawLayer(BACKGROUND_IMAGES.s4_layer01, 0.2)) layersDrawn = true;
         if (drawLayer(BACKGROUND_IMAGES.s4_layer02, 0.5)) layersDrawn = true;
         if (drawLayer(BACKGROUND_IMAGES.s4_layer03, 0.8)) layersDrawn = true;
+        if (layersDrawn) return;
+    } else if (stage === 5) {
+        let layersDrawn = false;
+        if (drawLayer(BACKGROUND_IMAGES.s5_layer01, 0.2)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s5_layer02, 0.5)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s5_layer03, 0.8)) layersDrawn = true;
+        if (layersDrawn) return;
+    } else if (stage === 6) {
+        let layersDrawn = false;
+        if (drawLayer(BACKGROUND_IMAGES.s6_layer01, 0.2)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s6_layer02, 0.5)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s6_layer03, 0.8)) layersDrawn = true;
         if (layersDrawn) return;
     }
 

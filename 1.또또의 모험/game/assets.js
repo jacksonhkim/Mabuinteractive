@@ -92,6 +92,16 @@ BACKGROUND_IMAGES.s4_layer01 = new Image(); BACKGROUND_IMAGES.s4_layer01.src = '
 BACKGROUND_IMAGES.s4_layer02 = new Image(); BACKGROUND_IMAGES.s4_layer02.src = 'assets/background/bg_stage4_layer02.png';
 BACKGROUND_IMAGES.s4_layer03 = new Image(); BACKGROUND_IMAGES.s4_layer03.src = 'assets/background/bg_stage4_layer03.png';
 
+// Stage 5 Assets (The Void / Final Stage)
+BACKGROUND_IMAGES.s5_layer01 = new Image(); BACKGROUND_IMAGES.s5_layer01.src = 'assets/background/bg_stage5_layer01.png';
+BACKGROUND_IMAGES.s5_layer02 = new Image(); BACKGROUND_IMAGES.s5_layer02.src = 'assets/background/bg_stage5_layer02.png';
+BACKGROUND_IMAGES.s5_layer03 = new Image(); BACKGROUND_IMAGES.s5_layer03.src = 'assets/background/bg_stage5_layer03.png';
+
+// Stage 6 Assets
+BACKGROUND_IMAGES.s6_layer01 = new Image(); BACKGROUND_IMAGES.s6_layer01.src = 'assets/background/bg_stage6_layer01.png';
+BACKGROUND_IMAGES.s6_layer02 = new Image(); BACKGROUND_IMAGES.s6_layer02.src = 'assets/background/bg_stage6_layer02.png';
+BACKGROUND_IMAGES.s6_layer03 = new Image(); BACKGROUND_IMAGES.s6_layer03.src = 'assets/background/bg_stage6_layer03.png';
+
 BACKGROUND_IMAGES.bgStart = new Image();
 BACKGROUND_IMAGES.bgStart.src = 'assets/background/bg_start.png';
 BACKGROUND_IMAGES.bgCharSelect = new Image();
