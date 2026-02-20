@@ -1,3 +1,8 @@
+// ============================================================
+// [Entry Point] game.js
+// 게임 엔트리 포인트 — 초기화, 글로벌 함수, 게임 루프
+// ============================================================
+
 import { state, resetState } from './state.js';
 import { CONFIG, CHARACTERS } from './constants.js';
 import { sound } from './sound.js';
@@ -12,8 +17,12 @@ import {
     startDialogue, startEndingSequence, startWorldMap
 } from './ui.js';
 import { draw } from './renderer.js';
+import { setupCanvas, setupKeyboardInput, setupMobileInput } from './core/input.js';
 
-// Expose globals for cheats
+// ── 캔버스 초기화 ──
+const { canvas, ctx } = setupCanvas();
+
+// ── 글로벌 치트/유틸 노출 ──
 window.sound = sound;
 window.updateBombUI = updateBombUI;
 window.startDialogue = startDialogue;
@@ -28,292 +37,117 @@ window.goNextStage = () => {
     }
 };
 
-// [Cheat Logic] - Requested by CEO (QA Issue #5)
+// ── 치트 시스템 (QA Issue #5) ──
 window.gameCheat = function (type) {
     if (!state.gameActive && type !== 'ending') return;
 
     switch (type) {
         case 'killBoss':
-            if (state.boss) {
-                state.boss.hp = 0;
-                console.log("Cheat: Boss Eliminated!");
-            }
+            if (state.boss) { state.boss.hp = 0; console.log("Cheat: Boss Eliminated!"); }
             break;
         case 'maxPower':
-            state.player.powerLevel = 5;
-            sound.playPowerUp();
+            state.player.powerLevel = 5; sound.playPowerUp();
             console.log("Cheat: Max Power Level!");
             break;
         case 'fullBomb':
-            state.player.bombCount = 9;
-            updateBombUI();
-            sound.playItemGet();
+            state.player.bombCount = 9; updateBombUI(); sound.playItemGet();
             console.log("Cheat: Bombs Refilled!");
             break;
         case 'invincible':
-            state.player.invincible = true;
-            state.player.invincibleTime = 999999;
+            state.player.invincible = true; state.player.invincibleTime = 999999;
             console.log("Cheat: God Mode ON!");
             break;
         case 'nextStage':
-            state.stageCleared = true;
-            state.stageTransitionTimer = 10;
+            state.stageCleared = true; state.stageTransitionTimer = 10;
             console.log("Cheat: Skipping Stage...");
             break;
         case 'ending':
-            state.gameActive = false;
-            startEndingSequence(ctx);
+            state.gameActive = false; startEndingSequence(ctx);
             console.log("Cheat: Forcing Ending Sequence...");
             break;
     }
 };
 
+// ── 재시작 핸들러 ──
 window.handleRestart = () => {
     resetState();
     const credits = document.getElementById('ending-credits');
     if (credits) credits.remove();
-    const canvas = document.getElementById('gameCanvas');
-    if (canvas) canvas.style.display = 'block';
+    const canvasEl = document.getElementById('gameCanvas');
+    if (canvasEl) canvasEl.style.display = 'block';
 
-    // UI 레이어 초기화
     document.getElementById('ui-layer').classList.add('hidden');
     document.getElementById('start-screen').classList.remove('hidden');
 
-    // UI HUD reset
     const hud = document.getElementById('hud');
-    if (hud) {
-        hud.style.display = 'flex';
-        hud.classList.remove('hidden');
-    }
+    if (hud) { hud.style.display = 'flex'; hud.classList.remove('hidden'); }
 
-    // 시작음 재생
     sound.startBGM('START');
 
-    // [Bug Fix] Interaction listener lost after restart
     window.addEventListener('click', startGame, { once: true });
     window.addEventListener('touchstart', startGame, { once: true });
 };
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-ctx.imageSmoothingEnabled = false;
+// ── 캐릭터 확정 ──
+function confirmCharacter() {
+    if (state.gameActive && !state.isContinuing) return;
 
-// Canvas Resize — iPhone Full Screen Support
-canvas.width = CONFIG.SCREEN_WIDTH;
-canvas.height = CONFIG.SCREEN_HEIGHT;
+    const isCont = state.isContinuing;
+    state.isSelectingCharacter = false;
+    state.gameActive = true;
+    state.gameOver = false;
+    state.isContinuing = false;
 
-function getViewportSize() {
-    // Use visualViewport API for accurate size (handles iOS Safari address bar)
-    if (window.visualViewport) {
-        return { w: window.visualViewport.width, h: window.visualViewport.height };
-    }
-    return { w: window.innerWidth, h: window.innerHeight };
-}
+    const char = CHARACTERS[state.selectedCharIndex];
+    state.player.color = char.color;
+    state.player.id = char.id;
+    state.player.shotDelay = char.shotDelay;
+    state.player.width = 148;
+    state.player.height = 148;
 
-function resizeCanvas() {
-    const vp = getViewportSize();
-    const vpW = vp.w;
-    const vpH = vp.h;
+    document.getElementById('ui-layer').classList.remove('hidden');
+    const hud = document.getElementById('hud');
+    if (hud) hud.classList.remove('hidden');
 
-    // Calculate scale to fill entire viewport (no black bars)
-    const scale = Math.min(vpW / CONFIG.SCREEN_WIDTH, vpH / CONFIG.SCREEN_HEIGHT);
-
-    const scaledW = CONFIG.SCREEN_WIDTH * scale;
-    const scaledH = CONFIG.SCREEN_HEIGHT * scale;
-
-    // Apply to canvas display size
-    canvas.style.width = `${scaledW}px`;
-    canvas.style.height = `${scaledH}px`;
-
-    // Center in container
-    const container = document.getElementById('game-container');
-    if (container) {
-        container.style.width = `${vpW}px`;
-        container.style.height = `${vpH}px`;
-    }
-
-    // Scale UI overlays — fill viewport so CSS media queries apply correctly
-    const ui = document.getElementById('ui-layer');
-    const startScreen = document.getElementById('start-screen');
-    [ui, startScreen].forEach(el => {
-        if (el) {
-            el.style.width = `${vpW}px`;
-            el.style.height = `${vpH}px`;
-            el.style.transform = '';
-            el.style.transformOrigin = '';
-        }
-    });
-}
-
-// Listen to multiple resize events for robust iPhone support
-window.addEventListener('resize', resizeCanvas);
-window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 100));
-if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', resizeCanvas);
-}
-resizeCanvas();
-
-// Input Handling
-window.addEventListener('keydown', (e) => {
-    if (state.isSelectingCharacter) {
-        if (e.key === 'ArrowRight') {
-            state.selectedCharIndex = (state.selectedCharIndex + 1) % CHARACTERS.length;
-            sound.playSelect();
-        } else if (e.key === 'ArrowLeft') {
-            state.selectedCharIndex = (state.selectedCharIndex - 1 + CHARACTERS.length) % CHARACTERS.length;
-            sound.playSelect();
-        } else if (e.code === 'Space' || e.code === 'Enter') {
-            confirmCharacter();
-        }
-        return;
-    }
-
-    if (!state.gameActive && state.gameOver && e.code === 'KeyR') {
-        window.handleRestart();
-        return;
-    }
-
-    if (state.gameActive) {
-        state.keys[e.code] = true;
-
-        // World Map Go signal
-        if (state.isWorldMapActive && state.isWorldMapReady && (e.code === 'Space' || e.code === 'Enter')) {
-            window.goNextStage();
-        }
-
-        // Dialogue / Branching logic
-        if (state.isDialogueActive && (e.code === 'Space' || e.code === 'Enter')) {
-            window.advanceDialogue();
-        }
-    }
-});
-
-window.addEventListener('keyup', (e) => {
-    if (state.gameActive) state.keys[e.code] = false;
-});
-
-// Fix for input stuck when window loses focus (QA Issue #1)
-window.addEventListener('blur', () => {
-    state.keys = {};
-});
-
-// Mobile Controls Enhancement: Sliding D-Pad ("도로록" feel)
-const dPad = document.getElementById('d-pad');
-const dPadButtons = document.querySelectorAll('.d-btn');
-
-function handleDPadTouch(e) {
-    if (!state.gameActive && !state.isSelectingCharacter) return;
-    e.preventDefault();
-    const touch = e.touches[0];
-    const rect = dPad.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-
-    // Reset current keys
-    state.keys['ArrowUp'] = false;
-    state.keys['ArrowDown'] = false;
-    state.keys['ArrowLeft'] = false;
-    state.keys['ArrowRight'] = false;
-
-    // Determine direction based on touch position relative to center
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const threshold = 20;
-
-    const up = y < centerY - threshold;
-    const down = y > centerY + threshold;
-    const left = x < centerX - threshold;
-    const right = x > centerX + threshold;
-
-    if (state.isSelectingCharacter) {
-        handleDPadNavigation(left, right);
+    if (isCont) {
+        state.lives = 3;
+        state.player.bombCount = 3;
+        state.player.powerLevel = 1;
+        state.player.invincible = true;
+        state.player.invincibleTime = 120;
+        state.player.x = 100;
+        state.player.y = 300;
+        state.enemies = [];
+        state.enemyBullets = [];
+        updateLivesUI();
+        updateBombUI();
+        sound.playConfirm();
+        sound.startBGM(`STAGE_${state.currentStage}`);
     } else {
-        state.keys['ArrowUp'] = up;
-        state.keys['ArrowDown'] = down;
-        state.keys['ArrowLeft'] = left;
-        state.keys['ArrowRight'] = right;
+        updateLivesUI();
+        updateBombUI();
+        sound.playGameStart();
+        sound.startBGM(`STAGE_${state.currentStage}`);
+        startDialogue(state.currentStage);
     }
 }
 
-if (dPad) {
-    dPad.addEventListener('touchstart', handleDPadTouch);
-    dPad.addEventListener('touchmove', handleDPadTouch);
-    dPad.addEventListener('touchend', (e) => {
-        state.keys['ArrowUp'] = false;
-        state.keys['ArrowDown'] = false;
-        state.keys['ArrowLeft'] = false;
-        state.keys['ArrowRight'] = false;
-    });
-}
+// ── 입력 설정 (callbacks 주입) ──
+const inputCallbacks = { confirmCharacter };
+setupKeyboardInput(inputCallbacks);
+setupMobileInput(inputCallbacks);
 
-const btnShot = document.getElementById('btn-shot');
-const btnBomb = document.getElementById('btn-bomb');
-
-if (btnShot) {
-    btnShot.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-
-        // 1. Character Selection Confirm
-        if (state.isSelectingCharacter) {
-            confirmCharacter();
-            return;
-        }
-
-        // 2. Advance Dialogue
-        if (state.isDialogueActive) {
-            window.advanceDialogue();
-            return;
-        }
-
-        // 3. Gameplay Shot
-        state.keys['Space'] = true;
-        if (state.isWorldMapReady) window.goNextStage();
-    });
-    btnShot.addEventListener('touchend', (e) => { e.preventDefault(); state.keys['Space'] = false; });
-}
-
-if (btnBomb) {
-    btnBomb.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        if (state.gameActive && !state.gameOver) {
-            state.keys['KeyX'] = true;
-        }
-    });
-    btnBomb.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        state.keys['KeyX'] = false;
-    });
-}
-
-// Logic to handle D-pad navigation for menus
-let lastDPadSignal = 0;
-function handleDPadNavigation(left, right) {
-    if (Date.now() - lastDPadSignal < 250) return; // Debounce
-    if (left) {
-        state.selectedCharIndex = (state.selectedCharIndex - 1 + CHARACTERS.length) % CHARACTERS.length;
-        sound.playSelect();
-        lastDPadSignal = Date.now();
-    } else if (right) {
-        state.selectedCharIndex = (state.selectedCharIndex + 1) % CHARACTERS.length;
-        sound.playSelect();
-        lastDPadSignal = Date.now();
-    }
-}
-
-// Global Start Logic
+// ── 게임 시작 로직 ──
 async function startGame() {
-    // Only allow starting if we are on the title screen
     if (state.gameActive || state.isSelectingCharacter) return;
 
-    // [Bug Fix] BGM Startup: Ensure Audio is initialized and BGM starts ASAP
     try {
         await sound.init();
         sound.startBGM('START');
         sound.playConfirm();
 
-        // [New] Mobile: Try to lock orientation to landscape
         if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape').catch(e => console.log("Orientation lock skipped (requires fullscreen):", e));
+            screen.orientation.lock('landscape').catch(e => console.log("Orientation lock skipped:", e));
         }
     } catch (err) {
         console.error("Audio Init Failed:", err);
@@ -331,22 +165,18 @@ async function startGame() {
         ]);
 
         document.getElementById('start-screen').classList.add('hidden');
-
-        // [Fix] Show UI layer for Mobile Controls (Character select needs them)
         document.getElementById('ui-layer').classList.remove('hidden');
         const hud = document.getElementById('hud');
-        if (hud) hud.classList.add('hidden'); // Ensure HUD is still hidden
+        if (hud) hud.classList.add('hidden');
 
         state.isSelectingCharacter = true;
         state.selectedCharIndex = 0;
 
-        // [New] Mobile Detection Fallback: If touch is detected, ensure controls are visible
         if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
             const controls = document.getElementById('mobile-controls');
             if (controls) controls.style.display = 'block';
         }
 
-        // Smooth transition to select music
         sound.startBGM('SELECT');
 
     } catch (err) {
@@ -355,26 +185,24 @@ async function startGame() {
     window.removeEventListener('click', startGame);
     window.removeEventListener('touchstart', startGame);
 
-    // [New] Add global click listener for map 'GO' and Game Over Restart
+    // 글로벌 액션 리스너 (맵/대화/게임오버 클릭)
     const handleGlobalAction = (e) => {
-        // [Optimization] If it's a touch on a control button, don't trigger global action
         if (e.target.closest('.control-group')) return;
 
-        // [BUG-02 Fix] Touch events have no e.code — use type check
+        // 월드맵 Go
         if (state.isWorldMapActive && state.isWorldMapReady) {
             if (e.type === 'touchstart' || e.code === 'Space' || e.code === 'Enter') {
                 window.goNextStage();
             }
         }
+
+        // 캐릭터 선택 카드 클릭
         if (state.isSelectingCharacter) {
-            // Character Card Click Logic
             const rect = canvas.getBoundingClientRect();
             const scaleX = CONFIG.SCREEN_WIDTH / rect.width;
             const scaleY = CONFIG.SCREEN_HEIGHT / rect.height;
-
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
             const canvasX = (clientX - rect.left) * scaleX;
             const canvasY = (clientY - rect.top) * scaleY;
 
@@ -391,12 +219,9 @@ async function startGame() {
 
                 if (canvasX >= x && canvasX <= x + cardW &&
                     canvasY >= y && canvasY <= y + cardH) {
-
                     if (state.selectedCharIndex === i) {
-                        // Confirm if clicked again
                         confirmCharacter();
                     } else {
-                        // Select
                         state.selectedCharIndex = i;
                         sound.playSelect();
                     }
@@ -405,22 +230,19 @@ async function startGame() {
             }
         }
 
-
-        // [New] Dialogue Advance Logic (Centralized)
+        // 대화 진행
         if (state.isDialogueActive) {
             window.advanceDialogue();
             return;
         }
 
+        // 게임 오버 버튼 클릭
         if (state.gameOver) {
-            // Check button clicks on Game Over screen
             const rect = canvas.getBoundingClientRect();
             const scaleX = CONFIG.SCREEN_WIDTH / rect.width;
             const scaleY = CONFIG.SCREEN_HEIGHT / rect.height;
-
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
             const canvasX = (clientX - rect.left) * scaleX;
             const canvasY = (clientY - rect.top) * scaleY;
 
@@ -429,7 +251,7 @@ async function startGame() {
             const centerX = CONFIG.SCREEN_WIDTH / 2;
             const centerY = CONFIG.SCREEN_HEIGHT / 2 + CONFIG.SCREEN_HEIGHT * 0.028;
 
-            // 1. Continue Button (Character Select)
+            // Continue 버튼
             if (canvasX >= centerX - btnW / 2 && canvasX <= centerX + btnW / 2 &&
                 canvasY >= centerY && canvasY <= centerY + btnH) {
                 state.isContinuing = true;
@@ -440,7 +262,7 @@ async function startGame() {
                 return;
             }
 
-            // 2. Quit Button
+            // Quit 버튼
             const quitY = centerY + btnH + CONFIG.SCREEN_HEIGHT * 0.028;
             if (canvasX >= centerX - btnW / 2 && canvasX <= centerX + btnW / 2 &&
                 canvasY >= quitY && canvasY <= quitY + btnH) {
@@ -449,7 +271,7 @@ async function startGame() {
             }
         }
     };
-    // [BUG-07 Fix] Remove previous listeners to prevent accumulation
+
     if (window._handleGlobalAction) {
         window.removeEventListener('click', window._handleGlobalAction);
         window.removeEventListener('touchstart', window._handleGlobalAction);
@@ -468,56 +290,7 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-function confirmCharacter() {
-    if (state.gameActive && !state.isContinuing) return;
-
-    const isCont = state.isContinuing;
-    state.isSelectingCharacter = false;
-    state.gameActive = true;
-    state.gameOver = false;
-    state.isContinuing = false;
-
-    // Apply Character Stats
-    const char = CHARACTERS[state.selectedCharIndex];
-    state.player.color = char.color;
-    state.player.id = char.id;
-    state.player.shotDelay = char.shotDelay;
-
-    // Character Specific Stats update (Size/Speed)
-    state.player.width = 148;
-    state.player.height = 148;
-
-    // UI Update
-    document.getElementById('ui-layer').classList.remove('hidden');
-    const hud = document.getElementById('hud');
-    if (hud) hud.classList.remove('hidden');
-
-    if (isCont) {
-        // Continue Logic: Reset basic stats but keep stage/score
-        state.lives = 3;
-        state.player.bombCount = 3;
-        state.player.powerLevel = 1; // Penalty for dying
-        state.player.invincible = true;
-        state.player.invincibleTime = 120;
-        state.player.x = 100;
-        state.player.y = 300;
-        state.enemies = []; // Clear current enemies for fair resume
-        state.enemyBullets = [];
-        updateLivesUI();
-        updateBombUI();
-        sound.playConfirm();
-        sound.startBGM(`STAGE_${state.currentStage}`);
-    } else {
-        // Fresh start
-        updateLivesUI();
-        updateBombUI();
-        sound.playGameStart();
-        sound.startBGM(`STAGE_${state.currentStage}`);
-        startDialogue(state.currentStage);
-    }
-}
-
-// Game Loop
+// ── 게임 루프 ──
 function gameLoop() {
     try {
         if (state.isSelectingCharacter) {
@@ -536,12 +309,12 @@ function gameLoop() {
                     state.bullets = [];
                     state.enemyBullets = [];
                     state.stageStartScore = state.score;
-                    state.player.x = 100; state.player.y = 300; // Reset Pos
-                    sound.startBGM(`STAGE_${state.currentStage + 1}`); // Preview next stage music
-                    startWorldMap(); // Fixed: Show world map instead of skipping to dialogue
+                    state.player.x = 100; state.player.y = 300;
+                    sound.startBGM(`STAGE_${state.currentStage + 1}`);
+                    startWorldMap();
                 }
             } else if (!state.isDialogueActive && !state.isWorldMapActive) {
-                updateBackground(); // Smooth scroll update
+                updateBackground();
                 updatePlayer();
                 updateBullets();
                 spawnEnemy();
@@ -552,10 +325,8 @@ function gameLoop() {
                 updateBombs();
                 updateParticles();
 
-                // Drawing
                 draw(ctx, state);
             } else {
-                // Dialogue or Map active: Just draw current state (paused)
                 draw(ctx, state);
             }
 
@@ -563,7 +334,6 @@ function gameLoop() {
             draw(ctx, state);
             drawGameOverScreen(ctx);
         } else {
-            // Title Screen
             drawTitleScreen(ctx);
         }
     } catch (err) {

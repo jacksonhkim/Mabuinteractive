@@ -556,20 +556,23 @@ body {
 <script>
 
 /* --- constants.js --- */
-// 게임 시스템 상수 및 설정const CONFIG = {
+// 게임 시스템 상수 및 설정
+const CONFIG = {
     SCREEN_WIDTH: 1280,
     SCREEN_HEIGHT: 720,
     PLAYER_SPEED: 9.0,
     FRICTION: 0.9,
     FPS: 60,
     GAME_SPEED: 1.0
-};const CHARACTERS = [
+};
+const CHARACTERS = [
     { id: 'toto', name: '또또', speed: 6.8, power: '일반', range: '광역', shotDelay: 200, color: '#ffcc00' },
     { id: 'lulu', name: '루루', speed: 9.5, power: '일반', range: '좁음', shotDelay: 130, color: '#F06292' },
     { id: 'kaka', name: '카카', speed: 5.2, power: '강력', range: '중앙', shotDelay: 350, color: '#4E342E' },
     { id: 'momo', name: '모모', speed: 5.8, power: '일반', range: '광역', shotDelay: 220, color: '#D32F2F' },
     { id: 'pipi', name: '피피', speed: 7.5, power: '일반', range: '유도', shotDelay: 180, color: '#2E7D32' }
-];const ENEMY_TYPES = {
+];
+const ENEMY_TYPES = {
     SCOUT_WASP: 0,
     DANCING_BUTTERFLY: 1,
     BEETLE: 2,
@@ -577,7 +580,8 @@ body {
     GHOST: 4,
     SLIME: 5,
     BOSS_BULLET: 99
-};const STAGE_ENEMIES = {
+};
+const STAGE_ENEMIES = {
     1: [ENEMY_TYPES.SCOUT_WASP, ENEMY_TYPES.DANCING_BUTTERFLY],
     2: [ENEMY_TYPES.SCOUT_WASP, ENEMY_TYPES.BEETLE],
     3: [ENEMY_TYPES.DANCING_BUTTERFLY, ENEMY_TYPES.BEETLE],
@@ -588,7 +592,8 @@ body {
     8: [ENEMY_TYPES.SLIME, ENEMY_TYPES.SCOUT_WASP],
     9: [ENEMY_TYPES.DRONE, ENEMY_TYPES.SCOUT_WASP],
     10: [ENEMY_TYPES.GHOST, ENEMY_TYPES.DRONE]
-};const BOSS_DATA = {
+};
+const BOSS_DATA = {
     1: { type: 1, name: "General Buzz", width: 300, height: 250, hp: 100, maxHp: 100 },
     2: { type: 2, name: "Queen Arachne", width: 350, height: 300, hp: 400, maxHp: 400 },
     3: { type: 3, name: "Metal Orochi", width: 450, height: 220, hp: 800, maxHp: 800 },
@@ -601,7 +606,8 @@ body {
     10: { type: 10, name: "Emperor V", width: 350, height: 480, hp: 3200, maxHp: 3200 }
 };
 
-// 스테이지별 대화 데이터const STAGE_DIALOGUES = {
+// 스테이지별 대화 데이터
+const STAGE_DIALOGUES = {
     1: [
         { name: "또또", text: "드디어 모험의 시작이야! 평화로운 숲을 지켜내겠어.", side: "left" },
         { name: "요정", text: "또또, 조심해! 말벌 부대가 나타났다는 보고야.", side: "right" }
@@ -697,7 +703,8 @@ const state = {
     worldMapTimer: 0,
     mapProgress: 0,
     isContinuing: false
-};function resetState() {
+};
+function resetState() {
     state.score = 0;
     state.lives = 3;
     state.keys = {};
@@ -746,7 +753,8 @@ window.state = state;
 /* --- assets.js --- */
 
 // Hansooni's High-Fidelity Asset Library (Vector/SVG Edition)
-// Bypassing server lag to deliver project assets immediately.const ASSETS = {
+// Bypassing server lag to deliver project assets immediately.
+const ASSETS = {
     toto: `data:image/svg+xml;base64,${btoa(`
         <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
             <!-- Wings (Animated Shimmer) -->
@@ -810,21 +818,39 @@ window.state = state;
     `)}`
 };
 
-// Background Image Assetsconst BACKGROUND_IMAGES = {
-    layer01: new Image(),
-    layer02: new Image(),
-    layer03: new Image()
-};
+// Background Image Assets
+const BACKGROUND_IMAGES = {};
 
-BACKGROUND_IMAGES.layer01.src = 'assets/background/bg_PixelSky_layer01.png';
-BACKGROUND_IMAGES.layer02.src = 'assets/background/bg_PixelSky_layer02.png';
-BACKGROUND_IMAGES.layer03.src = 'assets/background/bg_PixelSky_layer03.png';
+// Stage 1 Assets (New Stage 1 Background)
+BACKGROUND_IMAGES.s1_layer01 = new Image(); BACKGROUND_IMAGES.s1_layer01.src = 'assets/background/bg_stage1_layer01.png';
+BACKGROUND_IMAGES.s1_layer02 = new Image(); BACKGROUND_IMAGES.s1_layer02.src = 'assets/background/bg_stage1_layer02.png';
+BACKGROUND_IMAGES.s1_layer03 = new Image(); BACKGROUND_IMAGES.s1_layer03.src = 'assets/background/bg_stage1_layer03.png';
+BACKGROUND_IMAGES.s1_layer04 = new Image(); BACKGROUND_IMAGES.s1_layer04.src = 'assets/background/bg_stage1_layer04.png';
+BACKGROUND_IMAGES.s1_layer05 = new Image(); BACKGROUND_IMAGES.s1_layer05.src = 'assets/background/bg_stage1_layer05.png';
+
+// Stage 2 Assets (3 Layers)
+BACKGROUND_IMAGES.s2_layer01 = new Image(); BACKGROUND_IMAGES.s2_layer01.src = 'assets/background/bg_stage2_layer01.png';
+BACKGROUND_IMAGES.s2_layer02 = new Image(); BACKGROUND_IMAGES.s2_layer02.src = 'assets/background/bg_stage2_layer02.png';
+BACKGROUND_IMAGES.s2_layer03 = new Image(); BACKGROUND_IMAGES.s2_layer03.src = 'assets/background/bg_stage2_layer03.png';
+
+// Stage 3 Assets (Sunset)
+BACKGROUND_IMAGES.s3_layer01 = new Image(); BACKGROUND_IMAGES.s3_layer01.src = 'assets/background/bg_stage3_layer01.png';
+BACKGROUND_IMAGES.s3_layer02 = new Image(); BACKGROUND_IMAGES.s3_layer02.src = 'assets/background/bg_stage3_layer02.png';
+BACKGROUND_IMAGES.s3_layer03 = new Image(); BACKGROUND_IMAGES.s3_layer03.src = 'assets/background/bg_stage3_layer03.png';
+BACKGROUND_IMAGES.s3_layer04 = new Image(); BACKGROUND_IMAGES.s3_layer04.src = 'assets/background/bg_stage3_layer04.png';
+
+// Stage 4 Assets
+BACKGROUND_IMAGES.s4_layer01 = new Image(); BACKGROUND_IMAGES.s4_layer01.src = 'assets/background/bg_stage4_layer01.png';
+BACKGROUND_IMAGES.s4_layer02 = new Image(); BACKGROUND_IMAGES.s4_layer02.src = 'assets/background/bg_stage4_layer02.png';
+BACKGROUND_IMAGES.s4_layer03 = new Image(); BACKGROUND_IMAGES.s4_layer03.src = 'assets/background/bg_stage4_layer03.png';
+
 BACKGROUND_IMAGES.bgStart = new Image();
 BACKGROUND_IMAGES.bgStart.src = 'assets/background/bg_start.png';
 BACKGROUND_IMAGES.bgCharSelect = new Image();
 BACKGROUND_IMAGES.bgCharSelect.src = 'assets/background/bg_character_select.png';
 
-// Player Character Image Assetsconst PLAYER_IMAGES = {
+// Player Character Image Assets
+const PLAYER_IMAGES = {
     ch_player1: new Image(),
     ch_player2: new Image(),
     ch_player3: new Image(),
@@ -838,7 +864,8 @@ PLAYER_IMAGES.ch_player3.src = 'assets/ch_player3.png';
 PLAYER_IMAGES.ch_player4.src = 'assets/ch_player4.png';
 PLAYER_IMAGES.ch_player5.src = 'assets/ch_player5.png';
 
-// Global Asset Loaderasync function loadAllAssets() {
+// Global Asset Loader
+async function loadAllAssets() {
     const images = [
         ...Object.values(BACKGROUND_IMAGES),
         ...Object.values(PLAYER_IMAGES)
@@ -1352,10 +1379,12 @@ class SoundEngine {
             this.bgmSource = null;
         }
     }
-}const sound = new SoundEngine();
+}
+const sound = new SoundEngine();
 
 /* --- pixel_art_v2.js --- */
-// [Ultra Pixel Art Engine V4] - High Fidelity & Performance
+// [Ultra Pixel Art Engine V4] - High Fidelity & Performance
+
 
 
 // Helper: 픽셀 그리기 (좌표 보정 포함)
@@ -1406,12 +1435,14 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
 // 1. Hero (Toto) - V12 [FINAL TRUE 1:1 REPLICATION]
 // 이 버전은 기존의 마스터본입니다.
 // 1. Hero (Toto) - V12 [FINAL TRUE 1:1 REPLICATION]
-// 이 버전은 기존의 마스터본입니다.function drawPixelTotoV2(ctx, x, y, w, h, vy = 0) {
+// 이 버전은 기존의 마스터본입니다.
+function drawPixelTotoV2(ctx, x, y, w, h, vy = 0) {
     drawPixelTotoV5(ctx, x, y, w, h, vy);
 }
 
 // 1-B. Hero (Toto) - V5 [HONEY BEE REDESIGN]
-// 한순이 AD: "울트라 디테일 2D 픽셀 아트 스타일로 재해석한 꿀벌 또또입니다."function drawPixelTotoV5(ctx, x, y, w, h, vy = 0) {
+// 한순이 AD: "울트라 디테일 2D 픽셀 아트 스타일로 재해석한 꿀벌 또또입니다."
+function drawPixelTotoV5(ctx, x, y, w, h, vy = 0) {
     if (drawCharImg(ctx, PLAYER_IMAGES.ch_player1, x, y, w, h)) return;
 
     // Fallback to procedural if image not loaded
@@ -1473,7 +1504,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 1-C. Bit Bee (Funnel) - Mini Totofunction drawBitBee(ctx, x, y, w, h) {
+// 1-C. Bit Bee (Funnel) - Mini Toto
+function drawBitBee(ctx, x, y, w, h) {
     // We use drawPixelTotoV5 with a smaller size (32x32 typically passed from entities)
     // To distinguish them, we can add a slight glow or just use them as is
     ctx.save();
@@ -1482,7 +1514,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 2. Enemy (Wasp) - Pixel Grid High Detailfunction drawPixelWaspV2(ctx, x, y, w, h) {
+// 2. Enemy (Wasp) - Pixel Grid High Detail
+function drawPixelWaspV2(ctx, x, y, w, h) {
     const cx = x;
     const cy = y;
     const t = Date.now() / 1000;
@@ -1522,7 +1555,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
 }
 
 // 2-B. Boss (Buzz) - Ultimate Detail V1
-// 2-B. Boss (Buzz) - Ultimate Pixel Gridfunction drawPixelBossBuzzV2(ctx, x, y, w, h) {
+// 2-B. Boss (Buzz) - Ultimate Pixel Grid
+function drawPixelBossBuzzV2(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const hover = Math.sin(t * 5) * 15;
     const pSize = w / 32;
@@ -1560,7 +1594,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     }
 }
 
-// 3. Enemy (Butterfly) - Pixel Grid V1function drawPixelButterflyV2(ctx, x, y, w, h) {
+// 3. Enemy (Butterfly) - Pixel Grid V1
+function drawPixelButterflyV2(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const flap = Math.sin(t * 15) > 0;
     const pSize = w / 16;
@@ -1604,7 +1639,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     drawPixelGrid(ctx, x, y, pSize, butterflyGrid);
 }
 
-// 4. Enemy (Beetle) - Pixel Grid V1function drawPixelBeetleV2(ctx, x, y, w, h) {
+// 4. Enemy (Beetle) - Pixel Grid V1
+function drawPixelBeetleV2(ctx, x, y, w, h) {
     const pSize = w / 16;
     const beetleGrid = [
         "      XXXX      ",
@@ -1627,7 +1663,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     drawPixelGrid(ctx, x, y, pSize, beetleGrid);
 }
 
-// 5. Enemy (Drone) - Pixel Grid V1function drawPixelDroneV2(ctx, x, y, w, h) {
+// 5. Enemy (Drone) - Pixel Grid V1
+function drawPixelDroneV2(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const pSize = w / 16;
     const droneGrid = [
@@ -1651,7 +1688,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     drawPixelGrid(ctx, x, y, pSize, droneGrid);
 }
 
-// 6. Enemy (Ghost) - Pixel Grid V1function drawPixelGhostV2(ctx, x, y, w, h) {
+// 6. Enemy (Ghost) - Pixel Grid V1
+function drawPixelGhostV2(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const pSize = w / 16;
     const ghostGrid = [
@@ -1678,7 +1716,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 7. Enemy (Slime) - Pixel Grid V1function drawPixelSlimeV2(ctx, x, y, w, h) {
+// 7. Enemy (Slime) - Pixel Grid V1
+function drawPixelSlimeV2(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const pSize = w / 16;
     const slimeGrid = [
@@ -1711,7 +1750,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
 // 3.5 Enemies Continued...
 
 // Background - High Quality Pixel Art Version (V3)
-// SEAMLESS LOOPING FIX: Using modulo and extra tile padding to ensure zero jumping.function drawPixelForestV2(ctx, CONFIG, state) {
+// SEAMLESS LOOPING FIX: Using modulo and extra tile padding to ensure zero jumping.
+function drawPixelForestV2(ctx, CONFIG, state) {
     const stage = state.currentStage || 1;
     const bgOffset = state.bgOffset || 0;
 
@@ -1852,7 +1892,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     }
 }
 
-// 2-C. Boss (Queen Arachne) - Pixel Block Designfunction drawPixelQueenArachne(ctx, x, y, w, h) {
+// 2-C. Boss (Queen Arachne) - Pixel Block Design
+function drawPixelQueenArachne(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const pSize = w / 32;
 
@@ -1900,7 +1941,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 2-D. Boss (Metal Orochi) - Pixel Snake V1function drawPixelMetalOrochi(ctx, x, y, w, h) {
+// 2-D. Boss (Metal Orochi) - Pixel Snake V1
+function drawPixelMetalOrochi(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const pSize = w / 64;
 
@@ -1950,7 +1992,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 2-E. Boss (Storm Falcon) - Pixel Ace V1function drawPixelStormFalcon(ctx, x, y, w, h) {
+// 2-E. Boss (Storm Falcon) - Pixel Ace V1
+function drawPixelStormFalcon(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const pSize = w / 32;
 
@@ -1998,7 +2041,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 2-F. Boss (Phantom Moth) - Pixel Mirage V1function drawPixelPhantomMoth(ctx, x, y, w, h) {
+// 2-F. Boss (Phantom Moth) - Pixel Mirage V1
+function drawPixelPhantomMoth(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const pSize = w / 32;
 
@@ -2045,7 +2089,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 2-G. Boss (Flame Salamander) - Pixel Drake V1function drawPixelFlameSalamander(ctx, x, y, w, h) {
+// 2-G. Boss (Flame Salamander) - Pixel Drake V1
+function drawPixelFlameSalamander(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const pSize = w / 32;
 
@@ -2073,7 +2118,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 2-H. Boss (Junk Amalgam) - Pixel Scrap V1function drawPixelJunkAmalgam(ctx, x, y, w, h) {
+// 2-H. Boss (Junk Amalgam) - Pixel Scrap V1
+function drawPixelJunkAmalgam(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const pSize = w / 32;
 
@@ -2098,7 +2144,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 2-I. Boss (Toxic Chimera) - Pixel Terror V1function drawPixelToxicChimera(ctx, x, y, w, h) {
+// 2-I. Boss (Toxic Chimera) - Pixel Terror V1
+function drawPixelToxicChimera(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const pSize = w / 32;
 
@@ -2126,7 +2173,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 2-J. Boss (Sky Fortress Core) - Pixel Engine V1function drawPixelSkyFortressCore(ctx, x, y, w, h) {
+// 2-J. Boss (Sky Fortress Core) - Pixel Engine V1
+function drawPixelSkyFortressCore(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const pSize = w / 48;
 
@@ -2162,7 +2210,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 2-K. Boss (Emperor "V") - Pixel King V1function drawPixelEmperorV(ctx, x, y, w, h) {
+// 2-K. Boss (Emperor "V") - Pixel King V1
+function drawPixelEmperorV(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const pSize = w / 32;
 
@@ -2206,32 +2255,38 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 9. Portraitsfunction drawPixelTotoPortrait(ctx, x, y, size = 120) {
+// 9. Portraits
+function drawPixelTotoPortrait(ctx, x, y, size = 120) {
     ctx.save();
     ctx.translate(x, y);
     drawPixelTotoV5(ctx, -size / 2, -size / 2, size, size, 0);
     ctx.restore();
-}function drawPixelLuluPortrait(ctx, x, y, size = 120) {
+}
+function drawPixelLuluPortrait(ctx, x, y, size = 120) {
     ctx.save();
     ctx.translate(x, y);
     drawPixelLuluV2(ctx, -size / 2, -size / 2, size, size);
     ctx.restore();
-}function drawPixelKakaPortrait(ctx, x, y, size = 120) {
+}
+function drawPixelKakaPortrait(ctx, x, y, size = 120) {
     ctx.save();
     ctx.translate(x, y);
     drawPixelKakaV2(ctx, -size / 2, -size / 2, size, size);
     ctx.restore();
-}function drawPixelMomoPortrait(ctx, x, y, size = 120) {
+}
+function drawPixelMomoPortrait(ctx, x, y, size = 120) {
     ctx.save();
     ctx.translate(x, y);
     drawPixelMomoV2(ctx, -size / 2, -size / 2, size, size);
     ctx.restore();
-}function drawPixelPipiPortrait(ctx, x, y, size = 120) {
+}
+function drawPixelPipiPortrait(ctx, x, y, size = 120) {
     ctx.save();
     ctx.translate(x, y);
     drawPixelPipiV2(ctx, -size / 2, -size / 2, size, size);
     ctx.restore();
-}function drawPixelFairyPortrait(ctx, x, y, size = 120) {
+}
+function drawPixelFairyPortrait(ctx, x, y, size = 120) {
     ctx.save();
     ctx.translate(x, y);
     const t = Date.now() / 1000;
@@ -2244,7 +2299,8 @@ const drawPixelGrid = (ctx, x, y, size, grid) => {
     ctx.restore();
 }
 
-// 10. Items & Effectsfunction drawPixelItemV2(ctx, x, y, type) {
+// 10. Items & Effects
+function drawPixelItemV2(ctx, x, y, type) {
     const t = Date.now() / 1000;
     const hover = Math.sin(t * 5) * 5;
     const size = 32;
@@ -2305,7 +2361,8 @@ function drawHeart(ctx, x, y, size) {
 /**
  * [TENGAI STYLE] High-Impact Character Ultimate Bomb Effects (V3)
  * Inspired by classic arcade shooters (Sengoku Blade).
- */function drawPixelBombEffectV2(ctx, x, y, radius, alpha, charId = 'toto', timer = 0) {
+ */
+function drawPixelBombEffectV2(ctx, x, y, radius, alpha, charId = 'toto', timer = 0) {
     ctx.save();
     const stageWidth = 1280;
     const stageHeight = 720;
@@ -2491,7 +2548,8 @@ function drawHeart(ctx, x, y, size) {
     ctx.restore();
 }
 
-// [Special] Safe Guard (Shield Aura)function drawPixelSafeGuard(ctx, x, y, w, h) {
+// [Special] Safe Guard (Shield Aura)
+function drawPixelSafeGuard(ctx, x, y, w, h) {
     const t = Date.now() / 1000;
     const cx = x + w / 2;
     const cy = y + h / 2;
@@ -2523,7 +2581,8 @@ function drawHeart(ctx, x, y, size) {
     ctx.restore();
 }
 
-// 10. Stage Branch Selection (Original line 1005+)function drawBranchSelectionUI(ctx, CONFIG, state) {
+// 10. Stage Branch Selection (Original line 1005+)
+function drawBranchSelectionUI(ctx, CONFIG, state) {
     const cx = CONFIG.SCREEN_WIDTH / 2;
     const cy = CONFIG.SCREEN_HEIGHT / 2;
 
@@ -2554,7 +2613,8 @@ function drawHeart(ctx, x, y, size) {
 // [New Player Characters] Lulu, Kaka, Momo, Pipi
 // ============================================================
 
-// 2. Lulu (Butterfly Speed Type) - V5 Upgradefunction drawPixelLuluV2(ctx, x, y, w, h) {
+// 2. Lulu (Butterfly Speed Type) - V5 Upgrade
+function drawPixelLuluV2(ctx, x, y, w, h) {
     if (drawCharImg(ctx, PLAYER_IMAGES.ch_player2, x, y, w, h)) return;
 
     const t = Date.now() / 1000;
@@ -2615,7 +2675,8 @@ function drawHeart(ctx, x, y, size) {
     ctx.restore();
 }
 
-// 3. Kaka (Beetle Power Type) - V5 Upgradefunction drawPixelKakaV2(ctx, x, y, w, h) {
+// 3. Kaka (Beetle Power Type) - V5 Upgrade
+function drawPixelKakaV2(ctx, x, y, w, h) {
     if (drawCharImg(ctx, PLAYER_IMAGES.ch_player3, x, y, w, h, true)) return;
 
     const t = Date.now() / 1000;
@@ -2675,7 +2736,8 @@ function drawHeart(ctx, x, y, size) {
     ctx.restore();
 }
 
-// 3. Momo (Ladybug Defense Type) - V5 Upgradefunction drawPixelMomoV2(ctx, x, y, w, h) {
+// 3. Momo (Ladybug Defense Type) - V5 Upgrade
+function drawPixelMomoV2(ctx, x, y, w, h) {
     if (drawCharImg(ctx, PLAYER_IMAGES.ch_player4, x, y, w, h, true)) return;
 
     const t = Date.now() / 1000;
@@ -2733,7 +2795,8 @@ function drawHeart(ctx, x, y, size) {
     ctx.restore();
 }
 
-// 4. Pipi (Dragonfly Special Type) - V5 Upgradefunction drawPixelPipiV2(ctx, x, y, w, h) {
+// 4. Pipi (Dragonfly Special Type) - V5 Upgrade
+function drawPixelPipiV2(ctx, x, y, w, h) {
     if (drawCharImg(ctx, PLAYER_IMAGES.ch_player5, x, y, w, h)) return;
 
     const t = Date.now() / 1000;
@@ -2791,7 +2854,8 @@ function drawHeart(ctx, x, y, size) {
 }
 
 
-// [Character Choice UI] Drawingfunction drawCharacterSelectionUI(ctx, CONFIG, characters, selectedIndex) {
+// [Character Choice UI] Drawing
+function drawCharacterSelectionUI(ctx, CONFIG, characters, selectedIndex) {
     ctx.save();
     // Semi-transparent overlay
     ctx.fillStyle = 'rgba(0,0,0,0.85)';
@@ -2854,7 +2918,8 @@ function drawHeart(ctx, x, y, size) {
 }
 
 // [World Map UI] Drawing
-// [World Map UI] RPG-Style Continental Drawingfunction drawWorldMap(ctx, CONFIG, state) {
+// [World Map UI] RPG-Style Continental Drawing
+function drawWorldMap(ctx, CONFIG, state) {
     ctx.save();
     // 1. Map Background (Antique Parchment Style)
     ctx.fillStyle = '#e8d5b5';
@@ -3002,16 +3067,21 @@ function drawHeart(ctx, x, y, size) {
 }
 
 /* --- ui.js --- */
-
+
+
+
 import {
     drawPixelForestV2, drawPixelTotoV5, drawPixelLuluV2, drawPixelKakaV2, drawPixelMomoV2, drawPixelPipiV2
-} from './pixel_art_v2.js';function updateLivesUI() {
+} from './pixel_art_v2.js';
+function updateLivesUI() {
     const el = document.getElementById('lives');
     if (el) el.innerText = '❤'.repeat(state.lives);
-}function updateBombUI() {
+}
+function updateBombUI() {
     const el = document.getElementById('bombs');
     if (el) el.innerText = '💣'.repeat(state.player.bombCount);
-}function drawTitleScreen(ctx) {
+}
+function drawTitleScreen(ctx) {
     const bg = BACKGROUND_IMAGES.bgStart;
     if (bg && bg.complete && bg.naturalWidth !== 0) {
         // Draw image keeping aspect ratio (cover style)
@@ -3025,7 +3095,8 @@ import {
         drawPixelForestV2(ctx, CONFIG, state);
     }
     // Text handled by DOM #start-screen
-}function drawGameOverScreen(ctx) {
+}
+function drawGameOverScreen(ctx) {
     ctx.fillStyle = 'rgba(0,0,0,0.85)';
     ctx.fillRect(0, 0, CONFIG.SCREEN_WIDTH, CONFIG.SCREEN_HEIGHT);
 
@@ -3063,12 +3134,14 @@ import {
 
     ctx.fillStyle = '#ccc';
     ctx.fillText("QUIT TO MENU", centerX, centerY + 118);
-}function drawStageClear(ctx) {
+}
+function drawStageClear(ctx) {
     ctx.font = 'bold 80px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffeb3b';
     ctx.fillText("STAGE " + state.currentStage + " CLEAR!", CONFIG.SCREEN_WIDTH / 2, CONFIG.SCREEN_HEIGHT / 2);
 }
 
-// [Character Selection UI]function drawCharacterSelectionUI(ctx, selectedIndex) {
+// [Character Selection UI]
+function drawCharacterSelectionUI(ctx, selectedIndex) {
     ctx.save();
 
     // 1. Character Select Background
@@ -3157,7 +3230,8 @@ import {
     ctx.fillText("← / →  Select   |   SPACE  Confirm", CONFIG.SCREEN_WIDTH / 2, CONFIG.SCREEN_HEIGHT - 60);
 
     ctx.restore();
-}function startWorldMap() {
+}
+function startWorldMap() {
     state.isWorldMapActive = true;
     state.isWorldMapReady = false;
     state.mapProgress = 0;
@@ -3174,7 +3248,8 @@ import {
     }, 30);
 }
 
-// 대화 시스템function startDialogue(stage) {
+// 대화 시스템
+function startDialogue(stage) {
     if (!STAGE_DIALOGUES[stage]) return;
     state.currentStage = stage; // Fix: Sync state with requested stage
     state.isDialogueActive = true;
@@ -3183,7 +3258,8 @@ import {
 }
 
 // Global reference for reliable listener cleanup - REMOVED interactions
-// let activeDialogueFunc = null;function showNextDialogue() {
+// let activeDialogueFunc = null;
+function showNextDialogue() {
     const dialogues = STAGE_DIALOGUES[state.currentStage];
     const box = document.getElementById('dialogue-box');
 
@@ -3216,7 +3292,8 @@ window.advanceDialogue = () => {
     state.dialogueIndex++;
     showNextDialogue();
     return true;
-};function startEndingSequence(ctx) {
+};
+function startEndingSequence(ctx) {
     console.log("Ending Sequence Started");
     sound.startBGM('ENDING'); // 엔딩 테마 재생
 
@@ -3243,7 +3320,8 @@ window.advanceDialogue = () => {
         requestAnimationFrame(drawEnding);
     }
     drawEnding();
-}function showCreditsScreen() {
+}
+function showCreditsScreen() {
     // Canvas와 UI 숨기기
     const canvas = document.getElementById('gameCanvas');
     if (canvas) canvas.style.display = 'none';
@@ -3343,7 +3421,8 @@ import {
     drawPixelFlameSalamander, drawPixelJunkAmalgam, drawPixelToxicChimera, drawPixelSkyFortressCore, drawPixelEmperorV,
     drawPixelTotoPortrait, drawPixelLuluPortrait, drawPixelKakaPortrait, drawPixelMomoPortrait, drawPixelPipiPortrait,
     drawPixelFairyPortrait, drawWorldMap, drawBitBee
-} from './pixel_art_v2.js';function draw(ctx, state) {
+} from './pixel_art_v2.js';
+function draw(ctx, state) {
     if (state.isWorldMapActive) {
         drawWorldMap(ctx, CONFIG, state);
         return;
@@ -3523,7 +3602,8 @@ import {
 /* --- entities.js --- */
 function updateBackground() {
     state.bgOffset = (state.bgOffset || 0) - 2.5; // Smooth constant scroll
-}function updatePlayer() {
+}
+function updatePlayer() {
     let dx = 0;
     let dy = 0;
     if (state.keys['ArrowUp'] || state.keys['KeyW']) dy -= 1;
@@ -3574,7 +3654,8 @@ function updateBackground() {
         state.keys['KeyX'] = false;
         state.keys['KeyB'] = false;
     }
-}function shoot() {
+}
+function shoot() {
     const p = state.player;
     // Scale factor ~0.77 (192 -> 148)
     let bulletData = { speed: 14, width: 25, height: 7, color: '#fff', vx: 14, vy: 0, damage: 1 };
@@ -3619,7 +3700,8 @@ function updateBackground() {
             break;
     }
     sound.playShot(p.id);
-}function fireCharacterChargeShot() {
+}
+function fireCharacterChargeShot() {
     const p = state.player;
     const charId = p.id;
     const level = Math.min(p.powerLevel, 5);
@@ -3674,7 +3756,8 @@ function updateBackground() {
         });
     }
     sound.playChargeShot(charId);
-}function spawnItem(x, y) {
+}
+function spawnItem(x, y) {
     const rand = Math.random();
     let type = null;
     if (rand < 0.25) type = 'P';
@@ -3682,7 +3765,8 @@ function updateBackground() {
     if (type) {
         state.items.push({ x, y, startY: y, type, vx: -2, time: 0, width: 40, height: 40 });
     }
-}function updateItems() {
+}
+function updateItems() {
     for (let i = state.items.length - 1; i >= 0; i--) {
         const item = state.items[i];
         item.time++;
@@ -3721,7 +3805,8 @@ function updateBackground() {
         }
         if (item.x < -100) state.items.splice(i, 1);
     }
-}function useBomb() {
+}
+function useBomb() {
     if (state.player.bombCount <= 0) return;
     state.player.bombCount--;
     updateBombUI();
@@ -3732,7 +3817,8 @@ function updateBackground() {
         charId: state.player.id // Store player id for effect
     });
     sound.playExplosion();
-}function updateBombs() {
+}
+function updateBombs() {
     for (let i = state.bombs.length - 1; i >= 0; i--) {
         const b = state.bombs[i];
         b.radius += 20; b.alpha -= 0.02; b.timer++;
@@ -3757,7 +3843,8 @@ function updateBackground() {
         }
         if (b.alpha <= 0) state.bombs.splice(i, 1);
     }
-}function updateBullets() {
+}
+function updateBullets() {
     for (let i = state.bullets.length - 1; i >= 0; i--) {
         const b = state.bullets[i];
 
@@ -3809,7 +3896,8 @@ function updateBackground() {
             state.bullets.splice(i, 1);
         }
     }
-}function spawnEnemy() {
+}
+function spawnEnemy() {
     const now = Date.now();
     if (now - state.lastSpawnTime < 1500) return;
     state.lastSpawnTime = now;
@@ -3842,7 +3930,8 @@ function updateBackground() {
         width: w, height: h, hp: hp, time: 0
     };
     state.enemies.push(enemy);
-}function spawnBoss() {
+}
+function spawnBoss() {
     const stage = state.currentStage;
     let bossData = BOSS_DATA[stage];
     if (!bossData) bossData = BOSS_DATA[1]; // Fallback
@@ -3856,7 +3945,8 @@ function updateBackground() {
         hitTimer: 0,
         phase: 1
     };
-}function updateBoss() {
+}
+function updateBoss() {
     const b = state.boss;
     if (!b) return;
     b.timer++;
@@ -3978,7 +4068,8 @@ function updateBackground() {
         state.player.y < b.y + b.height && state.player.y + b.height > b.y) {
         playerHit();
     }
-}function playerHit() {
+}
+function playerHit() {
     state.lives--;
     updateLivesUI();
     state.player.invincible = true;
@@ -3990,7 +4081,8 @@ function updateBackground() {
     } else {
         state.player.powerLevel = 1;
     }
-}function bossShoot(boss) {
+}
+function bossShoot(boss) {
     const b = boss || state.boss;
     if (b.type === 1) {
         for (let i = 0; i < 3; i++) {
@@ -4047,7 +4139,8 @@ function updateBackground() {
             }
         }
     }
-}function updateEnemyBullets() {
+}
+function updateEnemyBullets() {
     for (let i = state.enemyBullets.length - 1; i >= 0; i--) {
         const eb = state.enemyBullets[i];
         eb.x += eb.vx; eb.y += eb.vy;
@@ -4062,7 +4155,8 @@ function updateBackground() {
             playerHit();
         }
     }
-}function updateEnemies() {
+}
+function updateEnemies() {
     for (let i = state.enemies.length - 1; i >= 0; i--) {
         const e = state.enemies[i];
         e.time = (e.time || 0) + 1;
@@ -4163,7 +4257,8 @@ function handleEnemyCollisions(e, index) {
     }
 
     return false;
-}function enemyShoot(e) {
+}
+function enemyShoot(e) {
     // Base size increased from 10x10 -> 12x12
     const common = { x: e.x, y: e.y + e.height / 2, width: 12, height: 12, color: '#FF5252' };
     switch (e.type) {
@@ -4203,7 +4298,8 @@ function handleEnemyCollisions(e, index) {
         default:
             state.enemyBullets.push({ ...common, vx: -6, vy: 0 });
     }
-}function updateParticles() {
+}
+function updateParticles() {
     for (let i = state.particles.length - 1; i >= 0; i--) {
         const p = state.particles[i];
         p.x += p.vx; p.y += p.vy; p.alpha -= 0.02;
@@ -4211,7 +4307,8 @@ function handleEnemyCollisions(e, index) {
             state.particles.splice(i, 1);
         }
     }
-}function createExplosion(x, y, color) {
+}
+function createExplosion(x, y, color) {
     const finalColor = color || '#ffffff';
     for (let i = 0; i < 10; i++) {
         state.particles.push({
@@ -4284,7 +4381,10 @@ window.gameCheat = function (type) {
 };
 
 /* --- game.js --- */
-
+
+
+
+
 import {
     updateBackground, updatePlayer, updateBullets, spawnEnemy, updateEnemies,
     updateBoss, updateEnemyBullets, updateItems, updateBombs, updateParticles
@@ -4293,7 +4393,8 @@ import {
     drawTitleScreen, drawGameOverScreen, drawStageClear,
     drawCharacterSelectionUI, updateLivesUI, updateBombUI,
     startDialogue, startEndingSequence, startWorldMap
-} from './ui.js';
+} from './ui.js';
+
 
 // Expose globals for cheats
 window.sound = sound;
