@@ -71,24 +71,26 @@
                 <button id="btn-cheat-next"
                     style="position:absolute; top:10px; right:10px; z-index:9000; padding:10px; background-color:rgba(255,0,0,0.5); color:white; border:2px solid red; border-radius:5px; font-weight:bold; cursor:pointer;"
                     onclick="if(window.gameCheat) window.gameCheat('nextStage');">Next Stage (Cheat)</button>
-                <!-- 모바일 컨트롤 (터치용) -->
-                <div id="mobile-controls">
-                    <div id="d-pad" class="control-group">
-                        <div id="up" class="d-btn" data-key="ArrowUp"></div>
-                        <div id="down" class="d-btn" data-key="ArrowDown"></div>
-                        <div id="left" class="d-btn" data-key="ArrowLeft"></div>
-                        <div id="right" class="d-btn" data-key="ArrowRight"></div>
-                    </div>
-                    <div id="action-group" class="control-group">
-                        <div id="btn-bomb" class="act-btn" data-key="KeyX">💣</div>
-                        <div id="btn-shot" class="act-btn" data-key="Space">🔥</div>
-                    </div>
-                </div>
             </div>
         </div>
-        <script src="game.js?v=bust3" type="module"></script>
-        <!-- Removed duplicate script tag -->
-        <!-- <script src="game.js" type="module"></script> This was causing issues -->
+
+        <!-- 모바일 컨트롤 (터치용) - ui-layer 밖으로 분리 -->
+        <div id="mobile-controls">
+            <div id="d-pad" class="control-group">
+                <div id="up" class="d-btn" data-key="ArrowUp"></div>
+                <div id="down" class="d-btn" data-key="ArrowDown"></div>
+                <div id="left" class="d-btn" data-key="ArrowLeft"></div>
+                <div id="right" class="d-btn" data-key="ArrowRight"></div>
+            </div>
+            <div id="action-group" class="control-group">
+                <div id="btn-bomb" class="act-btn" data-key="KeyX">💣</div>
+                <div id="btn-shot" class="act-btn" data-key="Space">🔥</div>
+            </div>
+        </div>
+    </div>
+    <script src="game.js?v=bust4" type="module"></script>
+    <!-- Removed duplicate script tag -->
+    <!-- <script src="game.js" type="module"></script> This was causing issues -->
 </body>
 
 </html>

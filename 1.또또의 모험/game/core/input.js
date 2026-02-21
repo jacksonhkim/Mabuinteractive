@@ -211,7 +211,9 @@ export function setupCanvas() {
 
         const ui = document.getElementById('ui-layer');
         const startScreen = document.getElementById('start-screen');
-        [ui, startScreen].forEach(el => {
+        const mobileControls = document.getElementById('mobile-controls');
+
+        [ui, startScreen, mobileControls].forEach(el => {
             if (el) {
                 el.style.width = `${vpW}px`;
                 el.style.height = `${vpH}px`;

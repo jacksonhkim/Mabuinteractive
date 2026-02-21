@@ -83,6 +83,9 @@ window.handleRestart = () => {
     const hud = document.getElementById('hud');
     if (hud) { hud.style.display = 'flex'; hud.classList.remove('hidden'); }
 
+    const mobileControls = document.getElementById('mobile-controls');
+    if (mobileControls) mobileControls.style.display = 'none';
+
     sound.startBGM('START');
 
     window.addEventListener('click', startGame, { once: true });
