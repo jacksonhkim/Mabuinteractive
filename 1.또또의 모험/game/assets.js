@@ -102,6 +102,17 @@ BACKGROUND_IMAGES.s6_layer01 = new Image(); BACKGROUND_IMAGES.s6_layer01.src = '
 BACKGROUND_IMAGES.s6_layer02 = new Image(); BACKGROUND_IMAGES.s6_layer02.src = 'assets/background/bg_stage6_layer02.png';
 BACKGROUND_IMAGES.s6_layer03 = new Image(); BACKGROUND_IMAGES.s6_layer03.src = 'assets/background/bg_stage6_layer03.png';
 
+// Stage 7 Assets
+BACKGROUND_IMAGES.s7_layer01 = new Image(); BACKGROUND_IMAGES.s7_layer01.src = 'assets/background/bg_stage7_layer01.png';
+BACKGROUND_IMAGES.s7_layer02 = new Image(); BACKGROUND_IMAGES.s7_layer02.src = 'assets/background/bg_stage7_layer02.png';
+BACKGROUND_IMAGES.s7_layer03 = new Image(); BACKGROUND_IMAGES.s7_layer03.src = 'assets/background/bg_stage7_layer03.png';
+
+// Stage 9 Assets
+BACKGROUND_IMAGES.s9_layer01 = new Image(); BACKGROUND_IMAGES.s9_layer01.src = 'assets/background/bg_stage9_layer01.png';
+BACKGROUND_IMAGES.s9_layer02 = new Image(); BACKGROUND_IMAGES.s9_layer02.src = 'assets/background/bg_stage9_layer02.png';
+BACKGROUND_IMAGES.s9_layer03 = new Image(); BACKGROUND_IMAGES.s9_layer03.src = 'assets/background/bg_stage9_layer03.png';
+BACKGROUND_IMAGES.s9_layer04 = new Image(); BACKGROUND_IMAGES.s9_layer04.src = 'assets/background/bg_stage9_layer04.png';
+
 BACKGROUND_IMAGES.bgStart = new Image();
 BACKGROUND_IMAGES.bgStart.src = 'assets/background/bg_start.png';
 BACKGROUND_IMAGES.bgCharSelect = new Image();

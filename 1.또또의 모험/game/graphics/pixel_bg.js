@@ -107,6 +107,19 @@ export function drawPixelForestV2(ctx, CONFIG, state) {
         if (drawLayer(BACKGROUND_IMAGES.s6_layer02, 0.5)) layersDrawn = true;
         if (drawLayer(BACKGROUND_IMAGES.s6_layer03, 0.8)) layersDrawn = true;
         if (layersDrawn) return;
+    } else if (stage === 7) {
+        let layersDrawn = false;
+        if (drawLayer(BACKGROUND_IMAGES.s7_layer01, 0.2)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s7_layer02, 0.5)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s7_layer03, 0.8)) layersDrawn = true;
+        if (layersDrawn) return;
+    } else if (stage === 9) {
+        let layersDrawn = false;
+        if (drawLayer(BACKGROUND_IMAGES.s9_layer01, 0.2)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s9_layer02, 0.4)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s9_layer03, 0.6)) layersDrawn = true;
+        if (drawLayer(BACKGROUND_IMAGES.s9_layer04, 0.8)) layersDrawn = true;
+        if (layersDrawn) return;
     }
 
     // ── 3. 프로시저럴 구름 (폴백) ──
