@@ -122,11 +122,21 @@ PLAYER_IMAGES.ch_player3.src = 'assets/ch_player3.png';
 PLAYER_IMAGES.ch_player4.src = 'assets/ch_player4.png';
 PLAYER_IMAGES.ch_player5.src = 'assets/ch_player5.png';
 
+// Boss Image Assets
+export const BOSS_IMAGES = {};
+for (let i = 1; i <= 10; i++) {
+    BOSS_IMAGES[`boss_${i}`] = new Image();
+    BOSS_IMAGES[`boss_${i}`].src = `assets/boss/boss_${i}.png`;
+    BOSS_IMAGES[`boss_${i}_sprite`] = new Image();
+    BOSS_IMAGES[`boss_${i}_sprite`].src = `assets/boss/boss_${i}_sprite.png`;
+}
+
 // Global Asset Loader
 export async function loadAllAssets() {
     const images = [
         ...Object.values(BACKGROUND_IMAGES),
-        ...Object.values(PLAYER_IMAGES)
+        ...Object.values(PLAYER_IMAGES),
+        ...Object.values(BOSS_IMAGES)
     ];
 
     const loadPromises = images.map(img => {

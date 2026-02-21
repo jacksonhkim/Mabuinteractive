@@ -40,16 +40,16 @@ export const STAGE_ENEMIES = {
 };
 
 export const BOSS_DATA = {
-    1: { type: 1, name: "General Buzz", width: 300, height: 250, hp: 100, maxHp: 100 },
-    2: { type: 2, name: "Queen Arachne", width: 350, height: 300, hp: 400, maxHp: 400 },
-    3: { type: 3, name: "Metal Orochi", width: 450, height: 220, hp: 800, maxHp: 800 },
-    4: { type: 4, name: "Storm Falcon", width: 300, height: 240, hp: 1000, maxHp: 1000 },
-    5: { type: 5, name: "Phantom Moth", width: 400, height: 280, hp: 1200, maxHp: 1200 },
-    6: { type: 6, name: "Flame Salamander", width: 500, height: 250, hp: 1600, maxHp: 1600 },
-    7: { type: 7, name: "Junk Amalgam", width: 400, height: 400, hp: 2000, maxHp: 2000 },
-    8: { type: 8, name: "Toxic Chimera", width: 450, height: 320, hp: 2400, maxHp: 2400 },
-    9: { type: 9, name: "Sky Fortress Core", width: 600, height: 600, hp: 3000, maxHp: 3000 },
-    10: { type: 10, name: "Emperor V", width: 350, height: 480, hp: 3200, maxHp: 3200 }
+    1: { type: 1, name: "General Buzz", width: 300, height: 250, hp: 20, maxHp: 20 },
+    2: { type: 2, name: "Queen Arachne", width: 350, height: 300, hp: 20, maxHp: 20 },
+    3: { type: 3, name: "Metal Orochi", width: 450, height: 220, hp: 20, maxHp: 20 },
+    4: { type: 4, name: "Storm Falcon", width: 300, height: 240, hp: 20, maxHp: 20 },
+    5: { type: 5, name: "Phantom Moth", width: 400, height: 280, hp: 20, maxHp: 20 },
+    6: { type: 6, name: "Flame Salamander", width: 500, height: 250, hp: 20, maxHp: 20 },
+    7: { type: 7, name: "Junk Amalgam", width: 400, height: 400, hp: 20, maxHp: 20 },
+    8: { type: 8, name: "Toxic Chimera", width: 450, height: 320, hp: 20, maxHp: 20 },
+    9: { type: 9, name: "Sky Fortress Core", width: 600, height: 600, hp: 20, maxHp: 20 },
+    10: { type: 10, name: "Emperor V", width: 350, height: 480, hp: 20, maxHp: 20 }
 };
 
 // 스테이지별 대화 데이터

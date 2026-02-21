@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
@@ -56,27 +57,38 @@
                 <div class="dialogue-content">
                     <div class="character-name">또또</div>
                     <div class="text">오늘따라 숲이 너무 조용한 걸?</div>
-            </div>
-            <!-- 치트 버튼 (테스트용) -->
-            <button id="btn-cheat-next" style="position:absolute; top:10px; right:10px; z-index:9000; padding:10px; background-color:rgba(255,0,0,0.5); color:white; border:2px solid red; border-radius:5px; font-weight:bold; cursor:pointer;" onclick="if(window.gameCheat) window.gameCheat('nextStage');">Next Stage (Cheat)</button>
-            <!-- 모바일 컨트롤 (터치용) -->
-            <div id="mobile-controls">
-                <div id="d-pad" class="control-group">
-                    <div id="up" class="d-btn" data-key="ArrowUp"></div>
-                    <div id="down" class="d-btn" data-key="ArrowDown"></div>
-                    <div id="left" class="d-btn" data-key="ArrowLeft"></div>
-                    <div id="right" class="d-btn" data-key="ArrowRight"></div>
                 </div>
-                <div id="action-group" class="control-group">
-                    <div id="btn-bomb" class="act-btn" data-key="KeyX">💣</div>
-                    <div id="btn-shot" class="act-btn" data-key="Space">🔥</div>
+                <!-- 치트 버튼 (테스트용) -->
+                <button id="btn-cheat-qa-speed"
+                    style="position:absolute; top:50px; right:10px; z-index:9000; padding:10px; background-color:rgba(255,165,0,0.8); color:black; border:2px solid orange; border-radius:5px; font-weight:bold; cursor:pointer;"
+                    onclick="if(window.gameCheat) window.gameCheat('qaSpeedUp');">QA: 5x Speed</button>
+                <button id="btn-cheat-qa-boss"
+                    style="position:absolute; top:90px; right:10px; z-index:9000; padding:10px; background-color:rgba(128,0,128,0.8); color:white; border:2px solid purple; border-radius:5px; font-weight:bold; cursor:pointer;"
+                    onclick="if(window.gameCheat) window.gameCheat('spawnBoss');">QA: Spawn Boss</button>
+                <button id="btn-cheat-invincible"
+                    style="position:absolute; top:10px; right:160px; z-index:9000; padding:10px; background-color:rgba(0,0,255,0.5); color:white; border:2px solid blue; border-radius:5px; font-weight:bold; cursor:pointer;"
+                    onclick="if(window.gameCheat) window.gameCheat('invincible');">Invincible (Cheat)</button>
+                <button id="btn-cheat-next"
+                    style="position:absolute; top:10px; right:10px; z-index:9000; padding:10px; background-color:rgba(255,0,0,0.5); color:white; border:2px solid red; border-radius:5px; font-weight:bold; cursor:pointer;"
+                    onclick="if(window.gameCheat) window.gameCheat('nextStage');">Next Stage (Cheat)</button>
+                <!-- 모바일 컨트롤 (터치용) -->
+                <div id="mobile-controls">
+                    <div id="d-pad" class="control-group">
+                        <div id="up" class="d-btn" data-key="ArrowUp"></div>
+                        <div id="down" class="d-btn" data-key="ArrowDown"></div>
+                        <div id="left" class="d-btn" data-key="ArrowLeft"></div>
+                        <div id="right" class="d-btn" data-key="ArrowRight"></div>
+                    </div>
+                    <div id="action-group" class="control-group">
+                        <div id="btn-bomb" class="act-btn" data-key="KeyX">💣</div>
+                        <div id="btn-shot" class="act-btn" data-key="Space">🔥</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script src="game.js?v=bust2" type="module"></script>
-    <!-- Removed duplicate script tag -->
-    <!-- <script src="game.js" type="module"></script> This was causing issues -->
+        <script src="game.js?v=bust3" type="module"></script>
+        <!-- Removed duplicate script tag -->
+        <!-- <script src="game.js" type="module"></script> This was causing issues -->
 </body>
 
 </html>

@@ -39,6 +39,19 @@ window.gameCheat = function (type) {
             state.player.invincibleTime = state.player.invincible ? 999999 : 0;
             console.log("God Mode: " + state.player.invincible);
             break;
+        case 'qaSpeedUp':
+            if (window.CONFIG) {
+                window.CONFIG.GAME_SPEED = 5.0;
+                state.player.speed = 15.0;
+                console.log("Cheat: Speed x5 for QA!");
+            }
+            break;
+        case 'spawnBoss':
+            if (!state.boss) {
+                state.score = state.stageStartScore + 3000;
+                console.log("Cheat: Boss condition met. Boss will spawn soon.");
+            }
+            break;
         case 'nextStage':
             state.currentStage++;
             state.stageCleared = false;

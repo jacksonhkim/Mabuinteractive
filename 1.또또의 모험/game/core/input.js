@@ -68,7 +68,10 @@ export function setupMobileInput(callbacks) {
     function handleDPadTouch(e) {
         if (!state.gameActive && !state.isSelectingCharacter) return;
         e.preventDefault();
-        const touch = e.touches[0];
+
+        const touch = e.targetTouches ? e.targetTouches[0] : e.touches[0];
+        if (!touch) return;
+
         const rect = dPad.getBoundingClientRect();
         const x = touch.clientX - rect.left;
         const y = touch.clientY - rect.top;
@@ -115,7 +118,15 @@ export function setupMobileInput(callbacks) {
     if (dPad) {
         dPad.addEventListener('touchstart', handleDPadTouch);
         dPad.addEventListener('touchmove', handleDPadTouch);
-        dPad.addEventListener('touchend', () => {
+        dPad.addEventListener('touchend', (e) => {
+            if (e.targetTouches && e.targetTouches.length > 0) return;
+            state.keys['ArrowUp'] = false;
+            state.keys['ArrowDown'] = false;
+            state.keys['ArrowLeft'] = false;
+            state.keys['ArrowRight'] = false;
+        });
+        dPad.addEventListener('touchcancel', (e) => {
+            if (e.targetTouches && e.targetTouches.length > 0) return;
             state.keys['ArrowUp'] = false;
             state.keys['ArrowDown'] = false;
             state.keys['ArrowLeft'] = false;
@@ -142,6 +153,7 @@ export function setupMobileInput(callbacks) {
             if (state.isWorldMapReady) window.goNextStage();
         });
         btnShot.addEventListener('touchend', (e) => { e.preventDefault(); state.keys['Space'] = false; });
+        btnShot.addEventListener('touchcancel', (e) => { e.preventDefault(); state.keys['Space'] = false; });
     }
 
     // 폭탄 버튼
@@ -154,6 +166,10 @@ export function setupMobileInput(callbacks) {
             }
         });
         btnBomb.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            state.keys['KeyX'] = false;
+        });
+        btnBomb.addEventListener('touchcancel', (e) => {
             e.preventDefault();
             state.keys['KeyX'] = false;
         });

@@ -24,6 +24,7 @@ const { canvas, ctx } = setupCanvas();
 
 // ── 글로벌 치트/유틸 노출 ──
 window.sound = sound;
+window.CONFIG = CONFIG;
 window.updateBombUI = updateBombUI;
 window.startDialogue = startDialogue;
 window.startEndingSequence = startEndingSequence;

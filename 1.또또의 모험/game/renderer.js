@@ -1,4 +1,5 @@
 import { CONFIG, CHARACTERS, ENEMY_TYPES, STAGE_DIALOGUES } from './constants.js';
+import { BOSS_IMAGES } from './assets.js';
 import {
     drawPixelForestV2, drawPixelTotoV2, drawPixelTotoV5, drawPixelLuluV2, drawPixelKakaV2, drawPixelMomoV2, drawPixelPipiV2,
     drawPixelWaspV2, drawPixelButterflyV2, drawPixelBeetleV2, drawPixelDroneV2, drawPixelGhostV2, drawPixelSlimeV2,
@@ -118,17 +119,27 @@ export function draw(ctx, state) {
 
     if (state.boss) {
         const b = state.boss;
-        if (b.type === 1) drawPixelBossBuzzV2(ctx, b.x, b.y, b.width, b.height);
-        else if (b.type === 2) drawPixelQueenArachne(ctx, b.x, b.y, b.width, b.height);
-        else if (b.type === 3) drawPixelMetalOrochi(ctx, b.x, b.y, b.width, b.height);
-        else if (b.type === 4) drawPixelStormFalcon(ctx, b.x, b.y, b.width, b.height);
-        else if (b.type === 5) drawPixelPhantomMoth(ctx, b.x, b.y, b.width, b.height);
-        else if (b.type === 6) drawPixelFlameSalamander(ctx, b.x, b.y, b.width, b.height);
-        else if (b.type === 7) drawPixelJunkAmalgam(ctx, b.x, b.y, b.width, b.height);
-        else if (b.type === 8) drawPixelToxicChimera(ctx, b.x, b.y, b.width, b.height);
-        else if (b.type === 9) drawPixelSkyFortressCore(ctx, b.x, b.y, b.width, b.height);
-        else if (b.type === 10) drawPixelEmperorV(ctx, b.x, b.y, b.width, b.height);
-        else drawPixelBossBuzzV2(ctx, b.x, b.y, b.width, b.height);
+        const bossSprite = BOSS_IMAGES[`boss_${b.type}_sprite`];
+        const bossStatic = BOSS_IMAGES[`boss_${b.type}`];
+
+        if (bossSprite && bossSprite.complete && bossSprite.naturalWidth > 0) {
+            const frameIndex = Math.floor(b.timer / 15) % 4;
+            if (b.hitTimer > 0 && b.hitTimer % 4 < 2) ctx.globalAlpha = 0.5;
+            ctx.drawImage(bossSprite, frameIndex * 128, 0, 128, 128, b.x, b.y, b.width, b.height);
+            ctx.globalAlpha = 1.0;
+        } else {
+            if (b.type === 1) drawPixelBossBuzzV2(ctx, b.x, b.y, b.width, b.height);
+            else if (b.type === 2) drawPixelQueenArachne(ctx, b.x, b.y, b.width, b.height);
+            else if (b.type === 3) drawPixelMetalOrochi(ctx, b.x, b.y, b.width, b.height);
+            else if (b.type === 4) drawPixelStormFalcon(ctx, b.x, b.y, b.width, b.height);
+            else if (b.type === 5) drawPixelPhantomMoth(ctx, b.x, b.y, b.width, b.height);
+            else if (b.type === 6) drawPixelFlameSalamander(ctx, b.x, b.y, b.width, b.height);
+            else if (b.type === 7) drawPixelJunkAmalgam(ctx, b.x, b.y, b.width, b.height);
+            else if (b.type === 8) drawPixelToxicChimera(ctx, b.x, b.y, b.width, b.height);
+            else if (b.type === 9) drawPixelSkyFortressCore(ctx, b.x, b.y, b.width, b.height);
+            else if (b.type === 10) drawPixelEmperorV(ctx, b.x, b.y, b.width, b.height);
+            else drawPixelBossBuzzV2(ctx, b.x, b.y, b.width, b.height);
+        }
 
         const hpBarW = Math.round(CONFIG.SCREEN_WIDTH * 0.3125); const currentW = (b.hp / b.maxHp) * hpBarW;
         const hpBarY = Math.round(CONFIG.SCREEN_HEIGHT * 0.056);
