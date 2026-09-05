@@ -1,0 +1,206 @@
+
+// Hansooni's High-Fidelity Asset Library (Vector/SVG Edition)
+// Bypassing server lag to deliver project assets immediately.
+
+export const ASSETS = {
+    toto: `data:image/svg+xml;base64,${btoa(`
+        <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <!-- Wings (Animated Shimmer) -->
+            <ellipse cx="20" cy="25" rx="15" ry="8" fill="rgba(200, 240, 255, 0.7)" transform="rotate(-30 20 25)" />
+            <ellipse cx="20" cy="35" rx="15" ry="8" fill="rgba(200, 240, 255, 0.5)" transform="rotate(30 20 35)" />
+            <!-- Bee Body -->
+            <ellipse cx="35" cy="32" rx="22" ry="16" fill="#FFEB3B" stroke="#000" stroke-width="2" />
+            <!-- Stripes -->
+            <path d="M28 18 Q30 32 28 46" fill="transparent" stroke="#212121" stroke-width="6" />
+            <path d="M38 18 Q40 32 38 46" fill="transparent" stroke="#212121" stroke-width="6" />
+            <!-- Head & Glasses -->
+            <circle cx="50" cy="32" r="12" fill="#FFEB3B" stroke="#000" stroke-width="1.5" />
+            <circle cx="54" cy="28" r="5" fill="none" stroke="#212121" stroke-width="2" />
+            <circle cx="54" cy="28" r="4" fill="#00E5FF" opacity="0.6" />
+            <rect x="58" y="27" width="4" height="2" fill="#212121" />
+            <!-- Eye -->
+            <circle cx="48" cy="28" r="2" fill="#000" />
+        </svg>
+    `)}`,
+
+    boss_buzz: `data:image/svg+xml;base64,${btoa(`
+        <svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="gold" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#FFD700" />
+                    <stop offset="50%" style="stop-color:#FF8C00" />
+                    <stop offset="100%" style="stop-color:#B8860B" />
+                </linearGradient>
+            </defs>
+            <!-- Heavy Wings -->
+            <path d="M40 40 L10 10 L40 30 Z" fill="rgba(255,100,100,0.4)" />
+            <path d="M40 88 L10 118 L40 98 Z" fill="rgba(255,100,100,0.4)" />
+            <!-- Heavy Armor Body -->
+            <rect x="30" y="30" width="80" height="68" rx="8" fill="url(#gold)" stroke="#3e2723" stroke-width="4" />
+            <!-- Gatling Gun -->
+            <rect x="0" y="55" width="45" height="18" fill="#455a64" stroke="#263238" stroke-width="2" />
+            <rect x="0" y="58" width="45" height="4" fill="#607d8b" />
+            <!-- Glowing Eye -->
+            <circle cx="100" cy="50" r="14" fill="#000" />
+            <circle cx="105" cy="48" r="6" fill="#FF1744">
+                <animate attributeName="opacity" values="1;0.4;1" dur="0.5s" repeatCount="indefinite" />
+            </circle>
+            <!-- Vent Pipes -->
+            <rect x="110" y="40" width="10" height="4" fill="#212121" />
+            <rect x="110" y="84" width="10" height="4" fill="#212121" />
+        </svg>
+    `)}`,
+
+    scout_wasp: `data:image/svg+xml;base64,${btoa(`
+        <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="24" cy="24" rx="18" ry="12" fill="#FFA726" stroke="#000" stroke-width="2" />
+            <rect x="18" y="14" width="4" height="20" fill="#212121" />
+            <!-- Scouter Eye -->
+            <rect x="34" y="16" width="10" height="10" fill="#263238" />
+            <rect x="36" y="18" width="6" height="6" fill="#F44336">
+                <animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite" />
+            </rect>
+            <!-- Wings -->
+            <path d="M20 15 L5 0 L15 10 Z" fill="rgba(200,200,255,0.5)" />
+        </svg>
+    `)}`
+};
+
+// Background Image Assets
+export const BACKGROUND_IMAGES = {};
+
+// Stage 1 Assets (New Stage 1 Background)
+BACKGROUND_IMAGES.s1_layer01 = new Image(); BACKGROUND_IMAGES.s1_layer01.src = 'assets/background/bg_stage1_layer01.png';
+BACKGROUND_IMAGES.s1_layer02 = new Image(); BACKGROUND_IMAGES.s1_layer02.src = 'assets/background/bg_stage1_layer02.png';
+BACKGROUND_IMAGES.s1_layer03 = new Image(); BACKGROUND_IMAGES.s1_layer03.src = 'assets/background/bg_stage1_layer03.png';
+BACKGROUND_IMAGES.s1_layer04 = new Image(); BACKGROUND_IMAGES.s1_layer04.src = 'assets/background/bg_stage1_layer04.png';
+BACKGROUND_IMAGES.s1_layer05 = new Image(); BACKGROUND_IMAGES.s1_layer05.src = 'assets/background/bg_stage1_layer05.png';
+
+// Stage 2 Assets (3 Layers)
+BACKGROUND_IMAGES.s2_layer01 = new Image(); BACKGROUND_IMAGES.s2_layer01.src = 'assets/background/bg_stage2_layer01.png';
+BACKGROUND_IMAGES.s2_layer02 = new Image(); BACKGROUND_IMAGES.s2_layer02.src = 'assets/background/bg_stage2_layer02.png';
+BACKGROUND_IMAGES.s2_layer03 = new Image(); BACKGROUND_IMAGES.s2_layer03.src = 'assets/background/bg_stage2_layer03.png';
+
+// Stage 3 Assets (Sunset)
+BACKGROUND_IMAGES.s3_layer01 = new Image(); BACKGROUND_IMAGES.s3_layer01.src = 'assets/background/bg_stage3_layer01.png';
+BACKGROUND_IMAGES.s3_layer02 = new Image(); BACKGROUND_IMAGES.s3_layer02.src = 'assets/background/bg_stage3_layer02.png';
+BACKGROUND_IMAGES.s3_layer03 = new Image(); BACKGROUND_IMAGES.s3_layer03.src = 'assets/background/bg_stage3_layer03.png';
+BACKGROUND_IMAGES.s3_layer04 = new Image(); BACKGROUND_IMAGES.s3_layer04.src = 'assets/background/bg_stage3_layer04.png';
+
+// Stage 4 Assets
+BACKGROUND_IMAGES.s4_layer01 = new Image(); BACKGROUND_IMAGES.s4_layer01.src = 'assets/background/bg_stage4_layer01.png';
+BACKGROUND_IMAGES.s4_layer02 = new Image(); BACKGROUND_IMAGES.s4_layer02.src = 'assets/background/bg_stage4_layer02.png';
+BACKGROUND_IMAGES.s4_layer03 = new Image(); BACKGROUND_IMAGES.s4_layer03.src = 'assets/background/bg_stage4_layer03.png';
+
+// Stage 5 Assets (The Void / Final Stage)
+BACKGROUND_IMAGES.s5_layer01 = new Image(); BACKGROUND_IMAGES.s5_layer01.src = 'assets/background/bg_stage5_layer01.png';
+BACKGROUND_IMAGES.s5_layer02 = new Image(); BACKGROUND_IMAGES.s5_layer02.src = 'assets/background/bg_stage5_layer02.png';
+BACKGROUND_IMAGES.s5_layer03 = new Image(); BACKGROUND_IMAGES.s5_layer03.src = 'assets/background/bg_stage5_layer03.png';
+
+// Stage 6 Assets
+BACKGROUND_IMAGES.s6_layer01 = new Image(); BACKGROUND_IMAGES.s6_layer01.src = 'assets/background/bg_stage6_layer01.png';
+BACKGROUND_IMAGES.s6_layer02 = new Image(); BACKGROUND_IMAGES.s6_layer02.src = 'assets/background/bg_stage6_layer02.png';
+BACKGROUND_IMAGES.s6_layer03 = new Image(); BACKGROUND_IMAGES.s6_layer03.src = 'assets/background/bg_stage6_layer03.png';
+
+// Stage 7 Assets
+BACKGROUND_IMAGES.s7_layer01 = new Image(); BACKGROUND_IMAGES.s7_layer01.src = 'assets/background/bg_stage7_layer01.png';
+BACKGROUND_IMAGES.s7_layer02 = new Image(); BACKGROUND_IMAGES.s7_layer02.src = 'assets/background/bg_stage7_layer02.png';
+BACKGROUND_IMAGES.s7_layer03 = new Image(); BACKGROUND_IMAGES.s7_layer03.src = 'assets/background/bg_stage7_layer03.png';
+
+// Stage 8 Assets
+BACKGROUND_IMAGES.s8_layer01 = new Image(); BACKGROUND_IMAGES.s8_layer01.src = 'assets/background/bg_stage8_layer01.png';
+BACKGROUND_IMAGES.s8_layer02 = new Image(); BACKGROUND_IMAGES.s8_layer02.src = 'assets/background/bg_stage8_layer02.png';
+BACKGROUND_IMAGES.s8_layer03 = new Image(); BACKGROUND_IMAGES.s8_layer03.src = 'assets/background/bg_stage8_layer03.png';
+
+// Stage 9 Assets
+BACKGROUND_IMAGES.s9_layer01 = new Image(); BACKGROUND_IMAGES.s9_layer01.src = 'assets/background/bg_stage9_layer01.png';
+BACKGROUND_IMAGES.s9_layer02 = new Image(); BACKGROUND_IMAGES.s9_layer02.src = 'assets/background/bg_stage9_layer02.png';
+BACKGROUND_IMAGES.s9_layer03 = new Image(); BACKGROUND_IMAGES.s9_layer03.src = 'assets/background/bg_stage9_layer03.png';
+BACKGROUND_IMAGES.s9_layer04 = new Image(); BACKGROUND_IMAGES.s9_layer04.src = 'assets/background/bg_stage9_layer04.png';
+BACKGROUND_IMAGES.s9_layer05 = new Image(); BACKGROUND_IMAGES.s9_layer05.src = 'assets/background/bg_stage9_layer05.png';
+
+// Stage 10 Assets
+BACKGROUND_IMAGES.s10_layer01 = new Image(); BACKGROUND_IMAGES.s10_layer01.src = 'assets/background/bg_stage10_layer01.png';
+BACKGROUND_IMAGES.s10_layer02 = new Image(); BACKGROUND_IMAGES.s10_layer02.src = 'assets/background/bg_stage10_layer02.png';
+BACKGROUND_IMAGES.s10_layer03 = new Image(); BACKGROUND_IMAGES.s10_layer03.src = 'assets/background/bg_stage10_layer03.png';
+
+BACKGROUND_IMAGES.bgStart = new Image();
+BACKGROUND_IMAGES.bgStart.src = 'assets/background/bg_start.png';
+BACKGROUND_IMAGES.bgCharSelect = new Image();
+BACKGROUND_IMAGES.bgCharSelect.src = 'assets/background/bg_character_select.png';
+
+// Player Character Image Assets
+export const PLAYER_IMAGES = {};
+export const PLAYER_SPRITES = {
+    ch_player1: { idle: new Image(), attack: new Image(), charge: new Image(), hit: new Image(), death: new Image() },
+    ch_player2: { idle: new Image(), attack: new Image(), charge: new Image(), hit: new Image(), death: new Image() },
+    ch_player3: { idle: new Image(), attack: new Image(), charge: new Image(), hit: new Image(), death: new Image() },
+    ch_player4: { idle: new Image(), attack: new Image(), charge: new Image(), hit: new Image(), death: new Image() },
+    ch_player5: { idle: new Image(), attack: new Image(), charge: new Image(), hit: new Image(), death: new Image() }
+};
+
+// Legacy single image refs (to prevent immediate breakage if referenced elsewhere)
+for (let i = 1; i <= 5; i++) {
+    PLAYER_IMAGES[`ch_player${i}`] = new Image();
+    PLAYER_IMAGES[`ch_player${i}`].src = `assets/ch_player${i}.png`;
+
+    // Load the new specific Nano Banana sprite sheets
+    PLAYER_SPRITES[`ch_player${i}`].idle.src = `assets/ch_player${i}_idle.png`;
+    PLAYER_SPRITES[`ch_player${i}`].attack.src = `assets/ch_player${i}_attack.png`;
+    PLAYER_SPRITES[`ch_player${i}`].charge.src = `assets/ch_player${i}_charge.png`;
+    PLAYER_SPRITES[`ch_player${i}`].hit.src = `assets/ch_player${i}_hit.png`;
+    PLAYER_SPRITES[`ch_player${i}`].death.src = `assets/ch_player${i}_death.png`;
+}
+
+// Boss Image Assets
+export const BOSS_IMAGES = {};
+for (let i = 1; i <= 10; i++) {
+    BOSS_IMAGES[`boss_${i}`] = new Image();
+    BOSS_IMAGES[`boss_${i}`].src = `assets/boss/boss_${i}.png`;
+    BOSS_IMAGES[`boss_${i}_sprite`] = new Image();
+    BOSS_IMAGES[`boss_${i}_sprite`].src = `assets/boss/boss_${i}_sprite.png`;
+}
+
+// Regular Enemy Image Assets (10 Stages * 4 Types)
+export const ENEMY_IMAGES = {};
+for (let s = 1; s <= 10; s++) {
+    ['a', 'b', 'c', 'd'].forEach(type => {
+        const key = `en_stage${s}_${type}`;
+        ENEMY_IMAGES[key] = new Image();
+        ENEMY_IMAGES[key].src = `assets/enemy/${key}.png?v=bust5`;
+    });
+}
+
+// Global Asset Loader
+export async function loadAllAssets() {
+    // Gather all individual sprite frames along with other assets
+    const spriteImages = [];
+    for (let i = 1; i <= 5; i++) {
+        spriteImages.push(
+            PLAYER_SPRITES[`ch_player${i}`].idle,
+            PLAYER_SPRITES[`ch_player${i}`].attack,
+            PLAYER_SPRITES[`ch_player${i}`].charge,
+            PLAYER_SPRITES[`ch_player${i}`].hit,
+            PLAYER_SPRITES[`ch_player${i}`].death
+        );
+    }
+
+    const images = [
+        ...Object.values(BACKGROUND_IMAGES),
+        ...Object.values(PLAYER_IMAGES),
+        ...spriteImages,
+        ...Object.values(BOSS_IMAGES),
+        ...Object.values(ENEMY_IMAGES)
+    ];
+
+    const loadPromises = images.map(img => {
+        return new Promise((resolve) => {
+            if (img.complete) resolve();
+            img.onload = resolve;
+            img.onerror = resolve; // Continue even if some fail
+        });
+    });
+
+    await Promise.all(loadPromises);
+    console.log("✅ All assets processed (some may have failed but loop continues)");
+}

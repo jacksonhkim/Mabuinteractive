@@ -1,0 +1,46 @@
+{
+  "_doc": "심볼 정의 — 기획서 §4-1(릴 배치 22종) · §4-2(연출 전용 5종)",
+  "_rule": "릴에 올라가는 심볼은 23종이다. 종류가 늘면 3연속 확률이 희석되므로 임의로 늘리지 않는다. 2026-08-25 결재로 프리스핀 트리거 s5_free(난중일기)를 추가하며 22 → 23 으로 개정했다.",
+  "_freeRule": "s5_free 는 배당을 갖지 않는다. 트리거 전용이며 paytable 에 항목이 없는 것이 정상이다.",
+  "_assets": "에셋은 WebP q95, 512×512 (UI기획서 v1.3 §7-2). 배포 시 2.에셋/ 에서 3.코드/assets/ 로 복사한다.",
+
+  "reelSymbols": [
+    { "code": "s1_wild",       "name": "WILD (이순신)",   "tier": "special", "asset": "assets/symbols/s1_wild.webp" },
+    { "code": "s2_scatter",    "name": "SCATTER (함대)",  "tier": "special", "asset": "assets/symbols/s2_scatter.webp" },
+    { "code": "s3_bonus",      "name": "BONUS (보물상자)", "tier": "special", "asset": "assets/symbols/s3_bonus.webp" },
+    { "code": "s5_free",       "name": "FREE (난중일기)",  "tier": "special", "asset": "assets/symbols/s5_free.webp",
+      "_role": "프리스핀 트리거 전용 — 3개 이상. 배당 없음 (evaluator.FREE)" },
+
+    { "code": "h2_geobukseon", "name": "거북선",   "tier": "high", "rank": 1, "asset": "assets/symbols/h2_geobukseon.webp" },
+    { "code": "h3_panokseon",  "name": "판옥선",   "tier": "high", "rank": 2, "asset": "assets/symbols/h3_panokseon.webp" },
+    { "code": "h4_navy",       "name": "조선수군", "tier": "high", "rank": 3, "asset": "assets/symbols/h4_navy.webp" },
+    { "code": "h5_cannon",     "name": "대포",     "tier": "high", "rank": 4, "asset": "assets/symbols/h5_cannon.webp" },
+    { "code": "h6_flag",       "name": "수군기",   "tier": "high", "rank": 5, "asset": "assets/symbols/h6_flag.webp" },
+
+    { "code": "m1_helmet",     "name": "투구",     "tier": "mid", "group": 1, "asset": "assets/symbols/m1_helmet.webp" },
+    { "code": "m2_armor",      "name": "갑옷",     "tier": "mid", "group": 1, "asset": "assets/symbols/m2_armor.webp" },
+    { "code": "m3_sword",      "name": "검",       "tier": "mid", "group": 2, "asset": "assets/symbols/m3_sword.webp" },
+    { "code": "m5_bow",        "name": "활",       "tier": "mid", "group": 2, "asset": "assets/symbols/m5_bow.webp" },
+    { "code": "m4_drum",       "name": "북",       "tier": "mid", "group": 3, "asset": "assets/symbols/m4_drum.webp" },
+    { "code": "m6_compass",    "name": "나침반",   "tier": "mid", "group": 3, "asset": "assets/symbols/m6_compass.webp" },
+    { "code": "m7_map",        "name": "전략도",   "tier": "mid", "group": 4, "asset": "assets/symbols/m7_map.webp" },
+    { "code": "m8_anchor",     "name": "닻",       "tier": "mid", "group": 4, "asset": "assets/symbols/m8_anchor.webp" },
+
+    { "code": "l1_A",          "name": "A",  "tier": "low", "group": 1, "asset": "assets/symbols/l1_A.webp" },
+    { "code": "l2_K",          "name": "K",  "tier": "low", "group": 1, "asset": "assets/symbols/l2_K.webp" },
+    { "code": "l3_Q",          "name": "Q",  "tier": "low", "group": 2, "asset": "assets/symbols/l3_Q.webp" },
+    { "code": "l4_J",          "name": "J",  "tier": "low", "group": 2, "asset": "assets/symbols/l4_J.webp" },
+    { "code": "l5_10",         "name": "10", "tier": "low", "group": 3, "asset": "assets/symbols/l5_10.webp",
+      "_qa": "160px 축소 시 'IO' 로 읽힐 여지가 있다. 플레이테스트에서 확인 (LOG 2026-08-22)" },
+    { "code": "l6_9",          "name": "9",  "tier": "low", "group": 3, "asset": "assets/symbols/l6_9.webp" }
+  ],
+
+  "presentationOnly": [
+    { "code": "h1_yisunsin",       "use": "타이틀·로딩",        "asset": "assets/scenes/h1_yisunsin.webp" },
+    { "code": "s4_freespin",       "use": "프리스핀 진입 연출", "asset": "assets/scenes/s4_freespin.webp" },
+    { "code": "x1_bonus_palace",   "use": "누적 보너스 연출",   "asset": "assets/scenes/x1_bonus_palace.webp" },
+    { "code": "x2_freespin_flags", "use": "선택 화면 배너",     "asset": "assets/scenes/x2_freespin_flags.webp" },
+    { "code": "x3_bonus_chest",    "use": "보너스 진입 연출",   "asset": "assets/scenes/x3_bonus_chest.webp" },
+    { "code": "x4_jackpot_ring",  "use": "잭팟 충격파 링",     "asset": "assets/scenes/x4_jackpot_ring.webp" }
+  ]
+}

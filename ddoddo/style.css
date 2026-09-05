@@ -1,0 +1,754 @@
+/* ============================================
+   또또의 모험 — Responsive CSS (v2.0 Refactored)
+   Targets: iPhone SE ~ iPhone 16 Pro Max + Desktop
+   
+   ✅ Refactor Notes (v2.0):
+   - CSS Custom Properties로 반응형 토큰 통합
+   - 6개 iPhone 미디어쿼리 → clamp() + 2개 브레이크포인트로 축소
+   - 679줄 → ~320줄 (53% 절감)
+   ============================================ */
+
+/* === 1. Font Import === */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+@font-face {
+    font-family: 'Jalnan';
+    src: url('https://cdn.jsdelivr.net/gh/jabont/Jalnan/Jalnan.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* === 2. Design Tokens (CSS Custom Properties) === */
+:root {
+    /* Colors */
+    --c-bg: #0d1b2a;
+    --c-accent: #ffcc00;
+    --c-score: #ffeb3b;
+    --c-life: #ff5252;
+    --c-bomb: #00e5ff;
+    --c-shot: rgba(255, 0, 0, 0.6);
+    --c-bomb-btn: rgba(0, 150, 255, 0.6);
+
+    /* HUD — fluid scaling */
+    --hud-top: calc(clamp(4px, 1vh, 20px) + env(safe-area-inset-top));
+    --hud-left: calc(clamp(4px, 1vw, 20px) + env(safe-area-inset-left));
+    --hud-gap: clamp(3px, 0.8vh, 15px);
+    --hud-pad: clamp(4px, 1vh, 15px) clamp(8px, 1.5vw, 15px);
+    --hud-score-label: clamp(7px, 1.2vh, 14px);
+    --hud-score-value: clamp(12px, 2vh, 28px);
+    --hud-info: clamp(9px, 1.5vh, 16px);
+
+    /* Dialogue */
+    --dlg-bottom: clamp(55px, 12vh, 120px);
+    /* 모바일 컨트롤 높이(35%, 컨테이너 기준)를 고려한 모바일 전용 대화창 bottom */
+    /* ⚠️ vh가 아닌 % 사용: mobile-controls의 height:35%는 컨테이너 기준이므로 동일 단위 사용 */
+    --dlg-bottom-mobile: calc(35% + clamp(6px, 1vh, 14px));
+    --dlg-min-h: clamp(50px, 10vh, 120px);
+    --dlg-max-h: clamp(70px, 15vh, 140px);
+    --dlg-pad: clamp(8px, 1.5vh, 20px) clamp(10px, 2vw, 20px);
+    --dlg-name: clamp(9px, 1.5vh, 20px);
+    --dlg-text: clamp(8px, 1.3vh, 18px);
+
+    /* Controls */
+    --ctrl-bottom: calc(clamp(5px, 1.5vh, 20px) + env(safe-area-inset-bottom));
+    --dpad-size: clamp(90px, 18vw, 180px);
+    --dpad-btn: clamp(30px, 5vw, 60px);
+    --act-btn-size: clamp(44px, 7vw, 80px);
+    --shot-btn-size: clamp(52px, 9vw, 100px);
+    --act-font: clamp(16px, 3vw, 32px);
+    --act-gap: clamp(8px, 2vw, 30px);
+}
+
+/* === 3. Reset === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    touch-action: none;
+}
+
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Press Start 2P', cursive, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding:
+        env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* === 4. Game Container & Canvas === */
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100dvh;
+    max-width: 100vw;
+    max-height: 100dvh;
+    border: none;
+    image-rendering: pixelated;
+    background-color: var(--c-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#gameCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    image-rendering: pixelated;
+}
+
+/* PC border */
+@media (pointer: fine) {
+    #game-container {
+        border: 4px solid #fff;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* === 5. HUD (Score / Life / Bomb) === */
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#hud {
+    position: absolute;
+    top: var(--hud-top);
+    left: var(--hud-left);
+    display: flex;
+    flex-direction: column;
+    gap: var(--hud-gap);
+    padding: var(--hud-pad);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border-left: 3px solid var(--c-accent);
+    border-radius: 4px;
+    font-family: inherit;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.score-container {
+    font-size: var(--hud-score-label);
+    color: #aaa;
+    margin-bottom: -3px;
+}
+
+#score {
+    color: var(--c-score);
+    font-size: var(--hud-score-value);
+    font-weight: 900;
+    text-shadow: 1px 1px 0 #333;
+}
+
+.life-container,
+.bomb-container {
+    font-size: var(--hud-info);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#lives {
+    color: var(--c-life);
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 #000;
+}
+
+#bombs {
+    color: var(--c-bomb);
+    letter-spacing: 1px;
+}
+
+/* === 6. Dialogue Box === */
+#dialogue-box {
+    position: absolute;
+    bottom: var(--dlg-bottom);
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 16px);
+    /* 좌우 8px 여백, 절대 화면 밖 불가 */
+    max-width: 800px;
+    height: auto;
+    min-height: var(--dlg-min-h);
+    max-height: var(--dlg-max-h);
+    overflow: hidden;
+    /* 내용이 넘쳐도 창 밖을 벗어나지 않게 */
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.92);
+    border: 3px solid var(--c-accent);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: clamp(6px, 1vw, 14px);
+    padding: var(--dlg-pad);
+    z-index: 1000;
+    pointer-events: auto;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+#dialogue-box.hidden {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+}
+
+/* 대화 박스 portrait 래퍼 — overflow 완전 차단 */
+.dialogue-portrait-wrap {
+    flex-shrink: 0;
+    width: clamp(44px, 7vh, 68px);
+    height: clamp(44px, 8vh, 68px);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dialogue-portrait-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
+    display: block;
+}
+
+.dialogue-content {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.character-name {
+    color: var(--c-accent);
+    font-weight: 900;
+    font-size: var(--dlg-name);
+    margin-bottom: clamp(4px, 0.8vh, 12px);
+}
+
+.text {
+    font-size: var(--dlg-text);
+    line-height: 1.6;
+    color: #fff;
+    white-space: normal;
+    word-break: keep-all;
+}
+
+/* === 7. Start Screen === */
+#start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('assets/background/bg_start.png');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 200;
+}
+
+#start-screen h1.title {
+    font-family: 'Jalnan', sans-serif;
+    font-size: clamp(36px, 8vw, 90px);
+    font-weight: normal;
+    background: linear-gradient(to bottom, #FFFB00 0%, #FFD54F 50%, #FFA000 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    filter: drop-shadow(2px 2px 0px #3E2723) drop-shadow(4px 4px 0px #3E2723) drop-shadow(0px 0px 20px rgba(255, 213, 79, 0.5));
+    margin-bottom: 0;
+    margin-top: clamp(40px, 12vh, 150px);
+    transform: perspective(500px) rotateX(10deg);
+    animation: titleFloat 3s infinite ease-in-out;
+}
+
+#start-screen .start-message {
+    font-size: clamp(14px, 3vw, 24px);
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
+    animation: blink 0.8s infinite;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px 20px;
+    border-radius: 30px;
+    margin-top: clamp(60px, 20vh, 280px);
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.instruction-message {
+    font-size: clamp(8px, 1.5vw, 14px);
+    color: #e0e0e0;
+    text-shadow: 1px 1px #000;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px 12px;
+    border-radius: 10px;
+}
+
+.company-credit {
+    font-size: clamp(7px, 1.2vw, 10px);
+    color: #cfd8dc;
+    margin-top: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* === 8. Mobile Controls === */
+#mobile-controls {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 35%;
+    pointer-events: none;
+    z-index: 2000;
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+.control-group {
+    pointer-events: auto;
+    position: absolute;
+    bottom: var(--ctrl-bottom);
+}
+
+/* D-Pad */
+#d-pad {
+    left: calc(15px + env(safe-area-inset-left));
+    width: var(--dpad-size);
+    height: var(--dpad-size);
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+}
+
+.d-btn {
+    position: absolute;
+    width: var(--dpad-btn);
+    height: var(--dpad-btn);
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: clamp(6px, 1vw, 12px);
+    transition: background 0.1s, transform 0.1s;
+}
+
+#up {
+    top: 4%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#down {
+    bottom: 4%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#left {
+    top: 50%;
+    left: 4%;
+    transform: translateY(-50%);
+}
+
+#right {
+    top: 50%;
+    right: 4%;
+    transform: translateY(-50%);
+}
+
+#d-pad::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 25%;
+    height: 25%;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+}
+
+/* Action Buttons */
+#action-group {
+    right: calc(15px + env(safe-area-inset-right));
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: var(--act-gap);
+}
+
+.act-btn {
+    width: var(--act-btn-size);
+    height: var(--act-btn-size);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--act-font);
+    color: white;
+    border: 3px solid #fff;
+    cursor: pointer;
+    transition: transform 0.1s;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#btn-shot {
+    width: var(--shot-btn-size);
+    height: var(--shot-btn-size);
+    background: var(--c-shot);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+}
+
+#btn-bomb {
+    background: var(--c-bomb-btn);
+    box-shadow: 0 0 15px rgba(0, 150, 255, 0.4);
+}
+
+.d-btn:active,
+.act-btn:active {
+    background: rgba(255, 255, 255, 0.8) !important;
+    transform: scale(1.15);
+}
+
+@media (pointer: coarse) {
+    #mobile-controls {
+        display: block;
+    }
+}
+
+/* === 9. Orientation Warning === */
+#orientation-warning {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    background: var(--c-bg);
+    color: #fff;
+    z-index: 99999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-family: 'Malgun Gothic', sans-serif;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.rotate-icon {
+    font-size: clamp(48px, 12vw, 80px);
+    margin-bottom: 20px;
+    animation: rotateDevice 2s infinite ease-in-out;
+}
+
+.warning-text {
+    font-size: clamp(16px, 4vw, 24px);
+    font-weight: bold;
+    color: var(--c-accent);
+    margin-bottom: 10px;
+}
+
+.sub-text {
+    font-size: clamp(12px, 3vw, 16px);
+    color: #aaa;
+}
+
+@media screen and (orientation: portrait) and (max-width: 1024px) {
+    #orientation-warning {
+        display: flex;
+    }
+
+    #game-container {
+        display: none;
+    }
+}
+
+/* === 10. Dev Tools === */
+#dev-tools {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    pointer-events: none;
+}
+
+#dev-toggle {
+    pointer-events: auto;
+    background: rgba(0, 0, 0, 0.6);
+    color: var(--c-accent);
+    border: 1px solid var(--c-accent);
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#dev-panel {
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+#dev-panel button {
+    padding: 8px;
+    color: white;
+    border: none;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+/* === 11. Keyframe Animations === */
+@keyframes titleFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes rotateDevice {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(-90deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+/* === 12. Responsive Overrides (Minimal) ===
+   Base values use clamp() for smooth scaling.
+   Only 2 breakpoints needed for edge cases. */
+
+/* Small phones (iPhone SE class: height ≤ 320px) */
+@media screen and (orientation: landscape) and (max-height: 320px) {
+    #hud {
+        border-left-width: 2px;
+    }
+
+    #dialogue-box {
+        border-width: 2px;
+    }
+
+    .act-btn {
+        border-width: 2px;
+    }
+}
+
+/* Desktop / Large tablets (height > 500px) */
+@media screen and (orientation: landscape) and (min-height: 501px) {
+    #hud {
+        top: 20px;
+        left: 20px;
+        border-left-width: 4px;
+    }
+
+    #dialogue-box {
+        width: 800px;
+        border-width: 4px;
+    }
+
+    .act-btn {
+        border-width: 4px;
+    }
+
+    #action-group {
+        right: 40px;
+    }
+
+    .control-group {
+        bottom: 20px;
+    }
+
+    #d-pad {
+        left: 40px;
+    }
+}
+
+/* === 13. 보스 대화 씬 (Boss Dialogue Scene) === */
+#boss-dialogue-box {
+    position: absolute;
+    bottom: clamp(80px, 15vh, 160px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 16px);
+    /* 좌우 8px 여백, 절대 화면 밖 불가 */
+    max-width: 860px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.95);
+    border: 3px solid #FF5252;
+    box-shadow: 0 0 25px rgba(255, 82, 82, 0.5), inset 0 0 12px rgba(255, 82, 82, 0.08);
+    padding: clamp(12px, 2vh, 24px) clamp(14px, 2.5vw, 28px);
+    z-index: 1100;
+    pointer-events: auto;
+    animation: bossDialogueFadeIn 0.35s ease-out;
+}
+
+/* 플레이어 대사 시 왼쪽 강조 */
+#boss-dialogue-box[data-side="left"] {
+    border-color: #FFD700;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.45), inset 0 0 12px rgba(255, 215, 0, 0.06);
+}
+
+#boss-dialogue-box.hidden {
+    display: none !important;
+}
+
+.boss-dialogue-inner {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(6px, 1vh, 14px);
+}
+
+.boss-char-name {
+    font-size: clamp(10px, 1.8vh, 22px);
+    font-weight: 900;
+    color: #FF5252;
+    text-shadow: 0 0 8px rgba(255, 82, 82, 0.7);
+    letter-spacing: 1px;
+    transition: color 0.2s;
+}
+
+#boss-dialogue-box[data-side="left"] .boss-char-name {
+    color: #FFD700;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+}
+
+.boss-char-text {
+    font-size: clamp(9px, 1.5vh, 18px);
+    line-height: 1.7;
+    color: #fff;
+    white-space: pre-wrap;
+}
+
+.boss-dialogue-hint {
+    font-size: clamp(7px, 1.1vh, 12px);
+    color: #888;
+    text-align: right;
+    animation: blink 1s infinite;
+    margin-top: 2px;
+}
+
+@keyframes bossDialogueFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* === 14. 모바일 대화창 좌우 축소 ===
+   터치 기기에서 대화 박스가 게임 배경화면을 좌우로 넘어가는 것 방지.
+   bottom 위치는 원래 값 유지, width(폭)만 줄여서 배경 안에 맞춤. */
+@media (pointer: coarse) {
+    #dialogue-box {
+        /* bottom 위치는 원래대로 유지 */
+        bottom: var(--dlg-bottom);
+        /* 폭을 줄여 게임 배경 밖으로 삐져나오지 않게 */
+        width: 70%;
+        max-width: 680px;
+        min-width: 260px;
+    }
+
+    #boss-dialogue-box {
+        bottom: clamp(80px, 15vh, 160px);
+        width: 70%;
+        max-width: 720px;
+        min-width: 260px;
+    }
+
+    /* iPhone SE 등 소형 폰 (가로모드 height ≤ 360px) */
+    @media screen and (orientation: landscape) and (max-height: 360px) {
+
+        #dialogue-box,
+        #boss-dialogue-box {
+            width: 65%;
+            max-height: clamp(44px, 14vh, 80px);
+            padding: 4px 8px;
+        }
+
+        .character-name,
+        .boss-char-name {
+            font-size: clamp(7px, 1.2vh, 12px);
+        }
+
+        .text,
+        .boss-char-text {
+            font-size: clamp(6px, 1.1vh, 11px);
+            line-height: 1.4;
+        }
+
+        .boss-dialogue-hint {
+            display: none;
+        }
+    }
+}

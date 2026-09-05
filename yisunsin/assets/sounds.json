@@ -1,0 +1,53 @@
+{
+  "_doc": "사운드 매니페스트 — 사운드기획서 §11-2. 교체 스위치는 이 파일 하나다.",
+  "_rule": [
+    "R1 코드는 ID 만 안다. 파일명을 코드에 쓰지 않는다.",
+    "R4 mode 를 'procedural' → 'file' 로 바꾸고 src 를 주면 절차적 항목도 파일로 덮인다.",
+    "R5 로드에 실패해도 게임은 멈추지 않는다. 조용히 무음이 된다.",
+    "교체 절차: 파일을 assets/sfx/ 에 넣고 src 를 가리키기만 하면 끝이다."
+  ],
+  "_status": "파일 20종 확보 (대표님 수령분 8종 반영) / 나머지는 synth.js 절차적 생성",
+
+  "sounds": {
+    "reel_start":        { "mode": "procedural", "_note": "상승 스윕 — 회전 시작. 이후는 reel_loop 이 받는다" },
+    "reel_loop":         { "mode": "file", "src": "assets/sfx/reel_loop.wav", "loop": true },
+    "reel_stop":         { "mode": "file",
+                           "_note": "🔴 변형 3종을 릴별로 돌려 쓰고 피치도 2%씩 올린다 — §4-2",
+                           "src": ["assets/sfx/reel_stop_01.wav",
+                                   "assets/sfx/reel_stop_02.wav",
+                                   "assets/sfx/reel_stop_03.wav"] },
+    "line_light":        { "mode": "procedural", "_note": "라인마다 피치 +1.5%" },
+    "count_tick":        { "mode": "procedural", "_note": "🔴 금액에 따라 피치 상승 — §4-1" },
+    "win_small":         { "mode": "procedural" },
+
+    "fanfare_big":       { "mode": "file", "src": "assets/sfx/fanfare_big.wav" },
+    "fanfare_mega":      { "mode": "file", "src": "assets/sfx/fanfare_mega.wav" },
+    "fanfare_legendary": { "mode": "file", "src": "assets/sfx/fanfare_legendary.wav" },
+    "impact_promote":    { "mode": "file", "src": "assets/sfx/impact_promote.wav" },
+    "trigger_free":      { "mode": "file", "src": "assets/sfx/trigger_scatter.wav" },
+    "trigger_bonus":     { "mode": "file", "src": "assets/sfx/trigger_bonus.wav" },
+    "jackpot":           { "mode": "file", "src": "assets/sfx/jackpot.wav" },
+
+    "cannon_fire":       { "mode": "file", "src": "assets/sfx/cannon_fire.wav" },
+    "hit_spark":         { "mode": "procedural", "_note": "🔴 90발을 쏘는 대상이 있다 — §4-3" },
+    "explosion":         { "mode": "file", "src": "assets/sfx/explosion.wav" },
+    "ram_impact":        { "mode": "file", "src": "assets/sfx/ram_impact.wav" },
+    "ram_ready":         { "mode": "procedural" },
+    "player_hit":        { "mode": "procedural" },
+    "boss_appear":       { "mode": "procedural" },
+    "time_warning":      { "mode": "procedural" },
+
+    "btn_click":         { "mode": "file", "src": "assets/sfx/btn_click.wav" },
+    "btn_toggle":        { "mode": "file", "src": "assets/sfx/menu_open.wav" },
+    "bet_change":        { "mode": "file",
+                           "_note": "variant 0 = 감소, 1 = 증가",
+                           "src": ["assets/sfx/bet_down.wav", "assets/sfx/bet_up.wav"] },
+    "freespin_select":   { "mode": "procedural" },
+    "screen_transition": { "mode": "procedural" },
+
+    "sea_ambience":      { "mode": "file", "src": "assets/sfx/sea_ambience.wav", "loop": true },
+    "bgm_main":          { "mode": "file", "src": "assets/bgm/Iron_Dragon_s_Wake.mp3", "loop": true }
+  },
+
+  "_credit": "Sound effects by ElevenLabs (팡파레·트리거·해면 7종) — 무료 플랜 저작자 표시 의무. 그 외는 대표님 자체 제작 및 CC0. 크레딧 화면 표기는 배포 전 필수."
+}

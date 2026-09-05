@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>또또의 모험 (The Adventure of Toto)</title>
+
+    <!-- Open Graph Meta Tags for Social Sharing Previews -->
+    <meta property="og:title" content="또또의 모험 (The Adventure of Toto)">
+    <meta property="og:description" content="Mabu Interactive 제공! 웹 브라우저에서 바로 즐기는 2D 도트 슈팅 액션 게임.">
+    <meta property="og:image"
+        content="https://jacksonhkim.github.io/Mabuinteractive/1.%EB%98%90%EB%98%90%EC%9D%98%20%EB%AA%A8%ED%97%98/game/assets/og_image.png">
+    <meta property="og:url"
+        content="https://jacksonhkim.github.io/Mabuinteractive/1.%EB%98%90%EB%98%90%EC%9D%98%20%EB%AA%A8%ED%97%98/game/index.html">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="또또의 모험 (The Adventure of Toto)">
+    <meta name="twitter:description" content="Mabu Interactive 제공! 웹 브라우저에서 바로 즐기는 2D 도트 슈팅 액션 게임.">
+    <meta name="twitter:image"
+        content="https://jacksonhkim.github.io/Mabuinteractive/1.%EB%98%90%EB%98%90%EC%9D%98%20%EB%AA%A8%ED%97%98/game/assets/og_image.png">
+
+    <link rel="icon" type="image/png" href="assets/og_image.png">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        window.onerror = function (msg, url, lineNo, columnNo, error) {
+            const errDiv = document.createElement('div');
+            errDiv.style.position = 'fixed';
+            errDiv.style.top = '0';
+            errDiv.style.left = '0';
+            errDiv.style.width = '100%';
+            errDiv.style.background = 'red';
+            errDiv.style.color = 'white';
+            errDiv.style.zIndex = '100000';
+            errDiv.style.padding = '10px';
+            errDiv.style.fontFamily = 'monospace';
+            errDiv.innerText = 'ERROR: ' + msg + ' at ' + url + ':' + lineNo;
+            document.body.appendChild(errDiv);
+            return false;
+        };
+    </script>
+</head>
+
+<body>
+    <!-- [New] Orientation Warning for Mobile -->
+    <div id="orientation-warning">
+        <div class="rotate-icon">🔄</div>
+        <div class="warning-text">PLEASE ROTATE TO LANDSCAPE</div>
+        <div class="sub-text">가로 모드로 회전하여 게임을 즐겨주세요</div>
+    </div>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="start-screen">
+            <h1 class="title">또또의 모험</h1>
+            <div class="start-message">CLICK TO START</div>
+            <div class="instruction-message">Space: Shoot | X: Bomb | Arrows: Move</div>
+            <div class="company-credit">Provided by Mabu Interactive</div>
+        </div>
+        <div id="ui-layer" class="hidden">
+            <div id="hud" class="hidden">
+                <div class="score-container">SCORE: <span id="score">000000</span></div>
+                <div class="life-container">LIFE: <span id="lives">★★★</span></div>
+                <div class="bomb-container">BOMB: <span id="bombs">💣💣💣</span></div>
+            </div>
+            <div id="dialogue-box" class="hidden">
+                <div class="dialogue-portrait-wrap">
+                    <img id="dialogue-portrait-left" class="dialogue-portrait-img" src="" alt="">
+                </div>
+                <div class="dialogue-content">
+                    <div class="character-name">또또</div>
+                    <div class="text">오늘따라 숲이 너무 조용한 걸?</div>
+                </div>
+            </div>
+            <!-- 보스 등장 대화 씬 전용 UI -->
+            <div id="boss-dialogue-box" class="hidden">
+                <div class="boss-dialogue-inner">
+                    <div class="boss-char-name">BOSS</div>
+                    <div class="boss-char-text">...</div>
+                    <div class="boss-dialogue-hint">[ 탭하여 계속 ]</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 모바일 컨트롤 (터치용) - ui-layer 밖으로 분리 -->
+        <div id="mobile-controls">
+            <div id="d-pad" class="control-group">
+                <div id="up" class="d-btn" data-key="ArrowUp"></div>
+                <div id="down" class="d-btn" data-key="ArrowDown"></div>
+                <div id="left" class="d-btn" data-key="ArrowLeft"></div>
+                <div id="right" class="d-btn" data-key="ArrowRight"></div>
+            </div>
+            <div id="action-group" class="control-group">
+                <div id="btn-bomb" class="act-btn" data-key="KeyX">💣</div>
+                <div id="btn-shot" class="act-btn" data-key="Space">🔥</div>
+            </div>
+        </div>
+    </div>
+    <script src="game.js?v=bust4" type="module"></script>
+    <!-- Removed duplicate script tag -->
+    <!-- <script src="game.js" type="module"></script> This was causing issues -->
+</body>
+
+</html>

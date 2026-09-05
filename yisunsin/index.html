@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>이순신 — 슬롯</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- 🔴 타이틀은 장식이 아니다. 브라우저의 오디오 잠금을 푸는 **첫 제스처**를 받는 자리다.
+       (사운드기획서 §5-1) -->
+  <section id="title">
+    <h1 id="title-name">이순신</h1>
+    <p class="tagline">THE LEGEND NEVER SINKS</p>
+    <p class="sub" id="title-sub">불러오는 중…</p>
+    <!-- 기동 실패는 **여기** 보여야 한다. 숨겨진 영역에 쓰면 아무 단서 없이 멈춘 것처럼 보인다. -->
+    <p id="boot-error" class="boot-error" role="alert"></p>
+  </section>
+
+  <main id="stage" class="hidden">
+
+    <!-- N3 상단+릴 통합 프레임 — 글자는 프레임과 분리해 선명도를 유지한다.
+         문자형 잭팟 라벨과 동적 누적액을 빈 현판 위에 두 줄로 표시한다.
+         거북선 4연속 조건 안내는 릴 하단의 `.jp-cond` 가 계속 담당한다. -->
+    <header class="topbar jackpot-bar" aria-label="누적 보너스">
+      <div class="jb-stage">
+        <div class="jb-money">
+          <span class="jb-label">JACKPOT</span>
+          <strong id="jackpot" class="jb-amount">0</strong>
+        </div>
+      </div>
+    </header>
+
+    <!-- 릴 패널 — 통합 프레임의 릴 창에 논리 872×664 캔버스를 맞춘다 -->
+    <div class="reel-panel">
+      <canvas id="reels" aria-label="릴 5×4"></canvas>
+
+
+
+      <!-- 🔴 프리스핀 선택 (기획서 §8-2). 세 선택지는 기대값이 같고 분산만 다르다. -->
+      <section id="choice" class="choice hidden" role="dialog" aria-label="프리스핀 선택">
+        <h2>프리스핀</h2>
+        <p class="choice-sub">셋 중 하나를 고르십시오</p>
+        <div id="choice-list" class="choice-list"></div>
+      </section>
+
+      <!-- 당첨 등급 배너 (UI기획서 §6-2) — BIG 이상에서만 뜬다 -->
+      <section id="winbanner" class="winbanner hidden" role="status" aria-live="polite">
+        <span id="wb-tier" class="wb-tier">BIG WIN</span>
+        <strong id="wb-num" class="wb-num">0</strong>
+        <!-- 🔴 잭팟 전용 2줄 (대표님 지시 2026-08-30) — 잭팟 상금과 릴 당첨을 합산해
+             총액으로 맺는다. 전에는 배너가 잭팟만 말하고 총액은 하단 WIN 칸에만 있어
+             플레이어가 두 숫자를 스스로 이어 붙여야 했다.
+             ⛔ 등급 배너(BIG·MEGA·LEGENDARY)에는 CSS 가 새어 나가지 못하게 막는다. -->
+        <span id="wb-line" class="wb-line hidden">+ LINE WIN <b id="wb-line-num">0</b></span>
+        <span id="wb-total" class="wb-total hidden">TOTAL WIN <b id="wb-total-num">0</b></span>
+      </section>
+
+      <!-- WIN 등급(당첨의 82%) — 배너 대신 금액만 떠올랐다 사라진다 -->
+      <div id="winpop" class="winpop hidden" aria-hidden="true">+0</div>
+
+      <!-- 프리스핀 종료 — 총 획득 (UI기획서 §5-1-3)
+           🔴 지갑은 매 스핀 정산돼 있다. 이 화면은 **연출만** 한다. -->
+      <section id="fs-total" class="fs-total hidden" role="status" aria-live="polite">
+        <span class="fs-total-label">무료 스핀 종료</span>
+        <strong id="fs-total-num" class="fs-total-num">0</strong>
+        <span class="fs-total-sub">총 획득</span>
+      </section>
+        </div>
+
+    <!-- 🔴 좌측 전략 패널 (N2 · 2026-09-06) — 「무엇이 뜨면 무엇을 얻는가」를 알린다.
+         네 장이 5초마다 교대한다. 판정은 `tacticplan.js`(순수), 화면은 `tacticpanel.js`.
+         ⛔ 심볼은 그림에 박혀 있다 — 릴 원본을 Python 이 홈에 합성했다(tactic_compose.py).
+            그래야 릴에서 본 그것과 픽셀 단위로 같아 안내가 성립한다.
+         📌 `aria-live` 는 두지 않는다. 5초마다 스크린리더가 다시 읽으면 방해만 된다. -->
+    <aside class="side-left">
+      <div class="tc-panel" id="tactic">
+        <img class="tc-frame tc-on" data-screen="seabattle" src="assets/ui/ui_tactic_1_seabattle.webp"
+             alt="해전 보너스 — 함대 3개가 뜨면 거북선으로 왜군을 격침하는 미니게임이 열립니다"
+             width="780" height="1465">
+        <img class="tc-frame" data-screen="jackpot" src="assets/ui/ui_tactic_2_jackpot.webp"
+             alt="잭팟 — 거북선 4연속이면 누적 상금 전액을 획득합니다"
+             width="780" height="1465">
+        <img class="tc-frame" data-screen="freespin" src="assets/ui/ui_tactic_3_freespin.webp"
+             alt="프리스핀 — 난중일기 3개가 뜨면 셋 중 골라 무료 스핀을 받습니다"
+             width="780" height="1465">
+        <img class="tc-frame" data-screen="legendary" src="assets/ui/ui_tactic_4_legendary.webp"
+             alt="보너스 게임 — 보물상자 3개가 뜨면 무료 10회 동안 와일드가 누적됩니다"
+             width="780" height="1465">
+        <ol class="tc-dots" aria-hidden="true"><li></li><li></li><li></li><li></li></ol>
+      </div>
+    </aside>
+
+    <!-- 🔴 우측 패널 — 릴 옆 빈 공간을 쓴다 (v2.9 빨간 박스 비율 적용 2026-08-27).
+         화면이 넓을수록 좌우가 남는다(1920 기준 한쪽 409px). 그 자리다.
+         프리스핀 정보를 릴 위에서 여기로 옮겨 릴을 가리지 않는다. -->
+    <aside class="side-right" aria-live="polite">
+      <!-- 🔴 「난중일기 · FREE SPINS · MULTIPLIER」 는 **그림에 박혀 있다**.
+           코드는 **바뀌는 숫자 두 개만** 얹는다 — 실측 좌표에 절대 배치한다. -->
+      <div id="fs-status" class="fs-panel idle" aria-label="프리스핀 진행">
+        <!-- 🔴 액자와 속지를 **두 층**으로 쌓는다 (대표님 지시 2026-09-03).
+             예전에는 종이 한 장에 글자까지 박혀 있었는데, 좌측 전략 패널이 액자라
+             우측만 종이여서 좌우가 다른 물건처럼 보였다.
+             액자는 좌우 공용(`ui_side_frame`)이고 속지만 갈아 끼운다.
+             🔴 배경이 아니라 **<img>** 인 이유는 그대로다 — 상자 비율이 조금만
+                어긋나도 배경은 늘어나지만 `<img>` 는 자기 비율을 지킨다. -->
+        <img class="fp-paper" src="assets/ui/ui_side_content_diary.webp" alt="" width="702" height="1339">
+        <img class="fp-frame" src="assets/ui/ui_side_frame_slim_v2.webp" alt="" width="780" height="1449">
+        <strong id="fs-left" class="fp-num">—</strong>
+        <span id="fs-mult" class="fp-mult">대기</span>
+      </div>
+    </aside>
+
+    <!-- 하단 컨트롤 (UI기획서 §2-1 · 140px)
+         🔴 SPIN 은 화면 정중앙이다. 좌우 정보 그룹을 같은 폭(1fr)으로 두면
+            양쪽 내용이 길어지거나 짧아져도 버튼은 가운데를 지킨다. -->
+    <footer class="controls">
+      <div class="side left">
+        <!-- 🔴 INFO · 설정은 자리를 먼저 잡는다 (HUD-a · 2026-09-03).
+             기능은 HUD-b 에서 붙인다. 자리를 비워 뒀다가 나중에 넣으면
+             배치를 두 번 만지게 된다 — 지금 한 번에 끝낸다.
+             HUD-b 는 런칭(13번)보다 앞(10번)이라 빈 버튼이 라이브로 나가지 않는다. -->
+        <!-- 🔴 `cell-*` 는 통짜 HUD 띠(`ui_hud_bar_slots.webp`)에 그려진 칸 좌표다
+             (실측 2026-09-04). 넓은 화면에서는 이 클래스로 칸 위에 절대 배치하고,
+             좁은 화면에서는 예전처럼 흐름 배치로 되돌아간다. -->
+        <div class="sys cell cell-a">
+          <button id="info" type="button" class="icon-btn" aria-label="게임 안내">
+            <span class="ico">i</span><span class="cap">INFO</span>
+          </button>
+          <button id="settings" type="button" class="icon-btn" aria-label="설정">
+            <span class="ico">⚙</span>
+          </button>
+        </div>
+        <div class="field cell cell-b">
+          <span class="label">BET</span>
+          <div class="bet-group">
+            <button id="bet-down" type="button" aria-label="베팅 감소">−</button>
+            <strong id="bet" class="num">0</strong>
+            <button id="bet-up" type="button" aria-label="베팅 증가">+</button>
+          </div>
+        </div>
+      </div>
+
+      <button id="spin" type="button" class="primary">SPIN</button>
+
+      <div class="side right">
+        <!-- 🔴 WIN · BALANCE 를 **세로 2단**으로 쌓는다 (대표님 결재 2026-09-04).
+             15자리(`999,999,999,999`)를 담게 되면서 가로로 나란히 두면 칸 두 개가
+             444px 이고, `1fr auto 1fr` 대칭 그리드는 넓은 쪽의 2배를 띠 폭으로
+             요구해 띠가 1,588px — 예전과 같아졌다. 쌓으면 폭이 절반이 되어
+             **숫자를 크게 유지한 채** 띠를 1,600 → 1,210px 로 줄일 수 있다.
+             INFO·설정 / FAST·AUTO 를 세로로 쌓은 것과 같은 해법이다. -->
+        <div class="values">
+          <div class="field cell cell-c">
+            <span class="label">WIN</span>
+            <strong id="win" class="num">0</strong>
+          </div>
+          <!-- ⛔ 라벨만 BALANCE 다. id 는 `credit` 그대로 — JS · 테스트가 이 이름을 쓴다. -->
+          <div class="field cell cell-d">
+            <span class="label">BALANCE</span>
+            <strong id="credit" class="num">0</strong>
+          </div>
+        </div>
+        <div class="toggles cell cell-e">
+          <button id="fast" type="button" class="toggle" aria-pressed="false">FAST</button>
+          <button id="auto" type="button" class="toggle" aria-pressed="false">AUTO</button>
+        </div>
+      </div>
+
+      <!-- 🔴 hint 는 **띠 안**에 산다 (2026-09-03).
+           행으로 두면 16px + 간격 12px 을 먹는데 그 28px 이 그대로 릴 크기였다.
+           띠 안쪽 아래가 비어 있으므로 거기에 절대 배치한다. -->
+      <p id="hint" class="hint" role="status" aria-live="polite"></p>
+    </footer>
+  </main>
+
+  <!-- ⛔ 개발용 두 줄 — **main 밖**에 둔다 (대표님 지시 2026-09-03).
+       🔴 stage 안에 두고 fixed 로 띄웠더니 화면을 확대할 때 게임만 커지고
+          치트 바는 뷰포트에 붙은 채라 하단 띠 위로 올라탔다.
+          body 기준 `top: 100%` 로 두면 화면이 크든 작든 **항상 게임 아래**다.
+       ⛔ stage 안으로 되돌리지 않는다 — stage 는 position:relative 라
+          (우측 패널이 그 기준을 쓴다) 무엇을 하든 stage 기준이 되어 버린다.
+       ⛔ P8 QA 에서 이 블록을 통째로 제거한다. -->
+  <p id="meta" class="meta"></p>
+  <p class="dev">
+    <button id="cheat-win" type="button" class="ghost" aria-pressed="false">일반 WIN 연속: OFF</button>
+    <button id="ledger" type="button" class="ghost">잔액 등식 확인</button>
+    <button id="cheat-fs" type="button" class="ghost">▶ 프리스핀 강제</button>
+    <button id="cheat-bonus" type="button" class="ghost">▶ 보너스 강제</button>
+    <button id="cheat-jp" type="button" class="ghost">▶ 잭팟 강제</button>
+  </p>
+
+  <!-- 🔴 잭팟 코인·폭죽은 **화면 전체**에 내린다 (대표님 지시 2026-08-29).
+       ⛔ 릴 패널 안에 두면 절대 나올 수 없다 — `.reel-panel { isolation: isolate }` 가
+          자체 층을 만들어 z-index 를 아무리 올려도 갇힌다. 그래서 body 직계다.
+       상자가 둘인 것은 실수가 아니다. 한 상자에 이어 붙이면 innerHTML 재파싱으로
+       **돌고 있던 코인이 처음부터 다시 시작한다.** -->
+  <div id="jp-sky" class="jp-sky" aria-hidden="true"></div>
+  <!-- 🔴 충격파 링도 화면 전체다 (대표님 결재 2026-08-29).
+       배너 안에 두면 릴 프레임에 갇혀 「릴 안에서 터지는」 것으로 읽힌다.
+       ⛔ 위 두 상자는 innerHTML 로 비워지므로 링은 **그 밖**에 둔다. -->
+  <img id="jp-ring" src="assets/scenes/x4_jackpot_ring.webp" alt="" aria-hidden="true">
+  <div id="jp-sky-hit" class="jp-sky" aria-hidden="true"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

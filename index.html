@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>마부 인터랙티브</title>
+<style>
+  :root{
+    --bg:#0b0f14; --bg2:#121a24; --line:#1f2b3a;
+    --gold:#d8b46a; --gold-dim:#8a7340;
+    --txt:#e8eef5; --dim:#8fa0b3;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; background:var(--bg);
+    color:var(--txt); font:16px/1.6 "Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+    display:flex; flex-direction:column; align-items:center;
+    padding:56px 20px 40px;
+  }
+  header{text-align:center; margin-bottom:44px}
+  h1{
+    margin:0 0 10px; font-size:30px; letter-spacing:.22em;
+    color:var(--gold); font-weight:700;
+  }
+  header p{margin:0; color:var(--dim); font-size:14px; letter-spacing:.05em}
+  .rule{
+    width:64px; height:2px; margin:18px auto 0;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  }
+  .grid{
+    display:grid; gap:20px; width:100%; max-width:760px;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  }
+  .card{
+    display:block; text-decoration:none; color:inherit;
+    background:var(--bg2); border:1px solid var(--line); border-radius:12px;
+    padding:26px 24px; transition:border-color .18s, transform .18s;
+  }
+  .card:hover,.card:focus-visible{
+    border-color:var(--gold-dim); transform:translateY(-3px); outline:none;
+  }
+  .card h2{margin:0 0 8px; font-size:20px; color:var(--gold); font-weight:600}
+  .card .en{margin:0 0 14px; font-size:12px; color:var(--gold-dim); letter-spacing:.12em}
+  .card p{margin:0; color:var(--dim); font-size:14px}
+  .tag{
+    display:inline-block; margin-top:16px; padding:4px 11px;
+    border:1px solid var(--line); border-radius:99px;
+    font-size:11px; color:var(--dim); letter-spacing:.08em;
+  }
+  footer{margin-top:52px; color:#5c6b7d; font-size:12px; letter-spacing:.06em}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>마부 인터랙티브</h1>
+  <p>MABU INTERACTIVE</p>
+  <div class="rule"></div>
+</header>
+
+<main class="grid">
+  <a class="card" href="ddoddo/">
+    <h2>또또의 모험</h2>
+    <p class="en">THE ADVENTURE OF TOTO</p>
+    <p>꿀벌 또또가 기계 제국에 맞서는 종스크롤 슈팅. 10 스테이지.</p>
+    <span class="tag">PLAY</span>
+  </a>
+
+  <a class="card" href="yisunsin/">
+    <h2>이순신</h2>
+    <p class="en">YISUNSIN SLOT</p>
+    <p>5×4 릴 25 페이라인 슬롯. 프리스핀 · 보너스 게임 · 잭팟.</p>
+    <span class="tag">PLAY</span>
+  </a>
+</main>
+
+<footer>© MABU INTERACTIVE</footer>
+
+</body>
+</html>

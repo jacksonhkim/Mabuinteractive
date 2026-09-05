@@ -1,0 +1,51 @@
+# ============================================================
+#  마부 인터랙티브 — 배포 전용 저장소
+#
+#  ⛔ 이 저장소에는 **게임 실행 파일만** 들어간다.
+#     기획서 · 인수인계서 · 제작 도구 · 에셋 원본은 절대 올리지 않는다.
+#     소스 저장소가 아니다. 로컬에서 빌드한 결과물만 커밋한다.
+# ============================================================
+
+# 문서 — 배포물이 아니다
+*.md
+*.txt
+*.pptx
+*.docx
+*.xlsx
+
+# 제작 도구
+*.py
+*.bat
+*.ps1
+*_baker.html
+
+# 개발 산출물
+node_modules/
+.vite/
+dist/
+build/
+__pycache__/
+*.pyc
+package.json
+package-lock.json
+
+# 테스트
+*.test.mjs
+*.test.js
+*.spec.js
+
+# 비밀·환경
+.env
+.env.*
+*.key
+*.pem
+credentials*
+secret*
+
+# 편집기·OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
