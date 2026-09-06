@@ -78,7 +78,7 @@ async function boot() {
     { wallet, sfx, rng, jackpot },
   );
 
-  document.title = `${slot.title} — 슬롯`;
+  document.title = slot.title;          // 이름 자체가 제목이다 (2026-09-06)
   $('#title-name').textContent = slot.title;
   $('#title-sub').textContent = '에셋 불러오는 중…';
 

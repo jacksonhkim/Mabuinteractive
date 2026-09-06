@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>이순신 — 슬롯</title>
+  <title>이순신 : 명량</title>
 
   <!-- 🔴 홈 화면에 추가하면 **사파리 주소창·툴바 130px 을 되찾는다** (2026-09-06).
        실측 — iPhone 16 Pro 가로에서 바가 있으면 세로 272px, 없으면 402px.
@@ -11,12 +11,34 @@
        ⛔ 사파리에서 `requestFullscreen()` 은 임의 요소에 쓸 수 없다 — 영상뿐이다.
           iOS 에서 바를 없애는 길은 「홈 화면에 추가」 하나뿐이다.
        ⚠️ 두 capable 태그가 모두 필요하다 — 표준은 `mobile-`, iOS 는 아직 `apple-` 만 읽는다. -->
+
+  <!-- 🔴 링크 미리보기 (2026-09-06 대표님 지시).
+       ⛔ `og:image` 는 **절대 URL** 이어야 한다 — 상대경로는 대부분의 크롤러가 못 읽는다.
+       ⛔ **JPEG 다.** 카카오톡을 비롯한 일부 크롤러가 WebP 를 읽지 못하고,
+       사진이라 PNG 로 두면 1.3MB 였다 — 크롤러가 큰 이미지를 건너뛴다 (201KB). -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="마부 인터랙티브">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:title" content="이순신 : 명량">
+  <meta property="og:description" content="울돌목의 해전을 배경으로 한 5×4 릴 25 페이라인 슬롯. 프리스핀 · 보너스 게임 · 잭팟.">
+  <meta property="og:url" content="https://jacksonhkim.github.io/Mabuinteractive/yisunsin/">
+  <meta property="og:image" content="https://jacksonhkim.github.io/Mabuinteractive/yisunsin/assets/ui/og_cover.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="이순신 : 명량 — 울돌목 해전을 배경으로 한 슬롯">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="이순신 : 명량">
+  <meta name="twitter:description" content="울돌목의 해전을 배경으로 한 5×4 릴 25 페이라인 슬롯. 프리스핀 · 보너스 게임 · 잭팟.">
+  <meta name="twitter:image" content="https://jacksonhkim.github.io/Mabuinteractive/yisunsin/assets/ui/og_cover.jpg">
+  <meta name="description" content="울돌목의 해전을 배경으로 한 5×4 릴 25 페이라인 슬롯. 프리스핀 · 보너스 게임 · 잭팟.">
+
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#060f18">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="이순신">
+  <meta name="apple-mobile-web-app-title" content="이순신 : 명량">
   <link rel="apple-touch-icon" href="assets/ui/app_icon_apple_180.png">
   <link rel="icon" type="image/png" href="assets/ui/app_icon_192.png">
 
@@ -27,7 +49,11 @@
   <!-- 🔴 타이틀은 장식이 아니다. 브라우저의 오디오 잠금을 푸는 **첫 제스처**를 받는 자리다.
        (사운드기획서 §5-1) -->
   <section id="title">
-    <h1 id="title-name">이순신</h1>
+    <h1 id="title-name">이순신 : 명량</h1>
+    <!-- 🔴 로고 그림에는 「이순신」만 들어 있다 (2026-09-06 명칭 변경).
+         에셋을 다시 뽑지 않고 「명량」을 아래에 얹어 이름을 완성한다.
+         ⛔ `aria-hidden` — 위 h1 이 이미 전체 이름을 읽는다. 두 번 읽히면 안 된다. -->
+    <p class="title-era" aria-hidden="true">명량</p>
     <p class="tagline">THE LEGEND NEVER SINKS</p>
     <p class="sub" id="title-sub">불러오는 중…</p>
     <!-- 기동 실패는 **여기** 보여야 한다. 숨겨진 영역에 쓰면 아무 단서 없이 멈춘 것처럼 보인다. -->
@@ -228,7 +254,7 @@
     <div class="rotate-box">
       <div class="rotate-phone" aria-hidden="true"><span class="rotate-screen"></span></div>
       <p id="rotate-title" class="rotate-title">가로로 돌려 주세요</p>
-      <p id="rotate-sub" class="rotate-sub">이순신은 가로 화면에 맞춰 만들어졌습니다</p>
+      <p id="rotate-sub" class="rotate-sub">이순신 : 명량은 가로 화면에 맞춰 만들어졌습니다</p>
     </div>
   </div>
 

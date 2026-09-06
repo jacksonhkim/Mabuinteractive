@@ -113,6 +113,20 @@ body {
   text-shadow: 0 0 30px rgba(201, 162, 39, 0.35);
 }
 
+/* 🔴 「명량」 — 로고 그림이 「이순신」까지만 그려 주므로 나머지를 코드가 얹는다.
+   ⛔ 자간을 준 마지막 글자 **뒤에도** 자간이 붙어 오른쪽으로 밀린다.
+      `text-indent` 로 절반을 되돌려야 로고와 가운데가 맞는다. */
+.title-era {
+  margin: -0.15em 0 0.15em;
+  font-family: "Noto Serif KR", "AppleMyungjo", "Batang", serif;
+  font-size: clamp(1.05rem, 3.4vw, 1.65rem);
+  font-weight: 700;
+  letter-spacing: 0.52em;
+  text-indent: 0.52em;
+  color: var(--gold-lit);
+  text-shadow: 0 0 24px rgba(201, 162, 39, 0.42), 0 2px 6px #030a12;
+}
+
 .tagline {
   margin: 0;
   font-size: clamp(0.7rem, 2vw, 0.9rem);

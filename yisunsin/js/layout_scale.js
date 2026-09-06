@@ -92,6 +92,34 @@ const px = (style, name) => {
  * @param {HTMLElement} o.root
  * @returns {number|null} 적용한 배율. 티어가 꺼져 있으면 null.
  */
+/**
+ * 확대와 무관한 **레이아웃 뷰포트**를 돌려준다.
+ *
+ * 🔴 **`innerWidth` 를 그대로 쓰면 확대할수록 게임이 작아진다** (2026-09-06 대표님 제보).
+ *    iOS Safari 는 핀치 확대 중 `innerWidth`/`innerHeight` 로 **보이는 영역**
+ *    (visual viewport)을 돌려준다. 확대하면 이 값이 작아지므로
+ *
+ *      확대 → innerHeight 감소 → --fit 감소 → 무대 축소 → 화면에서 더 작아짐
+ *        ↑                                                          │
+ *        └──────────────────  또 확대  ←───────────────────────────┘
+ *
+ *    되먹임이 걸려 게임이 배경만 남기고 사라졌다 (실측 — 확대 후 릴이 오히려 31% 축소).
+ *    배경은 `background-attachment: fixed` 라 확대 영향을 받지 않아 그것만 남는다.
+ *
+ *    `visualViewport.width × scale` 이 확대분을 되돌린 **레이아웃 뷰포트**다.
+ *    이 값으로 재면 배율이 확대와 무관하게 고정되고, 사파리가 순수하게 화면만
+ *    확대한다 — 즉 **확대하면 릴이 진짜로 커진다.**
+ *
+ * ⛔ 확대를 막지 않는다. 작은 글씨를 크게 보려는 것은 정당한 요구다.
+ */
+export function layoutViewport(win) {
+  const vv = win && win.visualViewport;
+  if (vv && Number.isFinite(vv.width) && Number.isFinite(vv.scale) && vv.scale > 0) {
+    return { width: vv.width * vv.scale, height: vv.height * vv.scale };
+  }
+  return { width: win.innerWidth, height: win.innerHeight };
+}
+
 export function syncStageFit({ win, stage, root }) {
   if (!stage || !stage.style || typeof win.matchMedia !== 'function') return null;
 
@@ -118,9 +146,10 @@ export function syncStageFit({ win, stage, root }) {
     return null;
   }
 
+  const view = layoutViewport(win);
   const fit = Math.min(
-    win.innerWidth / STAGE_W,
-    Math.max(1, win.innerHeight - insetY) / natH,
+    view.width / STAGE_W,
+    Math.max(1, view.height - insetY) / natH,
   );
   const safe = Math.max(0.05, Math.min(1, fit));
   stage.style.setProperty('--fit', String(Math.round(safe * 10000) / 10000));
