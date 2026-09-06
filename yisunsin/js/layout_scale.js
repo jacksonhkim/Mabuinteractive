@@ -61,8 +61,75 @@ export function hasCoarsePointer(win) {
   }
 }
 
+/* ══ 고정 무대 배율 (대표님 결재 2026-09-06) ═══════════════════════════════
+   폰 가로에서는 데스크톱 1920×1080 화면을 굳혀 놓고 통째로 축소한다 (§FIT).
+   그 배율을 여기서 계산해 `--fit` 으로 넘긴다.
+
+   🔴 무대 높이를 상수로 박지 않는다. 힌트 한 줄, 개발용 줄 하나에도 높이가
+      바뀌는데 상수로 두면 그때마다 아래가 잘리거나 뜬다. **매번 실측한다.**
+      `--fit: 1` 로 되돌려 재고 곧바로 되돌리므로 화면에는 보이지 않는다
+      (스타일 계산만 일어나고 페인트 사이에 끝난다).
+
+   ⚠️ 안전영역은 CSS 에서만 읽을 수 있다(`env()`). §FIT 이 `--sa-t`/`--sa-b` 로
+      노출해 둔 값을 여기서 받는다. 빼지 않으면 iOS 가로에서 홈 인디케이터
+      21px 만큼 하단이 잘린다. */
+
+/** 폰 가로 고정 무대 티어가 켜져 있는가 — CSS 의 §FIT 조건과 **한 글자도 다르면 안 된다** */
+const FIT_QUERY = '(orientation: landscape) and (max-height: 560px)';
+
+/** 무대가 데스크톱에서 차지하는 폭. §FIT 의 `#stage { width }` 와 같은 값이다. */
+const STAGE_W = 1600;
+
+const px = (style, name) => {
+  const v = parseFloat(style.getPropertyValue(name));
+  return Number.isFinite(v) ? v : 0;
+};
+
+/**
+ * @param {object} o
+ * @param {Window} o.win
+ * @param {HTMLElement|null} o.stage
+ * @param {HTMLElement} o.root
+ * @returns {number|null} 적용한 배율. 티어가 꺼져 있으면 null.
+ */
+export function syncStageFit({ win, stage, root }) {
+  if (!stage || !stage.style || typeof win.matchMedia !== 'function') return null;
+
+  let on = false;
+  try { on = win.matchMedia(FIT_QUERY).matches === true; } catch { on = false; }
+  if (!on) {
+    stage.style.removeProperty('--fit');
+    return null;
+  }
+
+  const style = win.getComputedStyle ? win.getComputedStyle(root) : null;
+  const insetY = style ? px(style, '--sa-t') + px(style, '--sa-b') : 0;
+
+  // 자연 크기를 재려면 배율을 잠시 풀어야 한다. 폭은 고정이라 높이만 본다.
+  stage.style.setProperty('--fit', '1');
+  const natH = stage.offsetHeight;
+
+  // 🔴 타이틀 화면에서는 무대가 `display: none` 이라 높이가 0 이다.
+  //    그 0 으로 나누면 배율이 폭 항으로 떨어져 화면 두 배짜리 무대가 나온다
+  //    (실측 --fit 0.5463 = 874/1600 — 높이를 아예 못 본 값이었다).
+  //    아래 ResizeObserver 가 무대가 실제로 열릴 때 다시 부른다.
+  if (!natH) {
+    stage.style.removeProperty('--fit');
+    return null;
+  }
+
+  const fit = Math.min(
+    win.innerWidth / STAGE_W,
+    Math.max(1, win.innerHeight - insetY) / natH,
+  );
+  const safe = Math.max(0.05, Math.min(1, fit));
+  stage.style.setProperty('--fit', String(Math.round(safe * 10000) / 10000));
+  return safe;
+}
+
 export function installLayoutScale({
   win = globalThis.window,
+  doc = globalThis.document,
   root = globalThis.document?.documentElement,
   baseDevicePixelRatio = 1,
 } = {}) {
@@ -89,6 +156,8 @@ export function installLayoutScale({
     root.style.setProperty("--browser-zoom", String(layout.zoom));
     root.classList.toggle("ui-zoomed", layout.zoom > 1.001);
     root.classList.toggle("is-touch", layout.coarsePointer);
+    // 🔴 고정 무대 배율도 같은 박자로 다시 잰다 — 회전·사파리 바 숨김이 전부 resize 로 온다
+    syncStageFit({ win, stage: doc && doc.getElementById ? doc.getElementById("stage") : null, root });
     return layout;
   };
 
@@ -96,8 +165,22 @@ export function installLayoutScale({
   win.addEventListener("resize", sync, { passive: true });
   // 🔴 회전은 resize 를 늦게 올리는 기기가 있다 — 방향 변화도 함께 듣는다.
   win.addEventListener("orientationchange", sync, { passive: true });
+
+  /* 🔴 무대가 **열리는 순간**을 잡는다.
+     타이틀을 누르기 전에는 `display: none` 이라 높이를 잴 수 없고, 그 뒤로는
+     resize 가 오지 않으므로 배율이 영영 틀린 채로 남는다.
+     ⛔ 무한 루프가 아니다 — `--fit` 은 transform 만 바꾸고 border-box 크기는
+        건드리지 않으므로 이 관찰자를 다시 깨우지 않는다. */
+  let ro = null;
+  const stage = doc && doc.getElementById ? doc.getElementById("stage") : null;
+  if (stage && typeof win.ResizeObserver === "function") {
+    ro = new win.ResizeObserver(() => sync());
+    ro.observe(stage);
+  }
+
   return () => {
     win.removeEventListener("resize", sync);
     win.removeEventListener("orientationchange", sync);
+    if (ro) ro.disconnect();
   };
 }
