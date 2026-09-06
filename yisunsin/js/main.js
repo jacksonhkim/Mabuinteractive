@@ -25,7 +25,7 @@ import { createFx } from './slots/yisunsin/fx.js';
 import { createAutoplay } from './slots/yisunsin/autoplay.js';
 import { createFreespinRunner, freeTotal } from './slots/yisunsin/freespin_runner.js';
 import { bindDevButtons } from './_devbuttons.js';   // ⛔ P8 에서 제거
-import { installLayoutScale } from './layout_scale.js';
+import { installLayoutScale, installOrientationGuard } from './layout_scale.js';
 
 installLayoutScale();
 
@@ -215,14 +215,13 @@ async function boot() {
     renderer.resize();
     fx.draw(performance.now());
     if (!raf) raf = requestAnimationFrame(loop);
-    // 🔴 BGM 은 **디코딩이 끝난 뒤** 시작한다. 먼저 걸면 버퍼가 없어 조용히 실패한다.
-    if (!audio.unlocked) report({ loaded: 0, failed: 0 });
-    else {
-      sfx.preload().then((r) => {
-        report(r);
-        bgm = sfx.play('bgm_main', { volume: BGM_VOLUME });
-      });
-    }
+    // 🔴 잠금 해제는 **비동기**다 (iOS). 반환값을 믿지 말고 onUnlock 에 맡긴다.
+    //    BGM 은 디코딩이 끝난 뒤 — 먼저 걸면 버퍼가 없어 조용히 실패한다.
+    report({ loaded: 0, failed: 0 });
+    audio.onUnlock(() => sfx.preload().then((r) => {
+      report(r);
+      bgm = sfx.play('bgm_main', { volume: BGM_VOLUME });
+    }));
   }, { once: true });
 
   // ── 입력 — 마우스·터치 동시 지원 (기획서 §1 대응 환경) ──
@@ -269,6 +268,7 @@ async function boot() {
     if (!raf && fx.hasGlow(slot)) raf = requestAnimationFrame(loop);
   });
 
+  installOrientationGuard({ pause: () => { play.stop(); free.stop(); fx.cancelTrigger(); } });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       audio.suspend();

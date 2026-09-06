@@ -4,6 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>이순신 — 슬롯</title>
+
+  <!-- 🔴 홈 화면에 추가하면 **사파리 주소창·툴바 130px 을 되찾는다** (2026-09-06).
+       실측 — iPhone 16 Pro 가로에서 바가 있으면 세로 272px, 없으면 402px.
+       세로가 릴 크기를 그대로 정하므로(§PHONE-L) 이 130px 이 릴을 231 → 370px 로 키운다.
+       ⛔ 사파리에서 `requestFullscreen()` 은 임의 요소에 쓸 수 없다 — 영상뿐이다.
+          iOS 에서 바를 없애는 길은 「홈 화면에 추가」 하나뿐이다.
+       ⚠️ 두 capable 태그가 모두 필요하다 — 표준은 `mobile-`, iOS 는 아직 `apple-` 만 읽는다. -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#060f18">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="이순신">
+  <link rel="apple-touch-icon" href="assets/ui/app_icon_apple_180.png">
+  <link rel="icon" type="image/png" href="assets/ui/app_icon_192.png">
+
   <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
@@ -202,6 +218,19 @@
        ⛔ 위 두 상자는 innerHTML 로 비워지므로 링은 **그 밖**에 둔다. -->
   <img id="jp-ring" src="assets/scenes/x4_jackpot_ring.webp" alt="" aria-hidden="true">
   <div id="jp-sky-hit" class="jp-sky" aria-hidden="true"></div>
+
+  <!-- 🔴 세로 안내 — **폰에서만** 뜬다 (대표님 지시 2026-09-06).
+       강제 회전은 iOS 가 지원하지 않으므로(orientation.js 주석) 안내로 막는다.
+       ⛔ `main` 밖에 둔다 — 릴 프레임의 층(`isolation: isolate`)에 갇히면
+          안내가 프레임 밑으로 깔린다. 선택 화면에서 이미 겪은 함정이다. -->
+  <div id="rotate" class="rotate" role="alertdialog" aria-modal="true"
+       aria-labelledby="rotate-title" aria-describedby="rotate-sub">
+    <div class="rotate-box">
+      <div class="rotate-phone" aria-hidden="true"><span class="rotate-screen"></span></div>
+      <p id="rotate-title" class="rotate-title">가로로 돌려 주세요</p>
+      <p id="rotate-sub" class="rotate-sub">이순신은 가로 화면에 맞춰 만들어졌습니다</p>
+    </div>
+  </div>
 
   <script type="module" src="js/main.js"></script>
 </body>
