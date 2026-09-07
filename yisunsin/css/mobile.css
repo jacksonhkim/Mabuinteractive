@@ -6,7 +6,7 @@
         │  좌    │   릴 프레임       │   우   │  상단 = 100dvh − 띠
         │ 전략   │  현판 + 개구부     │ 난중일기│
         ├────────┴──────────────────┴────────┤
-        │            HUD 띠 100%             │  띠 = 폭 ÷ 9.63
+        │            HUD 띠 100%             │  띠 = 폭 ÷ 10.4
         └────────────────────────────────────┘
 
    🔴 릴 격자는 WEB 과 같은 872×664 **정사각** 좌표다 (renderlayout.js).
@@ -23,17 +23,20 @@
     --vw-safe: calc(100vw - var(--sa-l) - var(--sa-r));
 
     /* 띠 비율이 높이를 정하고, 남는 세로가 통째로 상단 영역이 된다 */
-    --m-hud-h: calc(var(--vw-safe) / 9.63);
+    --m-hud-h: calc(var(--vw-safe) / 10.4);
     --m-top-h: calc(100dvh - var(--m-hud-h));
 
-    /* 프레임 그림 1266×833 · 유효 높이 778 (아래 55px 은 HUD 위로 걸치는 장식) */
-    --m-frame-w: calc(var(--m-top-h) * 1266 / 778);
-    --m-frame-h: calc(var(--m-top-h) * 833 / 778);
+    /* 프레임 그림 1266×857 · 유효 높이 802 (아래 55px 은 HUD 위로 걸치는 장식)
+       🔴 상단 압축을 0.685 → 0.85배로 완화해 현판 찌그러짐을 풀었다 (2026-09-08) */
+    --m-frame-w: calc(var(--m-top-h) * 1266 / 802);
+    --m-frame-h: calc(var(--m-top-h) * 857 / 802);
     --m-frame-l: calc(var(--sa-l) + (var(--vw-safe) - var(--m-frame-w)) / 2);
 
-    /* 좌우 패널 — 프레임에 8px 겹쳐 렌더링 반올림 실틈을 없앤다 */
-    --m-side-w: calc((var(--vw-safe) - var(--m-frame-w)) / 2 + 8px);
-    --m-side-top: 6.5dvh;      /* 패널 상단이 프레임 금테 라인에 닿는 높이 */
+    /* 좌우 패널 — 프레임과 6px 띄우고 5% 줄여 세로 중앙에 놓는다 (대표님 지시) */
+    --m-side-gap: 6px;
+    --m-side-w: calc((var(--vw-safe) - var(--m-frame-w)) / 2 - var(--m-side-gap));
+    --m-side-h: calc(var(--m-top-h) * 0.95);
+    --m-side-top: calc((var(--m-top-h) - var(--m-side-h)) / 2);
   }
 
   html.is-touch,
@@ -91,17 +94,17 @@
      개구부 경계가 높이마다 들쭉날쭉해(판옥선·파도) 딱 맞추면 배경이 샌다. */
   html.is-touch .reel-panel::before {
     display: block;
-    inset: 6% 7.98% 3.96% 7.9%;
+    inset: 7% 7.98% 6.65% 7.9%;
     background: radial-gradient(ellipse at 50% 0%, rgba(11, 26, 42, 0.97), rgba(4, 10, 17, 1));
   }
 
-  /* 캔버스는 개구부 실측 좌표에 앉힌다 (프레임 원본 x160~1105 · y100~737) */
+  /* 캔버스는 개구부 실측 좌표에 앉힌다 (프레임 원본 x160~1105 · y124~761) */
   html.is-touch .reel-panel canvas {
     position: absolute;
     left: 12.64%;
-    top: 12%;
+    top: 14.47%;
     width: 74.64%;
-    height: 76.47%;
+    height: 74.33%;
     max-height: none;
     margin: 0;
     object-fit: contain;
@@ -109,17 +112,17 @@
   }
 
   /* ── JACKPOT 현판 — 프레임에 그려진 남색 판 실측 좌표 ───────────── */
-  /* 🔴 원본 1266×833 에서 빈 남색 판만 골라 잰 값 (2026-09-08 2차 실측).
-     1차에는 아래 금테 바까지 남색으로 세어 높이를 9.72% 로 잡았고, 그만큼
-     글자가 아래로 흘러 금테에 겹쳤다 (Playwright 932×430 실측).
-     실제 판은 y10~63 · x410~850 — **높이 6.48%** 뿐이다. */
+  /* 🔴 원본 1266×857 에서 빈 남색 판만 골라 잰 값 (2026-09-08 3차 실측).
+     1차에는 아래 금테 바까지 남색으로 세어 9.72% 로 잡았고 글자가 금테에 겹쳤다.
+     2차(6.48%)는 상단 압축이 0.685배이던 때의 값이다. 압축을 0.85배로 풀면서
+     판이 커져 **높이 7.93%** 가 됐다 — 판 크기는 압축률과 함께 움직인다. */
   html.is-touch .topbar.jackpot-bar {
     position: absolute;
     z-index: 8;
     left: calc(var(--m-frame-l) + var(--m-frame-w) * 0.3239);
-    top: calc(var(--m-frame-h) * 0.012);
-    width: calc(var(--m-frame-w) * 0.3483);
-    height: calc(var(--m-frame-h) * 0.0648);
+    top: calc(var(--m-frame-h) * 0.014);
+    width: calc(var(--m-frame-w) * 0.3507);
+    height: calc(var(--m-frame-h) * 0.0793);
     margin: 0;
     padding: 0;
     transform: none;
@@ -143,7 +146,7 @@
     gap: 0;
   }
 
-  /* 두 줄 합이 판 높이(6.48%)를 넘으면 금테를 침범한다 — 넉넉히 아래로 잡는다 */
+  /* 두 줄 합이 판 높이(7.93%)를 넘으면 금테를 침범한다 — 넉넉히 아래로 잡는다 */
   html.is-touch .jb-label {
     font-size: clamp(0.42rem, 1.75dvh, 0.62rem);
     line-height: 1;
@@ -163,7 +166,7 @@
     right: auto;
     top: var(--m-side-top);
     width: var(--m-side-w);
-    height: calc(var(--m-top-h) - var(--m-side-top));
+    height: var(--m-side-h);
     transform: none;
     z-index: 2;
   }
@@ -192,7 +195,7 @@
     right: var(--sa-r);
     top: var(--m-side-top);
     width: var(--m-side-w);
-    height: calc(var(--m-top-h) - var(--m-side-top));
+    height: var(--m-side-h);
     transform: none;
     z-index: 2;
     pointer-events: none;
@@ -215,24 +218,25 @@
     object-fit: fill;
   }
 
-  /* 모바일 액자 1073×1397 의 개구부 실측 x169~903 · y88~1308 */
+  /* 🔴 속지는 액자 개구부(1002×1417 중 701×1221)보다 **2% 크게** 깐다.
+     딱 맞추면 액자 안쪽 테두리와의 경계에 남색이 비친다 (대표님 지적). */
   html.is-touch .fp-paper {
-    left: 15.75%;
-    top: 6.3%;
-    width: 68.5%;
-    height: 87.4%;
+    left: 14.37%;
+    top: 6.14%;
+    width: 71.36%;
+    height: 87.86%;
   }
 
-  /* 속지 내부 좌표는 WEB 과 같다. 속지 폭이 80.64% → 68.5% 로 바뀐 만큼만 환산 */
+  /* 속지 내부 좌표는 WEB 과 같다. 속지 폭이 80.64% → 71.36% 로 바뀐 만큼만 환산 */
   html.is-touch .fp-num {
-    left: 50.39%;
-    top: 49.02%;
-    font-size: 24.4cqw;
+    left: 50.46%;
+    top: 49.09%;
+    font-size: 25.4cqw;
   }
 
   html.is-touch .fp-mult {
-    left: 49.71%;
-    top: 83.09%;
+    left: 49.74%;
+    top: 83.34%;
   }
 
   html.is-touch .fs-panel.idle .fp-mult { font-size: 5.5cqw; }
@@ -267,16 +271,19 @@
     pointer-events: auto;
   }
 
-  /* 칸 좌표 — 재조판 띠(2215×230) 실측. 세로는 원본 띠 값 그대로다. */
-  html.is-touch .cell-a { left: 3.16%;  top: 16.09%; width: 5.64%;  height: 66.96%; flex-direction: column; }
-  html.is-touch .cell-b { left: 11.29%; top: 23.91%; width: 24.92%; height: 53.48%; flex-direction: column; }
-  html.is-touch .cell-c { left: 62.57%; top: 17.83%; width: 27.45%; height: 26.96%; }
-  html.is-touch .cell-d { left: 62.57%; top: 53.48%; width: 27.45%; height: 27.39%; }
-  html.is-touch .cell-e { left: 91.83%; top: 16.09%; width: 4.92%;  height: 66.96%; flex-direction: column; }
+  /* 칸 좌표 — 재조판 띠(2392×230) 실측. 세로는 원본 띠 값 그대로다.
+     🔴 좌우 확장 배율을 비대칭(칸B 1.841 / 나머지 1.731)으로 주어 SPIN 빈 구간
+        중심을 **정확히 50%** 에 맞췄다. 균등 확장이면 49.39% 로 밀려 릴 프레임
+        하단 꽃과 SPIN 용 장식이 어긋난다 (대표님 지적 2026-09-08). */
+  html.is-touch .cell-a { left: 2.93%;  top: 16.09%; width: 5.23%;  height: 66.96%; flex-direction: column; }
+  html.is-touch .cell-b { left: 10.45%; top: 23.91%; width: 26.21%; height: 53.48%; flex-direction: column; }
+  html.is-touch .cell-c { left: 63.38%; top: 17.83%; width: 27.42%; height: 26.96%; }
+  html.is-touch .cell-d { left: 63.38%; top: 53.48%; width: 27.42%; height: 27.39%; }
+  html.is-touch .cell-e { left: 92.47%; top: 16.09%; width: 4.54%;  height: 66.96%; flex-direction: column; }
 
   html.is-touch #spin {
     position: absolute;
-    left: 49.39%;
+    left: 50%;
     top: 50%;
     width: auto;
     height: 111%;
@@ -289,10 +296,15 @@
 
   html.is-touch #spin:active:not(:disabled) { transform: translate(-50%, -50%) scale(0.95); }
 
+  /* 🔴 버튼 크기를 **칸에 종속**시킨다 (대표님 지적 2026-09-08).
+     고정 44px 을 걸어 두니 칸 E(폭 4.54%)처럼 좁은 칸에서 버튼이 칸 밖으로
+     삐져나왔다. 터치 최소치는 칸 자체(높이 = 띠의 66.96%)가 확보한다. */
   html.is-touch .controls .side .icon-btn,
   html.is-touch .controls .side .toggle {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    height: 46%;
     padding: 0;
   }
 
@@ -308,9 +320,12 @@
 
   html.is-touch .bet-group { gap: clamp(0.18rem, 1vw, 0.5rem); }
   html.is-touch .controls .side .bet-group button {
-    min-width: 44px;
-    min-height: 44px;
-    background-size: 36px 36px;
+    min-width: 0;
+    min-height: 0;
+    width: 22%;
+    height: auto;
+    aspect-ratio: 1;
+    background-size: 78% 78%;
   }
 
   /* 힌트는 띠 안에 산다 — 행으로 두면 그 높이가 그대로 릴에서 빠진다 */
