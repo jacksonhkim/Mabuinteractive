@@ -14,7 +14,7 @@ import { createWinFxRenderer } from './winfxrender.js';
 import { createStickyRenderer } from './stickyrender.js';
 import { createReelView } from './reelview.js';
 import { specialGlowFade } from './winfxplan.js';
-import { resolveRenderLayout, usesMobileReelLayout } from './renderlayout.js';
+import { resolveRenderLayout } from './renderlayout.js';
 const PLACEHOLDER = {
   special: '#c9a227',
   high: '#7a5cc4',
@@ -47,7 +47,7 @@ export function createRenderer(canvas, { config, symbols, assets, strips }) {
   const L = config.layout;
   const cols = config.reels;
   const rows = config.rows;
-  const layout = resolveRenderLayout(L, usesMobileReelLayout(window), cols, rows);
+  const layout = resolveRenderLayout(L, cols, rows);
   const { cellWidth, cellHeight, pitch, width: W, height: H, symbolSize } = layout;
 
   const tiers = new Map((symbols.reelSymbols || []).map((s) => [s.code, s.tier]));

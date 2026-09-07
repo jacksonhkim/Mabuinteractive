@@ -1,9 +1,39 @@
-/* 모바일 가로 전용 표현 계층. WEB 규칙은 main.css 그대로 유지한다. */
+/* 모바일 가로 전용 표현 계층. WEB 규칙은 main.css 그대로 유지한다.
+   ⛔ 이 파일은 폰 가로에서만 켜진다. 데스크톱·세로·태블릿은 한 줄도 타지 않는다.
+
+   🔴 구조 (UI기획서 §16 · 대표님 결재 2026-09-08)
+        ┌────────┬──────────────────┬────────┐
+        │  좌    │   릴 프레임       │   우   │  상단 = 100dvh − 띠
+        │ 전략   │  현판 + 개구부     │ 난중일기│
+        ├────────┴──────────────────┴────────┤
+        │            HUD 띠 100%             │  띠 = 폭 ÷ 9.63
+        └────────────────────────────────────┘
+
+   🔴 릴 격자는 WEB 과 같은 872×664 **정사각** 좌표다 (renderlayout.js).
+      예전에는 모바일만 칸 폭을 2.4배로 넓혀 남는 가로를 메웠는데, 심볼은 칸
+      높이 기준이라 함께 커지지 않아 칸의 36.7% 만 차지했다. 남는 폭은 이제
+      프레임 기둥과 좌우 패널이 가져간다.
+
+   🔴 안전영역(노치)은 **배경만** 회수한다. 배치 요소는 안쪽에 둔다 —
+      노치에 버튼이 물리면 눌리지 않는다. */
 @media (orientation: landscape) and (max-height: 560px) {
   html.is-touch {
-    --mobile-frame-ratio: 1846 / 852;
     --sa-l: env(safe-area-inset-left, 0px);
     --sa-r: env(safe-area-inset-right, 0px);
+    --vw-safe: calc(100vw - var(--sa-l) - var(--sa-r));
+
+    /* 띠 비율이 높이를 정하고, 남는 세로가 통째로 상단 영역이 된다 */
+    --m-hud-h: calc(var(--vw-safe) / 9.63);
+    --m-top-h: calc(100dvh - var(--m-hud-h));
+
+    /* 프레임 그림 1266×833 · 유효 높이 778 (아래 55px 은 HUD 위로 걸치는 장식) */
+    --m-frame-w: calc(var(--m-top-h) * 1266 / 778);
+    --m-frame-h: calc(var(--m-top-h) * 833 / 778);
+    --m-frame-l: calc(var(--sa-l) + (var(--vw-safe) - var(--m-frame-w)) / 2);
+
+    /* 좌우 패널 — 프레임에 8px 겹쳐 렌더링 반올림 실틈을 없앤다 */
+    --m-side-w: calc((var(--vw-safe) - var(--m-frame-w)) / 2 + 8px);
+    --m-side-top: 6.5dvh;      /* 패널 상단이 프레임 금테 라인에 닿는 높이 */
   }
 
   html.is-touch,
@@ -19,13 +49,14 @@
     padding: 0;
   }
 
+  /* 무대는 노치까지 덮는다 — 검게 죽던 좌우 7% 를 배경이 가져간다 */
   html.is-touch #stage {
     --vw0: 100vw;
     --layout-vh: 100dvh;
     position: absolute;
-    inset: 0 var(--sa-r) auto var(--sa-l);
+    inset: 0;
     display: block;
-    width: calc(100vw - var(--sa-l) - var(--sa-r));
+    width: 100vw;
     height: 100dvh;
     padding: 0;
     transform: none;
@@ -34,54 +65,64 @@
 
   html.is-touch #stage.hidden { display: none; }
 
-  html.is-touch .side-left { display: none; }
-
+  /* ── 릴 프레임 ───────────────────────────────────────────────── */
   html.is-touch .reel-panel {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    left: var(--m-frame-l);
+    top: 0;
+    width: var(--m-frame-w);
+    height: var(--m-frame-h);
     margin: 0;
     aspect-ratio: auto;
-    overflow: hidden;
+    overflow: visible;
   }
 
+  /* 프레임 그림은 모든 것 위에 온다 — 창틀이므로 창 안 무엇에도 가리지 않는다 */
   html.is-touch .reel-panel::after {
     display: block;
-    inset: 0;
+    left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    background: url("../assets/ui/mobile/ui_mobile_reel_frame_v1.1.webp") center / 100% 100% no-repeat;
+    background: url("../assets/ui/mobile/ui_mobile_reel_frame_v2.webp") center / 100% 100% no-repeat;
   }
 
+  /* 릴 바닥 — 개구부(12.6~87.3%)보다 넓게 깔아 프레임 뒤로 밀어 넣는다.
+     개구부 경계가 높이마다 들쭉날쭉해(판옥선·파도) 딱 맞추면 배경이 샌다. */
   html.is-touch .reel-panel::before {
     display: block;
-    inset: 24.1% 8.1% 14.7%;
-    background: radial-gradient(ellipse at 50% 0%, rgba(11, 26, 42, 0.96), rgba(4, 10, 17, 0.99));
+    inset: 6% 7.98% 3.96% 7.9%;
+    background: radial-gradient(ellipse at 50% 0%, rgba(11, 26, 42, 0.97), rgba(4, 10, 17, 1));
   }
 
+  /* 캔버스는 개구부 실측 좌표에 앉힌다 (프레임 원본 x160~1105 · y100~737) */
   html.is-touch .reel-panel canvas {
     position: absolute;
-    top: 24.2%;
-    left: 8.2%;
-    width: 83.6%;
-    height: auto;
+    left: 12.64%;
+    top: 12%;
+    width: 74.64%;
+    height: 76.47%;
     max-height: none;
     margin: 0;
-    object-fit: fill;
+    object-fit: contain;
     z-index: 1;
   }
 
+  /* ── JACKPOT 현판 — 프레임에 그려진 남색 판 실측 좌표 ───────────── */
+  /* 🔴 원본 1266×833 에서 빈 남색 판만 골라 잰 값 (2026-09-08 2차 실측).
+     1차에는 아래 금테 바까지 남색으로 세어 높이를 9.72% 로 잡았고, 그만큼
+     글자가 아래로 흘러 금테에 겹쳤다 (Playwright 932×430 실측).
+     실제 판은 y10~63 · x410~850 — **높이 6.48%** 뿐이다. */
   html.is-touch .topbar.jackpot-bar {
     position: absolute;
     z-index: 8;
-    top: 1.3%;
-    left: 50%;
-    width: 42.5%;
-    height: 19.2%;
+    left: calc(var(--m-frame-l) + var(--m-frame-w) * 0.3239);
+    top: calc(var(--m-frame-h) * 0.012);
+    width: calc(var(--m-frame-w) * 0.3483);
+    height: calc(var(--m-frame-h) * 0.0648);
     margin: 0;
     padding: 0;
-    transform: translateX(-50%);
+    transform: none;
     aspect-ratio: auto;
     border: 0;
     background: none;
@@ -90,91 +131,127 @@
 
   html.is-touch .jb-stage { position: absolute; inset: 0; }
 
+  /* ⛔ `display` 를 건드리지 않는다. main.css 의 2행 그리드를 그대로 쓴다.
+     flex 로 바꾸면 `.jb-label{align-self:end}` · `.jb-amount{align-self:start}` 가
+     **교차축(가로) 정렬**로 뒤집혀 두 줄이 현판 좌우로 벌어진다 (780×360 실측). */
   html.is-touch .jb-money {
-    inset: 17% 8% 13%;
+    position: absolute;
+    inset: 0;
     width: auto;
     height: auto;
     transform: none;
     gap: 0;
   }
 
+  /* 두 줄 합이 판 높이(6.48%)를 넘으면 금테를 침범한다 — 넉넉히 아래로 잡는다 */
   html.is-touch .jb-label {
-    font-size: clamp(0.68rem, 3.2dvh, 1rem);
+    font-size: clamp(0.42rem, 1.75dvh, 0.62rem);
     line-height: 1;
   }
 
   html.is-touch .jb-amount {
-    font-size: clamp(0.8rem, 4.3dvh, 1.32rem);
-    line-height: 1.05;
+    font-size: clamp(0.55rem, 2.7dvh, 0.86rem);
+    line-height: 1.02;
   }
 
   html.is-touch .topbar.feature-mode .jb-money { visibility: hidden; }
 
-  html.is-touch .side-right {
+  /* ── 좌측 전략 패널 ──────────────────────────────────────────── */
+  html.is-touch .side-left {
     position: absolute;
-    inset: 0;
-    display: block;
-    width: 0;
-    height: 0;
+    left: var(--sa-l);
+    right: auto;
+    top: var(--m-side-top);
+    width: var(--m-side-w);
+    height: calc(var(--m-top-h) - var(--m-side-top));
     transform: none;
-    z-index: 9;
-    pointer-events: none;
+    z-index: 2;
   }
 
-  html.is-touch .fs-panel { display: none; }
-
-  html.is-touch .fs-panel:not(.idle) {
+  html.is-touch .tc-panel {
     position: absolute;
-    top: 1.3dvh;
-    left: 28.75vw;
-    display: grid;
-    grid-template-columns: auto auto;
-    grid-template-rows: auto auto;
-    align-content: center;
-    justify-content: center;
-    column-gap: 0.55rem;
-    width: 42.5vw;
-    height: 19.2dvh;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     aspect-ratio: auto;
     filter: none;
   }
 
-  html.is-touch .fs-panel:not(.idle)::before {
-    content: "FREE SPINS";
-    grid-column: 1 / -1;
-    font-family: Georgia, serif;
-    font-size: clamp(0.68rem, 3.2dvh, 1rem);
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: var(--gold-lit);
-    text-align: center;
-  }
-
-  html.is-touch .fs-panel.bonus::before { content: "BONUS GAME"; }
-  html.is-touch .fp-frame,
-  html.is-touch .fp-paper { display: none; }
-
-  html.is-touch .fp-num,
-  html.is-touch .fp-mult {
-    position: static;
-    transform: none;
-    font-size: clamp(0.8rem, 4.2dvh, 1.28rem);
-    line-height: 1;
-    color: #fff6d8;
-    text-shadow: 0 0 10px rgba(232, 198, 90, 0.78), 0 2px 4px #030a12;
-  }
-
-  html.is-touch .controls {
-    --hud-h: 100dvh;
-    position: absolute;
-    z-index: 10;
-    inset: 0;
-    display: block;
+  html.is-touch .tc-frame {
     width: 100%;
     height: 100%;
+    object-fit: fill;
+  }
+
+  html.is-touch .tc-dots { bottom: 2.4%; gap: 5px; }
+
+  /* ── 우측 난중일기 패널 ─────────────────────────────────────── */
+  html.is-touch .side-right {
+    position: absolute;
+    left: auto;
+    right: var(--sa-r);
+    top: var(--m-side-top);
+    width: var(--m-side-w);
+    height: calc(var(--m-top-h) - var(--m-side-top));
+    transform: none;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  html.is-touch .fs-panel {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    filter: none;
+  }
+
+  html.is-touch .fp-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+  }
+
+  /* 모바일 액자 1073×1397 의 개구부 실측 x169~903 · y88~1308 */
+  html.is-touch .fp-paper {
+    left: 15.75%;
+    top: 6.3%;
+    width: 68.5%;
+    height: 87.4%;
+  }
+
+  /* 속지 내부 좌표는 WEB 과 같다. 속지 폭이 80.64% → 68.5% 로 바뀐 만큼만 환산 */
+  html.is-touch .fp-num {
+    left: 50.39%;
+    top: 49.02%;
+    font-size: 24.4cqw;
+  }
+
+  html.is-touch .fp-mult {
+    left: 49.71%;
+    top: 83.09%;
+  }
+
+  html.is-touch .fs-panel.idle .fp-mult { font-size: 5.5cqw; }
+
+  /* ── 하단 HUD 띠 ───────────────────────────────────────────── */
+  html.is-touch .controls {
+    --hud-h: var(--m-hud-h);
+    position: absolute;
+    z-index: 10;
+    left: var(--sa-l);
+    right: auto;
+    bottom: 0;
+    top: auto;
+    display: block;
+    width: var(--vw-safe);
+    height: var(--m-hud-h);
     margin: 0;
     padding: 0;
-    background: url("../assets/ui/mobile/ui_mobile_hud_v1.0.webp") center / 100% 100% no-repeat;
+    background: url("../assets/ui/mobile/ui_mobile_hud_bar_v2.webp") center / 100% 100% no-repeat;
     pointer-events: none;
   }
 
@@ -190,21 +267,22 @@
     pointer-events: auto;
   }
 
-  html.is-touch .cell-a { left: 5.2%; top: 69.6%; width: 6.7%; height: 21%; flex-direction: column; }
-  html.is-touch .cell-b { left: 13.7%; top: 71.4%; width: 26.5%; height: 18.2%; flex-direction: column; }
-  html.is-touch .cell-c { left: 60%; top: 70.4%; width: 27%; height: 8.8%; }
-  html.is-touch .cell-d { left: 60%; top: 81%; width: 27%; height: 8.8%; }
-  html.is-touch .cell-e { left: 89%; top: 69.6%; width: 6.1%; height: 21%; flex-direction: column; }
+  /* 칸 좌표 — 재조판 띠(2215×230) 실측. 세로는 원본 띠 값 그대로다. */
+  html.is-touch .cell-a { left: 3.16%;  top: 16.09%; width: 5.64%;  height: 66.96%; flex-direction: column; }
+  html.is-touch .cell-b { left: 11.29%; top: 23.91%; width: 24.92%; height: 53.48%; flex-direction: column; }
+  html.is-touch .cell-c { left: 62.57%; top: 17.83%; width: 27.45%; height: 26.96%; }
+  html.is-touch .cell-d { left: 62.57%; top: 53.48%; width: 27.45%; height: 27.39%; }
+  html.is-touch .cell-e { left: 91.83%; top: 16.09%; width: 4.92%;  height: 66.96%; flex-direction: column; }
 
   html.is-touch #spin {
     position: absolute;
-    left: 50%;
-    top: 81%;
-    width: clamp(76px, 27dvh, 124px);
-    height: auto;
+    left: 49.39%;
+    top: 50%;
+    width: auto;
+    height: 111%;
     aspect-ratio: 1;
     transform: translate(-50%, -50%);
-    font-size: clamp(0.62rem, 2.8dvh, 0.9rem);
+    font-size: clamp(0.6rem, 2.6dvh, 0.88rem);
     pointer-events: auto;
     z-index: 12;
   }
@@ -218,13 +296,13 @@
     padding: 0;
   }
 
-  html.is-touch .controls .side .icon-btn .ico { font-size: clamp(0.65rem, 2.5dvh, 0.88rem); }
+  html.is-touch .controls .side .icon-btn .ico { font-size: clamp(0.65rem, 2.5dvh, 0.9rem); }
   html.is-touch .controls .side .icon-btn .cap,
-  html.is-touch .controls .side .toggle { font-size: clamp(0.5rem, 1.9dvh, 0.68rem); }
+  html.is-touch .controls .side .toggle { font-size: clamp(0.5rem, 1.9dvh, 0.7rem); }
 
   html.is-touch .controls .side .field { gap: 0.1rem; }
-  html.is-touch .controls .side .field .label { font-size: clamp(0.5rem, 1.8dvh, 0.66rem); }
-  html.is-touch .controls .side .num { font-size: clamp(0.68rem, 3.1dvh, 1rem); }
+  html.is-touch .controls .side .field .label { font-size: clamp(0.5rem, 1.8dvh, 0.68rem); }
+  html.is-touch .controls .side .num { font-size: clamp(0.68rem, 3.1dvh, 1.02rem); }
   html.is-touch #win,
   html.is-touch #credit { min-width: 15ch; }
 
@@ -235,15 +313,17 @@
     background-size: 36px 36px;
   }
 
+  /* 힌트는 띠 안에 산다 — 행으로 두면 그 높이가 그대로 릴에서 빠진다 */
   html.is-touch .hint {
     position: absolute;
-    left: 41%;
-    bottom: 1.6%;
-    width: 18%;
+    left: 40%;
+    bottom: 1.2%;
+    width: 20%;
     max-width: none;
-    font-size: clamp(0.48rem, 1.65dvh, 0.62rem);
+    font-size: clamp(0.46rem, 1.6dvh, 0.6rem);
   }
 
+  /* 치트는 첫 화면 아래 문서 흐름에 남는다 (대표님 지시 — 배포 환경 테스트용) */
   html.is-touch .meta { margin-top: calc(100dvh + 0.9rem); }
   html.is-touch .dev { margin: 0.6rem auto 1.4rem; }
 

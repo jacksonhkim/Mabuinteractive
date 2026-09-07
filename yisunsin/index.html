@@ -119,18 +119,34 @@
          📌 `aria-live` 는 두지 않는다. 5초마다 스크린리더가 다시 읽으면 방해만 된다. -->
     <aside class="side-left">
       <div class="tc-panel" id="tactic">
-        <img class="tc-frame tc-on" data-screen="seabattle" src="assets/ui/ui_tactic_1_seabattle.webp"
-             alt="해전 보너스 — 함대 3개가 뜨면 거북선으로 왜군을 격침하는 미니게임이 열립니다"
-             width="780" height="1465">
-        <img class="tc-frame" data-screen="jackpot" src="assets/ui/ui_tactic_2_jackpot.webp"
-             alt="잭팟 — 거북선 4연속이면 누적 상금 전액을 획득합니다"
-             width="780" height="1465">
-        <img class="tc-frame" data-screen="freespin" src="assets/ui/ui_tactic_3_freespin.webp"
-             alt="프리스핀 — 난중일기 3개가 뜨면 셋 중 골라 무료 스핀을 받습니다"
-             width="780" height="1465">
-        <img class="tc-frame" data-screen="legendary" src="assets/ui/ui_tactic_4_legendary.webp"
-             alt="보너스 게임 — 보물상자 3개가 뜨면 무료 10회 동안 와일드가 누적됩니다"
-             width="780" height="1465">
+        <picture>
+          <source media="(orientation: landscape) and (max-height: 560px)"
+                  srcset="assets/ui/mobile/ui_mobile_tactic_1_seabattle.webp">
+          <img class="tc-frame tc-on" data-screen="seabattle" src="assets/ui/ui_tactic_1_seabattle.webp"
+          alt="해전 보너스 — 함대 3개가 뜨면 거북선으로 왜군을 격침하는 미니게임이 열립니다"
+          width="780" height="1465">
+        </picture>
+        <picture>
+          <source media="(orientation: landscape) and (max-height: 560px)"
+                  srcset="assets/ui/mobile/ui_mobile_tactic_2_jackpot.webp">
+          <img class="tc-frame" data-screen="jackpot" src="assets/ui/ui_tactic_2_jackpot.webp"
+          alt="잭팟 — 거북선 4연속이면 누적 상금 전액을 획득합니다"
+          width="780" height="1465">
+        </picture>
+        <picture>
+          <source media="(orientation: landscape) and (max-height: 560px)"
+                  srcset="assets/ui/mobile/ui_mobile_tactic_3_freespin.webp">
+          <img class="tc-frame" data-screen="freespin" src="assets/ui/ui_tactic_3_freespin.webp"
+          alt="프리스핀 — 난중일기 3개가 뜨면 셋 중 골라 무료 스핀을 받습니다"
+          width="780" height="1465">
+        </picture>
+        <picture>
+          <source media="(orientation: landscape) and (max-height: 560px)"
+                  srcset="assets/ui/mobile/ui_mobile_tactic_4_legendary.webp">
+          <img class="tc-frame" data-screen="legendary" src="assets/ui/ui_tactic_4_legendary.webp"
+          alt="보너스 게임 — 보물상자 3개가 뜨면 무료 10회 동안 와일드가 누적됩니다"
+          width="780" height="1465">
+        </picture>
         <ol class="tc-dots" aria-hidden="true"><li></li><li></li><li></li><li></li></ol>
       </div>
     </aside>
@@ -148,8 +164,16 @@
              액자는 좌우 공용(`ui_side_frame`)이고 속지만 갈아 끼운다.
              🔴 배경이 아니라 **<img>** 인 이유는 그대로다 — 상자 비율이 조금만
                 어긋나도 배경은 늘어나지만 `<img>` 는 자기 비율을 지킨다. -->
-        <img class="fp-paper" src="assets/ui/ui_side_content_diary.webp" alt="" width="702" height="1339">
-        <img class="fp-frame" src="assets/ui/ui_side_frame_slim_v2.webp" alt="" width="780" height="1449">
+        <picture>
+          <source media="(orientation: landscape) and (max-height: 560px)"
+                  srcset="assets/ui/mobile/ui_mobile_diary.webp">
+          <img class="fp-paper" src="assets/ui/ui_side_content_diary.webp" alt="" width="702" height="1339">
+        </picture>
+        <picture>
+          <source media="(orientation: landscape) and (max-height: 560px)"
+                  srcset="assets/ui/mobile/ui_mobile_side_frame.webp">
+          <img class="fp-frame" src="assets/ui/ui_side_frame_slim_v2.webp" alt="" width="780" height="1449">
+        </picture>
         <strong id="fs-left" class="fp-num">—</strong>
         <span id="fs-mult" class="fp-mult">대기</span>
       </div>

@@ -779,9 +779,17 @@ button.ghost[aria-pressed="true"] {
 
 .tc-frame.tc-on { opacity: 1; }
 
+/* 🔴 `<picture>` 는 레이아웃에 없다 (2026-09-08).
+   폰 가로에서 모바일 재조판본만 내려받게 `<img>` 를 감쌌을 뿐이므로 상자를
+   만들면 안 된다. `display: contents` 면 자식이 그대로 부모의 자식이 된다. */
+.tc-panel > picture,
+.fs-panel > picture { display: contents; }
+
 /* 🔴 첫 장은 흐름에 남겨 상자 크기를 정하게 한다.
-   전부 absolute 로 띄우면 `.tc-panel` 이 높이를 잃는다. */
-.tc-frame:first-of-type { position: relative; }
+   전부 absolute 로 띄우면 `.tc-panel` 이 높이를 잃는다.
+   ⛔ `picture` 로 감싼 뒤로는 **모든** `.tc-frame` 이 자기 picture 안에서
+      first-of-type 이다. 부모를 picture 로 세어야 한 장만 걸린다. */
+.tc-panel > picture:first-of-type > .tc-frame { position: relative; }
 
 /* 로테이션 점 — 지금 몇 번째인지 알린다.
    ⛔ 그림에 넣지 않았다. 활성 표시가 바뀌어야 하므로 CSS 가 그린다. */
