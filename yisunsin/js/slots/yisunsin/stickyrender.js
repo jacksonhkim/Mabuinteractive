@@ -24,7 +24,7 @@ export const STICKY_COLOR = '#ffe066';
 const FRESH_MS = 400;
 
 export function createStickyRenderer(ctx, {
-  cell, pitch, colX, drawSymbol, rows, code = 's1_wild', color = STICKY_COLOR,
+  cellWidth, cellHeight, pitch, colX, drawSymbol, rows, code = 's1_wild', color = STICKY_COLOR,
 }) {
   let fresh = new Set();
   let freshUntil = 0;
@@ -75,7 +75,7 @@ export function createStickyRenderer(ctx, {
         if (winCells && winCells.has(key)) continue;
 
         const isNew = showFresh && fresh.has(key);
-        stroke(x + 3, y + 3, cell - 6, cell - 6,
+        stroke(x + 3, y + 3, cellWidth - 6, cellHeight - 6,
           isNew ? 5 : 3,
           Math.min(1, (isNew ? 0.85 : 0.55) + pulse * 0.45),
           (isNew ? 20 : 10) + pulse * 16);
@@ -84,7 +84,7 @@ export function createStickyRenderer(ctx, {
       // ② 완성된 열은 통째로 한 번 더 감싼다 — 「이 열이 열렸다」가 명확해진다
       for (const [c, n] of perReel) {
         if (n < rows) continue;
-        stroke(colX(c) + 1, 1, cell - 2, rows * pitch - (pitch - cell) - 2,
+        stroke(colX(c) + 1, 1, cellWidth - 2, rows * pitch - (pitch - cellHeight) - 2,
           4, Math.min(1, 0.45 + pulse * 0.4), 14 + pulse * 18);
       }
     },

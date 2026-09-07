@@ -1,8 +1,7 @@
 /**
  * render.js — 릴 Canvas 렌더링
  *
- * 🔴 논리 좌표는 872×664 로 **고정**한다 (UI기획서 §2-2).
- *    화면 크기에 맞춰 좌표를 다시 계산하면 1920 과 390 에서 서로 다른 코드가 돌게 되고,
+ * 🔴 WEB 논리 좌표는 872×664 로 고정하고 모바일은 표시 좌표만 넓힌다.
  *    한쪽에서만 나는 버그가 생긴다. 여기서는 **고정 좌표로 그리고 CSS 로 축소**한다.
  *
  * 🔴 릴 위치는 **소수**다.
@@ -15,7 +14,7 @@ import { createWinFxRenderer } from './winfxrender.js';
 import { createStickyRenderer } from './stickyrender.js';
 import { createReelView } from './reelview.js';
 import { specialGlowFade } from './winfxplan.js';
-
+import { resolveRenderLayout, usesMobileReelLayout } from './renderlayout.js';
 const PLACEHOLDER = {
   special: '#c9a227',
   high: '#7a5cc4',
@@ -48,19 +47,19 @@ export function createRenderer(canvas, { config, symbols, assets, strips }) {
   const L = config.layout;
   const cols = config.reels;
   const rows = config.rows;
-  const pitch = L.cell + L.cellGap;                 // 한 칸이 차지하는 세로 길이
-
-  const W = cols * L.cell + (cols - 1) * L.reelGap + L.padding * 2;
-  const H = rows * L.cell + (rows - 1) * L.cellGap;
+  const layout = resolveRenderLayout(L, usesMobileReelLayout(window), cols, rows);
+  const { cellWidth, cellHeight, pitch, width: W, height: H, symbolSize } = layout;
 
   const tiers = new Map((symbols.reelSymbols || []).map((s) => [s.code, s.tier]));
   const ctx = canvas.getContext('2d');
 
-  const colX = (col) => L.padding + col * (L.cell + L.reelGap);
+  const colX = (col) => L.padding + col * (cellWidth + L.reelGap);
   const winFxRenderer = createWinFxRenderer(ctx, {
-    cell: L.cell, pitch, colX, color: WIN_COLOR,
+    cellWidth, cellHeight, pitch, colX, color: WIN_COLOR,
   });
-  const stickyRenderer = createStickyRenderer(ctx, { cell: L.cell, pitch, colX, rows, drawSymbol: (...a) => drawSymbol(...a) });
+  const stickyRenderer = createStickyRenderer(ctx, {
+    cellWidth, cellHeight, pitch, colX, rows, drawSymbol: (...a) => drawSymbol(...a),
+  });
 
   const view = createReelView(strips);
 
@@ -90,19 +89,20 @@ export function createRenderer(canvas, { config, symbols, assets, strips }) {
     ctx.globalAlpha = Math.min(1, 0.5 + pulse * 0.5 + boost * 0.5) * fade;
     ctx.shadowColor = color;
     ctx.shadowBlur = (10 + pulse * 14) * (1 + boost * 1.6);
-    ctx.strokeRect(x + 3, y + 3, L.cell - 6, L.cell - 6);
+    ctx.strokeRect(x + 3, y + 3, cellWidth - 6, cellHeight - 6);
     ctx.restore();
   }
 
   function drawSymbol(code, x, y, blur, scale = 1) {
-    const size = L.cell * L.symbolScale * scale;
-    const off = (L.cell - size) / 2;
+    const size = symbolSize * scale;
+    const offX = (cellWidth - size) / 2;
+    const offY = (cellHeight - size) / 2;
 
     ctx.fillStyle = 'rgba(6, 15, 24, 0.55)';
-    ctx.fillRect(x, y, L.cell, L.cell);
+    ctx.fillRect(x, y, cellWidth, cellHeight);
     ctx.strokeStyle = 'rgba(201, 162, 39, 0.18)';
     ctx.lineWidth = 1;
-    ctx.strokeRect(x + 0.5, y + 0.5, L.cell - 1, L.cell - 1);
+    ctx.strokeRect(x + 0.5, y + 0.5, cellWidth - 1, cellHeight - 1);
 
     const img = assets.get(code);
     if (img) {
@@ -113,23 +113,23 @@ export function createRenderer(canvas, { config, symbols, assets, strips }) {
         const k = Math.min(blur, 1);
         const h = size * (1 + k * 0.18);
         ctx.globalAlpha = 1 - k * 0.2;
-        ctx.drawImage(img, x + off, y + off - (h - size) / 2, size, h);
+        ctx.drawImage(img, x + offX, y + offY - (h - size) / 2, size, h);
         ctx.globalAlpha = 1;
       } else {
-        ctx.drawImage(img, x + off, y + off, size, size);
+        ctx.drawImage(img, x + offX, y + offY, size, size);
       }
       return;
     }
 
     ctx.fillStyle = PLACEHOLDER[tiers.get(code)] || '#555';
     ctx.globalAlpha = 0.35;
-    ctx.fillRect(x + off, y + off, size, size);
+    ctx.fillRect(x + offX, y + offY, size, size);
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#f2e8d5';
     ctx.font = '600 15px ui-monospace, monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(code, x + L.cell / 2, y + L.cell / 2);
+    ctx.fillText(code, x + cellWidth / 2, y + cellHeight / 2);
   }
 
   /**
@@ -154,8 +154,8 @@ export function createRenderer(canvas, { config, symbols, assets, strips }) {
     for (let c = 0; c < cols; c += 1) {
       const frac = positions[c] - Math.floor(positions[c]);
       all.push([
-        colX(c) + L.cell / 2,
-        (rowsOfLine[c] - frac) * pitch + L.cell / 2,
+        colX(c) + cellWidth / 2,
+        (rowsOfLine[c] - frac) * pitch + cellHeight / 2,
       ]);
     }
     const hit = all.slice(0, Math.min(count, cols));
@@ -252,7 +252,7 @@ export function createRenderer(canvas, { config, symbols, assets, strips }) {
 
         ctx.save();
         ctx.beginPath();
-        ctx.rect(x, 0, L.cell, H);      // 릴 밖으로 새는 부분을 자른다
+        ctx.rect(x, 0, cellWidth, H);      // 릴 밖으로 새는 부분을 자른다
         ctx.clip();
 
         // 위아래 한 칸씩 더 그려야 흘러내릴 때 빈틈이 없다
@@ -283,7 +283,7 @@ export function createRenderer(canvas, { config, symbols, assets, strips }) {
         if (winFx && winCells && winFx.nonWinAlpha < 1) {
           ctx.fillStyle = `rgba(6, 15, 24, ${1 - winFx.nonWinAlpha})`;
           for (let r = 0; r < rows; r += 1) {
-            if (!winCells.has(`${c},${r}`)) ctx.fillRect(x, r * pitch, L.cell, L.cell);
+            if (!winCells.has(`${c},${r}`)) ctx.fillRect(x, r * pitch, cellWidth, cellHeight);
           }
         }
         ctx.restore();

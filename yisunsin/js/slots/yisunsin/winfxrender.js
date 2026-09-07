@@ -5,13 +5,14 @@
  * 이 파일이 슬롯 레이아웃 상수를 복제하지 않게 한다.
  */
 export function createWinFxRenderer(ctx, {
-  cell, pitch, colX, color,
+  cellWidth, cellHeight, pitch, colX, color,
 }) {
+  const unit = Math.min(cellWidth, cellHeight);
   const center = (col, row, positions) => {
     const frac = positions[col] - Math.floor(positions[col]);
     return [
-      colX(col) + cell / 2,
-      (row - frac) * pitch + cell / 2,
+      colX(col) + cellWidth / 2,
+      (row - frac) * pitch + cellHeight / 2,
     ];
   };
 
@@ -22,7 +23,7 @@ export function createWinFxRenderer(ctx, {
     for (const key of winCells) {
       const [col, row] = key.split(',').map(Number);
       const [x, y] = center(col, row, positions);
-      const radius = cell * 0.58;
+      const radius = unit * 0.58;
       const light = ctx.createRadialGradient(x, y, 0, x, y, radius);
       light.addColorStop(0, `rgba(255, 255, 244, ${frame.flash * 0.62})`);
       light.addColorStop(0.35, `rgba(255, 224, 112, ${frame.flash * 0.38})`);
@@ -41,10 +42,10 @@ export function createWinFxRenderer(ctx, {
     ctx.shadowBlur = 12;
     for (const spark of frame.sparks) {
       const [cx, cy] = center(spark.col, spark.row, positions);
-      const size = cell * spark.size;
+      const size = unit * spark.size;
       ctx.save();
       ctx.globalAlpha = spark.alpha;
-      ctx.translate(cx + spark.x * cell, cy + spark.y * cell);
+      ctx.translate(cx + spark.x * unit, cy + spark.y * unit);
       ctx.rotate(Math.PI / 4);
       ctx.fillRect(-size / 2, -size / 2, size, size);
       ctx.shadowBlur = 0;

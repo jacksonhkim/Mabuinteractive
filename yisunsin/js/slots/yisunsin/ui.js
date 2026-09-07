@@ -240,10 +240,7 @@ export function bindHud($, slot, onChoose, onTrigger = null) {
     $('#credit').textContent = fmt(s.credit);
     $('#bet').textContent = fmt(s.bet);
 
-    // 🔴 프리스핀 중에는 **유저가 누를 수 없다** (대표님 지시 2026-08-25).
-    //    러너(freespin_runner.js)가 남은 횟수만큼 몰고 가므로, 사람이 끼어들면
-    //    같은 스핀이 두 번 걸리거나 횟수가 어긋난다.
-    //    ⛔ 잔액 때문에 잠그는 것이 아니다 — 프리스핀은 베팅을 걷지 않는다.
+    // 프리스핀 러너가 도는 동안 사용자 입력만 차단한다. 잔액 잠금이 아니다.
     $('#spin').disabled = s.awaitingChoice || Boolean(s.freespin) || !s.canSpin;
 
     // 🔴 패널은 **늘 떠 있다** (대표님 지시 2026-08-27).
@@ -257,6 +254,9 @@ export function bindHud($, slot, onChoose, onTrigger = null) {
       $('#fs-left').textContent = '—';
       $('#fs-mult').textContent = '대기';
     }
+    const featureMode = Boolean(s.freespin) && !(s.jackpot && s.jackpot.won);
+    plateEl.classList.toggle('feature-mode', featureMode);
+    fsEl.classList.toggle('bonus', featureMode && Boolean(s.freespin.stuck));
 
     // 🔴 누적액을 실시간으로 띄운다. 예전에는 **시드 고정값**이 박혀 있었다.
     if (s.jackpot) $('#jackpot').textContent = fmt(s.jackpot.value);
