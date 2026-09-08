@@ -47,6 +47,14 @@ function positionsShowing(strip, rows, code) {
  *    라인 하나를 골라 그 라인이 지나는 행에 정확히 심는다.
  *    릴0 에는 WILD 가 없으므로(§7-1) 첫 칸은 반드시 진짜 거북선을 찾는다.
  *
+ * 🔴 **거북선을 먼저 찾는다** (대표님 지시 2026-09-08 — *"와일드 당첨보다 거북선 4개가 좋겠다"*).
+ *    예전에는 거북선과 WILD 를 **한 바구니에 담아 무작위로** 뽑았다. 릴1~3 의 후보는
+ *    거북선 2 + WILD 7 = 9개라 거북선이 뽑힐 확률이 릴당 2/9 뿐이고,
+ *    **세 릴 모두 거북선일 확률은 (2/9)³ = 1.1%** — 사실상 늘 WILD 로 섰다.
+ *    WILD 는 **대체재**다. 거북선이 그 행에 설 자리가 있으면 그것을 쓴다.
+ *    ⛔ 게임 규칙은 그대로다 — 실제 잭팟은 여전히 WILD 대체를 허용한다(기획서 §10).
+ *       여기서 바뀌는 것은 **개발용 강제 스핀이 무엇을 보여주는가** 뿐이다.
+ *
  * @param {'freespin'|'bonus'|'jackpot'} kind
  * @param {number[]} base 손대지 않을 기본 위치
  * @param {number[][]} [paylines] 잭팟 강제에만 쓴다
@@ -57,12 +65,17 @@ function forcedPositions(strips, rows, rng, kind, base, paylines) {
   if (kind === 'jackpot') {
     const line = (paylines && paylines[0]) || [0, 0, 0, 0, 0];
     for (let i = 0; i < JACKPOT_REELS; i += 1) {
-      const codes = i === 0 ? [GEO] : [GEO, WILD];
-      const cands = [];
-      for (let p = 0; p < strips[i].length; p += 1) {
-        if (codes.includes(strips[i][(p + line[i]) % strips[i].length])) cands.push(p);
+      // 🔴 거북선 → WILD 순서로 **따로** 찾는다. 한 바구니에 담으면 개수 비율에 밀린다.
+      for (const code of (i === 0 ? [GEO] : [GEO, WILD])) {
+        const cands = [];
+        for (let p = 0; p < strips[i].length; p += 1) {
+          if (strips[i][(p + line[i]) % strips[i].length] === code) cands.push(p);
+        }
+        if (cands.length) {
+          pos[i] = cands[rng.int(cands.length)];
+          break;                       // 거북선을 찾았으면 WILD 는 보지 않는다
+        }
       }
-      if (cands.length) pos[i] = cands[rng.int(cands.length)];
     }
     return pos;
   }
