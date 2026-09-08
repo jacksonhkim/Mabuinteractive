@@ -23,7 +23,7 @@
  */
 import { playJackpotFx } from './jackpotfx.js';
 import { easeJackpot, jackpotAmounts } from './jackpotplan.js';
-import { liftOverlay } from './overlay.js';
+import { liftOverlay, showStage } from './overlay.js';
 
 const fmt = (n) => n.toLocaleString('ko-KR');
 
@@ -47,6 +47,7 @@ export function jackpotShow($, sfx, jackpotWon, paidTotal, scale) {
   //    한 번 재생되고 옮겨져 첫 섬광이 릴 크기로 번쩍인다.
   //    ⛔ 되돌리기는 `onEnd` 가 반드시 부른다. `finish()` 가 취소·스킵·정상 종료
   //       **모든 경로**에서 `onEnd` 를 거치므로 릴에 되돌아오지 못하는 길이 없다.
+  showStage();                      // 스크롤돼 있었다면 무대를 화면에 되돌린다
   const restore = liftOverlay($, '#winbanner');
   if (el) {
     el.className = 'winbanner t-jackpot';

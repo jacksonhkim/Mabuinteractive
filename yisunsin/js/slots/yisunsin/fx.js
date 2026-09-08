@@ -14,6 +14,7 @@
 import { lineAtTime, presentWin } from './ui.js';
 import { playFreeTrigger } from './freetrigger.js';
 import { playBonusIntro as runBonusIntro } from './bonusintro.js';
+import { showStage } from './overlay.js';
 import { createRng } from './rng.js';
 import { createWinFxPlan, sampleWinFx } from './winfxplan.js';
 
@@ -113,6 +114,7 @@ export function createFx($, { renderer, reels, settled, paylines, sfx }) {
      * @param {object} o `showChoice` 는 선택 화면을 띄우는 일. 재트리거면 비워 둔다.
      */
     playTrigger(o = {}) {
+      showStage();                       // 선택 화면이 화면 밖으로 밀리지 않게
       if (trigger) trigger.cancel();     // 겹쳐 걸리면 앞것을 걷는다
       trigger = playFreeTrigger({ $, sfx, ...o });
       return trigger;
@@ -124,6 +126,7 @@ export function createFx($, { renderer, reels, settled, paylines, sfx }) {
      * @returns {number} 부르는 쪽이 기다려야 할 시간(ms)
      */
     playBonusIntro(fast = false) {
+      showStage();                       // 스크롤돼 있었다면 무대를 화면에 되돌린다
       if (bonusIn) bonusIn.cancel();     // 겹쳐 걸리면 앞것을 걷는다
       bonusIn = runBonusIntro({ $, sfx, fast });
       return bonusIn.total;

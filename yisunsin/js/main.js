@@ -131,11 +131,11 @@ async function boot() {
       //    ① 그 스핀만의 카운트업이 합산 연출과 겹치지 않고
       //    ② 총 획득에서 마지막 스핀 지급이 빠지지 않는다 (2026-08-30 실측 결함)
       const freeEnded = wasFree && !s.freespin && !s.awaitingChoice;
-      // 🔴 보너스 게임 진입은 **선택 화면이 없어** 여기서 알아챈다 (결재 2026-09-05).
-      //    프리스핀은 `awaitingChoice` 를 거쳐 오지만 이쪽은 곧바로 상태가 선다.
-      //    ⛔ `hold` 에 진입 연출(2,000ms)을 반드시 **합쳐서** 넘긴다 — 안 그러면
-      //       러너가 650ms 뒤 첫 스핀을 돌려 상자 위로 릴이 돈다 (대표님 지시 2026-09-08).
-      const bonusIn = !wasFree && s.freespin && !s.awaitingChoice;
+      // 🔴 보너스 진입은 **트리거 플래그로** 가른다 (대표님 지적 2026-09-08).
+      //    `!wasFree && s.freespin` 만으로는 프리스핀 **1번째 스핀**도 걸렸다 —
+      //    트리거 스핀에서 `freespin` 이 아직 null 이라 `wasFree` 가 false 로 남는다.
+      //    ⛔ `hold` 에 진입 연출을 **합쳐서** 넘긴다 — 안 그러면 러너가 650ms 뒤 첫 스핀을 돌려 상자 위로 릴이 돈다 (#18).
+      const bonusIn = !wasFree && !s.awaitingChoice && Boolean(s.freespin && s.result && s.result.legendaryTrigger);
       if (bonusIn) play.stop();         // 유저 AUTO 를 물린다 — 여기서부터는 러너가 몬다
       const hold = Math.max(fx.showWin(slot, play.fast, freeEnded),
         bonusIn ? fx.playBonusIntro(play.fast) : 0);

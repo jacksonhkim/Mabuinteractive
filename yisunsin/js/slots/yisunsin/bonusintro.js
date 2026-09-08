@@ -17,8 +17,12 @@
  *    연출이 스케줄링을 알기 시작하면 둘을 따로 시험할 수 없게 된다.
  */
 
-/** 기본 길이 — 대표님 지시 「2초 정도」. 사운드(`trigger_legendary`)도 2.0s 다 */
-export const TOTAL_MS = 2000;
+/**
+ * 기본 길이 — 🔴 **3초** (대표님 지시 2026-09-08 2차. 1차는 「2초 정도」였다).
+ * 사운드(`trigger_legendary`)도 **3.0s · 「땡-땡-땡」 3타**로 함께 늘렸다 —
+ * 소리가 화면보다 길면 보너스 첫 스핀 위로 종소리가 끌린다.
+ */
+export const TOTAL_MS = 3000;
 /** FAST 는 40% 로 줄인다 (§6-1). 다만 이 아래로는 「깜빡」으로만 보인다 */
 export const FAST_SCALE = 0.4;
 export const FAST_MIN_MS = 900;

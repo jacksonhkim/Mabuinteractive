@@ -2009,7 +2009,7 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   -webkit-mask-image: radial-gradient(closest-side, #000 58%, rgba(0, 0, 0, 0.35) 82%, transparent 100%);
   mask-image: radial-gradient(closest-side, #000 58%, rgba(0, 0, 0, 0.35) 82%, transparent 100%);
   filter: drop-shadow(0 0 30px rgba(232, 198, 90, 0.5));
-  animation: bi-chest 2s ease-out both;
+  animation: bi-chest 3s ease-out both;
 }
 
 .bonus-intro .bi-title {
@@ -2020,7 +2020,7 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   text-indent: 0.11em;
   color: var(--gold-lit);
   text-shadow: 0 0 4px #030a12, 0 2px 10px #030a12, 0 0 34px rgba(232, 198, 90, 0.75);
-  animation: bi-title 2s ease-out both;
+  animation: bi-title 3s ease-out both;
 }
 
 .bonus-intro .bi-sub {
@@ -2028,7 +2028,7 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   letter-spacing: 0.1em;
   color: var(--ink);
   text-shadow: 0 0 3px #030a12, 0 2px 8px #030a12;
-  animation: bi-title 2s ease-out 0.12s both;
+  animation: bi-title 3s ease-out 0.12s both;
 }
 
 @keyframes bi-in {
@@ -2036,22 +2036,27 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   to   { opacity: 1; }
 }
 
-/* 상자는 「튀어나와 자리를 잡고, 끝에 물러난다」 — 종소리 두 타와 박자를 맞춘다.
-   0% 등장 · 23% 첫 타 정점 · 46% 둘째 타에서 한 번 더 밀어준다 */
+/* 상자는 「튀어나와 자리를 잡고, 끝에 물러난다」 — 🔴 **종소리 세 타**와 박자를 맞춘다
+   (대표님 지시 2026-09-08 2차 — 「땡-땡-땡」).
+   사운드 실측 타격 시각 0.00 / 0.46 / 0.92s ÷ 3.0s = **0% · 15% · 31%**.
+   ⛔ 정점을 타격보다 조금 **뒤**에 둔다 — 소리와 그림이 동시에 정점이면
+      두 자극이 겹쳐 오히려 한 번으로 뭉쳐 읽힌다. */
 @keyframes bi-chest {
   0%   { transform: scale(0.55) translateY(8%); opacity: 0; }
-  18%  { transform: scale(1.06); opacity: 1; }
-  26%  { transform: scale(0.98); }
-  44%  { transform: scale(1.04); }
-  56%  { transform: scale(1); }
-  88%  { transform: scale(1); opacity: 1; }
+  6%   { transform: scale(1.06); opacity: 1; }   /* 1타 */
+  12%  { transform: scale(0.97); }
+  20%  { transform: scale(1.05); }               /* 2타 */
+  27%  { transform: scale(0.98); }
+  36%  { transform: scale(1.04); }               /* 3타 */
+  46%  { transform: scale(1); }
+  90%  { transform: scale(1); opacity: 1; }
   100% { transform: scale(1.04); opacity: 0; }
 }
 
 @keyframes bi-title {
   0%   { transform: translateY(14px); opacity: 0; }
-  16%  { transform: translateY(0); opacity: 1; }
-  88%  { opacity: 1; }
+  11%  { transform: translateY(0); opacity: 1; }
+  90%  { opacity: 1; }
   100% { opacity: 0; }
 }
 
