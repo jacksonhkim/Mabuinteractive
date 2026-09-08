@@ -5,7 +5,7 @@
   "_assets": "에셋은 WebP q95, 512×512 (UI기획서 v1.3 §7-2). 배포 시 2.에셋/ 에서 3.코드/assets/ 로 복사한다.",
 
   "reelSymbols": [
-    { "code": "s1_wild",       "name": "WILD (이순신)",   "tier": "special", "asset": "assets/symbols/s1_wild.webp" },
+    { "code": "s1_wild",       "name": "WILD (장군)",   "tier": "special", "asset": "assets/symbols/s1_wild.webp" },
     { "code": "s2_scatter",    "name": "SCATTER (함대)",  "tier": "special", "asset": "assets/symbols/s2_scatter.webp" },
     { "code": "s3_bonus",      "name": "BONUS (보물상자)", "tier": "special", "asset": "assets/symbols/s3_bonus.webp" },
     { "code": "s5_free",       "name": "FREE (난중일기)",  "tier": "special", "asset": "assets/symbols/s5_free.webp",

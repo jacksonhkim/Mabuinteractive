@@ -113,19 +113,9 @@ body {
   text-shadow: 0 0 30px rgba(201, 162, 39, 0.35);
 }
 
-/* 🔴 「명량」 — 로고 그림이 「이순신」까지만 그려 주므로 나머지를 코드가 얹는다.
-   ⛔ 자간을 준 마지막 글자 **뒤에도** 자간이 붙어 오른쪽으로 밀린다.
-      `text-indent` 로 절반을 되돌려야 로고와 가운데가 맞는다. */
-.title-era {
-  margin: -0.15em 0 0.15em;
-  font-family: "Noto Serif KR", "AppleMyungjo", "Batang", serif;
-  font-size: clamp(1.05rem, 3.4vw, 1.65rem);
-  font-weight: 700;
-  letter-spacing: 0.52em;
-  text-indent: 0.52em;
-  color: var(--gold-lit);
-  text-shadow: 0 0 24px rgba(201, 162, 39, 0.42), 0 2px 6px #030a12;
-}
+/* ⛔ `.title-era` 는 없앴다 (2026-09-08 로고 V2).
+   이전 로고에 「이순신」까지만 있어 「명 량」을 코드로 얹었는데, V2 에는
+   **「명량」이 그려져 있어** 그 줄이 중복이 됐다. 규칙과 요소를 함께 걷었다. */
 
 .tagline {
   margin: 0;
@@ -1113,13 +1103,13 @@ button.ghost[aria-pressed="true"] {
 }
 .topbar .field.jackpot .num { font-size: clamp(0.95rem, 2vw, 1.35rem); }
 
-/* 타이틀 로고 — 이미지에 「이순신」이 이미 들어 있으므로 글자는 숨긴다.
-   ⛔ display:none 은 쓰지 않는다. 스크린리더가 제목을 읽지 못한다. */
-/* 타이틀 로고 — 원본 비율 900:306 을 그대로 지킨다.
-   높이를 따로 주면 좌우 용이 잘리거나 여백이 생긴다. */
+/* 타이틀 로고 — 이미지에 「명량」이 이미 들어 있으므로 글자는 숨긴다.
+   ⛔ display:none 은 쓰지 않는다. 스크린리더가 제목을 읽지 못한다.
+   🔴 비율은 **에셋이 정한다** — V2 는 크로마 키 + 여백 트림 후 900×303 이다
+      (구본 900×306). 높이를 따로 주면 좌우 용이 잘리거나 여백이 생긴다. */
 #title h1 {
   width: min(620px, 86vw);
-  aspect-ratio: 900 / 306;
+  aspect-ratio: 900 / 303;
   height: auto;
   background: url("../assets/ui/ui_title_logo.webp") center / contain no-repeat;
   text-indent: -9999px;
