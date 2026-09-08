@@ -131,7 +131,14 @@ async function boot() {
       //    ① 그 스핀만의 카운트업이 합산 연출과 겹치지 않고
       //    ② 총 획득에서 마지막 스핀 지급이 빠지지 않는다 (2026-08-30 실측 결함)
       const freeEnded = wasFree && !s.freespin && !s.awaitingChoice;
-      const hold = fx.showWin(slot, play.fast, freeEnded);
+      // 🔴 보너스 게임 진입은 **선택 화면이 없어** 여기서 알아챈다 (결재 2026-09-05).
+      //    프리스핀은 `awaitingChoice` 를 거쳐 오지만 이쪽은 곧바로 상태가 선다.
+      //    ⛔ `hold` 에 진입 연출(2,000ms)을 반드시 **합쳐서** 넘긴다 — 안 그러면
+      //       러너가 650ms 뒤 첫 스핀을 돌려 상자 위로 릴이 돈다 (대표님 지시 2026-09-08).
+      const bonusIn = !wasFree && s.freespin && !s.awaitingChoice;
+      if (bonusIn) play.stop();         // 유저 AUTO 를 물린다 — 여기서부터는 러너가 몬다
+      const hold = Math.max(fx.showWin(slot, play.fast, freeEnded),
+        bonusIn ? fx.playBonusIntro(play.fast) : 0);
       // 프리스핀이 방금 끝났다면 **합산 연출**을 띄운다 (대표님 지시 2026-08-25)
       if (freeEnded) {
         free.stop();
@@ -145,13 +152,6 @@ async function boot() {
       const rt = s.freespin ? s.freespin.retriggers : 0;
       if (rt > lastRetriggers) fx.playTrigger({ retrigger: true, fast: play.fast, auto: true });
       lastRetriggers = rt;
-      // 🔴 레전더리는 선택 화면이 없다 (결재 2026-09-05). 프리스핀은 `awaitingChoice` 를
-      //    거쳐 오지만 이쪽은 곧바로 상태가 서므로, 시작을 여기서 알아채고
-      //    유저 AUTO 를 물린다 — 여기서부터는 러너가 몬다.
-      if (!wasFree && s.freespin && !s.awaitingChoice) {
-        play.stop();
-        fx.playTrigger({ retrigger: true, fast: play.fast, auto: true });
-      }
       seenCells = syncRound(renderer, slot, strips, seenCells); tactic.update();   // 🔴 이번에 열린 칸
       wasFree = Boolean(s.freespin);
       if (s.freespin) freeWon = s.freespin.won;

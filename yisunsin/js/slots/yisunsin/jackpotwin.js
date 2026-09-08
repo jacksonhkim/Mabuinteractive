@@ -23,6 +23,7 @@
  */
 import { playJackpotFx } from './jackpotfx.js';
 import { easeJackpot, jackpotAmounts } from './jackpotplan.js';
+import { liftOverlay } from './overlay.js';
 
 const fmt = (n) => n.toLocaleString('ko-KR');
 
@@ -41,6 +42,12 @@ export function jackpotShow($, sfx, jackpotWon, paidTotal, scale) {
   const show = (sel) => { const e = $(sel); if (e) e.classList.remove('hidden'); };
   const hide = (sel) => { const e = $(sel); if (e) e.classList.add('hidden'); };
 
+  // 🔴 **릴 밖으로 들어 올린다** (대표님 지시 2026-09-08 — 잭팟은 전체 화면).
+  //    자리를 먼저 옮기고 클래스를 건다 — 반대로 하면 `wb-flash` 가 릴 안에서
+  //    한 번 재생되고 옮겨져 첫 섬광이 릴 크기로 번쩍인다.
+  //    ⛔ 되돌리기는 `onEnd` 가 반드시 부른다. `finish()` 가 취소·스킵·정상 종료
+  //       **모든 경로**에서 `onEnd` 를 거치므로 릴에 되돌아오지 못하는 길이 없다.
+  const restore = liftOverlay($, '#winbanner');
   if (el) {
     el.className = 'winbanner t-jackpot';
     el.classList.remove('hidden');
@@ -102,6 +109,8 @@ export function jackpotShow($, sfx, jackpotWon, paidTotal, scale) {
       //    CSS 도 `.winbanner:not(.t-jackpot)` 로 막지만, 값까지 지워 두 겹으로 막는다.
       hide('#wb-line');
       hide('#wb-total');
+      // 🔴 릴 안 제자리로 되돌린다 — 다음 BIG·MEGA 배너는 릴에서 떠야 한다
+      restore();
     },
   });
 

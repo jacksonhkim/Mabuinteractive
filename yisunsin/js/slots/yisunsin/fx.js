@@ -13,6 +13,7 @@
  */
 import { lineAtTime, presentWin } from './ui.js';
 import { playFreeTrigger } from './freetrigger.js';
+import { playBonusIntro as runBonusIntro } from './bonusintro.js';
 import { createRng } from './rng.js';
 import { createWinFxPlan, sampleWinFx } from './winfxplan.js';
 
@@ -37,6 +38,8 @@ export function createFx($, { renderer, reels, settled, paylines, sfx }) {
   const rngFx = createRng(WIN_FX_SEED);
   /** 진행 중인 트리거 연출 — 스킵·취소를 위해 잡아 둔다 */
   let trigger = null;
+  /** 진행 중인 보너스 진입 연출 — 탭 이탈 시 함께 걷는다 */
+  let bonusIn = null;
   /** 당첨 칸 `"릴,행"` — settle 후 채워진다 */
   let winCells = new Set();
   /** 당첨 라인 목록 */
@@ -115,11 +118,25 @@ export function createFx($, { renderer, reels, settled, paylines, sfx }) {
       return trigger;
     },
 
+    /**
+     * 보너스 게임 진입 연출 (대표님 지시 2026-09-08).
+     * ⛔ 선택 화면이 없으므로 `showChoice` 가 없다 — 알리고 끝난다.
+     * @returns {number} 부르는 쪽이 기다려야 할 시간(ms)
+     */
+    playBonusIntro(fast = false) {
+      if (bonusIn) bonusIn.cancel();     // 겹쳐 걸리면 앞것을 걷는다
+      bonusIn = runBonusIntro({ $, sfx, fast });
+      return bonusIn.total;
+    },
+
     /** 사람이 화면을 눌러 건너뛴다. 연출이 없으면 아무 일도 없다. */
     skipTrigger() { if (trigger) trigger.skip(); },
 
     /** 탭 이탈 — 화면만 걷는다 */
-    cancelTrigger() { if (trigger) trigger.cancel(); },
+    cancelTrigger() {
+      if (trigger) trigger.cancel();
+      if (bonusIn) bonusIn.cancel();
+    },
 
     /** 화면에 강조할 것이 있으면 정지 중에도 계속 그려야 맥동이 보인다 */
     hasGlow(slot) {

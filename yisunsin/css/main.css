@@ -425,16 +425,58 @@ button.toggle[aria-pressed="true"] {
   gap: 0.4rem;
 }
 
+/* 🔴 `−` `+` 를 **코드가 그린다** (대표님 지적 2026-09-08 · §7-3 과 같은 판단).
+   글자로 두면 위치가 폰트 메트릭에 딸려 간다. 배경 그림은 `center` 로 정확히
+   중앙에 앉는데 글자는 엔진마다 다른 자리에 놓여, 기준이 둘로 갈렸다.
+
+   실측 (874×402 · DPR4 · 버튼 대비 %)
+   | 엔진             | `−` 가로 어긋남 | `+` 가로 어긋남 |
+   |------------------|----------------|----------------|
+   | Chromium         | 0%             | 0%             |
+   | **WebKit(사파리)** | **+10.9%**     | **+3.8%**      |
+   대표님 기기가 iOS 사파리라 여기서만 드러났다. 크롬으로는 재현되지 않는다.
+
+   막대를 그리면 상자 계산만 남아 **어느 엔진에서도 정확히 중앙**이다.
+   덤으로 `−`(폭 74%)와 `+`(62%)의 길이가 제각각이던 것도 60% 로 맞췄다.
+   ⛔ `::after` 는 쓰지 않는다 — 모바일 터치 히트박스가 이미 쓰고 있다(§터치 영역).
+   📌 접근성 손실 0 — 두 버튼 모두 `aria-label` 이 이미 붙어 있어 글자는 읽히지 않았다.
+
+   ⚠️ **글자를 지우지 않고 «투명하게»만 한다.** 한 번 `font-size: 0` 으로 없앴더니
+      버튼이 17 → 8px 로 반토막 났다 — 폭이 `22%` 인데 그 기준인 `.bet-group` 의
+      max-content 폭을 **버튼 안의 글자가 만들고 있었다.** 글자를 지우면 기준이
+      함께 줄어든다. 상자는 그대로 두고 잉크만 바꾼다. */
 .bet-group button {
+  position: relative;
   min-width: var(--tap);
   min-height: var(--tap);
   font-size: 1.2rem;
-  color: var(--ink);
+  color: transparent;               /* 글리프는 자리만 지킨다 — 막대가 대신 그린다 */
   background: url("../assets/ui/ui_small_button.webp") center / 100% 100% no-repeat;
   background-size: 40px 40px;
   border: 0;
   border-radius: 8px;
   cursor: pointer;
+}
+
+/* 글리프 상자 — 버튼의 60%. 막대 두께는 이 상자의 13.3%(= 버튼의 8%).
+   🔴 버튼 그림(`background-size: 78%`)이 차지하는 판의 **77%** 다.
+      예전 `−` 는 판의 95% 를 가로질러 길었고 `+` 는 79% 였다 — 그 사이로 맞췄다. */
+.bet-group button::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60%;
+  height: 60%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(var(--ink), var(--ink)) center / 100% 13.3% no-repeat;
+}
+
+/* `+` 는 세로 막대를 한 겹 더 얹는다 — 두 겹 모두 `center` 라 교차점이 정중앙이다 */
+#bet-up::before {
+  background:
+    linear-gradient(var(--ink), var(--ink)) center / 100% 13.3% no-repeat,
+    linear-gradient(var(--ink), var(--ink)) center / 13.3% 100% no-repeat;
 }
 
 .bet-group button:active { background: rgba(201, 162, 39, 0.3); }
@@ -1475,10 +1517,17 @@ button.ghost[aria-pressed="true"] {
 
 /* 🔴 선택 화면은 **릴 위에** 띄운다. 릴이 보이는 채로 물어야
    "무엇으로 이걸 돌릴 것인가" 라는 맥락이 유지된다. */
+/* 🔴 **무대 전체**로 나왔다 (대표님 지시 2026-09-08).
+   예전에는 릴 개구부(`inset: 8.6% 6.8% 8.9% 6.9%`) 안에서 골랐다. 프리스핀은
+   라운드가 통째로 바뀌는 사건인데 릴 창 안에서 조용히 일어나 무게가 맞지 않았다.
+   ⛔ `.reel-panel` 안에 두면 절대 나올 수 없다 — `isolation: isolate` 가 층을
+      가둔다. 그래서 `index.html` 에서 **무대 직계로 옮겼다.**
+   🔴 기준은 뷰포트가 아니라 **무대(`#stage`)** 다 (대표님 결재 「다」).
+      `position: fixed` 로 잡으면 WEB 에서 게임 배경 밖 검은 여백까지 덮는다. */
 .choice {
   position: absolute;
-  inset: 8.6% 6.8% 8.9% 6.9%;
-  z-index: 3;                       /* 릴(1) 위 · 프레임(5) 아래 */
+  inset: 0;
+  z-index: 30;                      /* HUD(10)·SPIN(12) 위 · 세로 안내(100) 아래 */
   display: grid;
   /* 🔴 `place-content: center` 는 트랙을 **내용 크기(max-content)** 로 잡는다.
      그래서 선택지 세 장이 컨테이너(691px)보다 넓어도(772px) 트랙이 함께 커져,
@@ -1612,7 +1661,7 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
 .winbanner {
   position: absolute;
   inset: 8.6% 6.8% 8.9% 6.9%;
-  z-index: 4;                       /* 선택 화면(3) 위 · 프레임(5) 아래 */
+  z-index: 4;                       /* 릴(1) 위 · 프레임(5) 아래 */
   display: grid;
   place-content: center;
   gap: 0.2rem;
@@ -1629,6 +1678,14 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
 
 /* 누적 보너스 — 전각(殿閣) 배경 (UI기획서 §6, 3.0s) */
 .winbanner.t-jackpot {
+  /* 🔴 잭팟만 **무대 전체**다 (대표님 지시 2026-09-08 · 결재 「라」).
+     이 요소는 평소 `.reel-panel` 안에 살지만, 잭팟 연출 동안에는
+     `jackpotwin.js` 가 `overlay.js` 로 **무대 직계로 들어 올린다** —
+     `isolation: isolate` 때문에 CSS 만으로는 릴 밖으로 못 나온다.
+     그래서 아래 `inset: 0` 은 릴이 아니라 **무대**를 채운다.
+     ⛔ 노출 시간은 손대지 않았다 — 4,000ms / 3단 합산 5,700ms 그대로다. */
+  inset: 0;
+  z-index: 40;                      /* 선택 화면(30) 위 · 세로 안내(100) 아래 */
   background:
     linear-gradient(rgba(3, 10, 18, 0.62), rgba(3, 10, 18, 0.72)),
     url("../assets/scenes/x1_bonus_palace.webp") center / cover no-repeat;
@@ -1824,7 +1881,7 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   inset: auto 6.9%;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 4;                       /* 선택 화면(3) 위 · 프레임(5) 아래 */
+  z-index: 4;                       /* 릴(1) 위 · 프레임(5) 아래 */
   display: grid;
   justify-items: center;
   gap: 0.15rem;
@@ -1905,9 +1962,104 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
 }
 
 @media (max-width: 760px) and (min-height: 561px), (orientation: portrait) and (min-height: 561px) {
-  .choice { inset: 0; }
+  /* ⛔ `inset: 0` 은 이제 기본값이다 (2026-09-08 무대 전체 전환) — 여기서 다시 쓰지 않는다.
+     좁은 세로 화면에서는 선택지 세 장이 가로로 들어가지 않아 세로로 쌓는다. */
   .choice-list { flex-direction: column; align-items: center; }
   button.choice-item { width: min(78vw, 260px); }
+}
+
+/* ══ §BONUS-INTRO ─ 보너스 게임 진입 연출 (대표님 지시 2026-09-08) ═══════
+   🔴 보물상자 3개(1/3,669)로 열리는 라운드에 **예고가 없었다.**
+      프리스핀에는 트리거 연출 + 선택 화면이 있는데, 보너스 게임은 결재
+      2026-09-05 로 선택 화면이 사라지면서 재트리거 축약 연출(500ms)만 남았다.
+   🔴 무대 전체다 — 선택 화면·잭팟과 같은 층 규칙 (대표님 결재 「다」).
+   ⛔ 클릭을 받지 않는다. 2초는 「알리는 시간」이지 「기다리는 시간」이 아니다 —
+      건너뛸 것을 주면 그만큼 못 보고 지나간다. */
+.bonus-intro {
+  position: absolute;
+  inset: 0;
+  z-index: 35;                      /* 선택 화면(30) 위 · 잭팟(40) 아래 */
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.4rem;
+  text-align: center;
+  pointer-events: none;
+  /* 🔴 딤을 충분히 건다. 0.62 로 두었더니 릴 심볼이 그대로 읽혀 상자와 시선이
+     갈렸다 (실측 2026-09-08). 잭팟 배너의 0.62~0.72 보다 진한 이유는 그쪽엔
+     전각(殿閣) 그림이 화면을 통째로 덮지만 여기는 상자 한 점뿐이기 때문이다. */
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(6, 15, 26, 0.82), rgba(3, 10, 18, 0.94));
+  animation: bi-in 0.28s ease-out both;
+}
+
+.bonus-intro.hidden { display: none; }
+
+/* 🔴 상자는 **높이에 매단다** (`dvh`). 폰 가로는 2.12~2.35:1 이라 `vw` 로 잡으면
+   글자 두 줄과 합쳐 세로가 먼저 터진다 — 모바일 3분할에서 배운 것과 같다.
+
+   🔴 **가장자리를 녹인다.** 원본은 알파가 없는 1280² 정사각이라 그대로 얹으면
+      파란 하늘 네모가 릴 위에 붙여넣은 것처럼 보인다 (실측 확인 2026-09-08).
+      원형 마스크로 바깥을 지우면 상자의 금빛만 남아 어두운 배경에 얹힌다.
+      ⛔ 에셋을 다시 뽑지 않는다 — 대표님이 지정하신 그림 그대로다 (§7-3 과 같은
+         판단: 그림은 그림대로 두고 화면 쪽에서 처리한다). */
+.bonus-intro .bi-chest {
+  width: auto;
+  height: clamp(90px, 40dvh, 420px);
+  -webkit-mask-image: radial-gradient(closest-side, #000 58%, rgba(0, 0, 0, 0.35) 82%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 58%, rgba(0, 0, 0, 0.35) 82%, transparent 100%);
+  filter: drop-shadow(0 0 30px rgba(232, 198, 90, 0.5));
+  animation: bi-chest 2s ease-out both;
+}
+
+.bonus-intro .bi-title {
+  font-size: clamp(1.2rem, 9dvh, 3.2rem);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  /* 마지막 글자 자간이 오른쪽에 남아 가운데가 밀린다 — 절반을 되돌린다 (§명량 선례) */
+  text-indent: 0.11em;
+  color: var(--gold-lit);
+  text-shadow: 0 0 4px #030a12, 0 2px 10px #030a12, 0 0 34px rgba(232, 198, 90, 0.75);
+  animation: bi-title 2s ease-out both;
+}
+
+.bonus-intro .bi-sub {
+  font-size: clamp(0.62rem, 3.2dvh, 1.05rem);
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  text-shadow: 0 0 3px #030a12, 0 2px 8px #030a12;
+  animation: bi-title 2s ease-out 0.12s both;
+}
+
+@keyframes bi-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* 상자는 「튀어나와 자리를 잡고, 끝에 물러난다」 — 종소리 두 타와 박자를 맞춘다.
+   0% 등장 · 23% 첫 타 정점 · 46% 둘째 타에서 한 번 더 밀어준다 */
+@keyframes bi-chest {
+  0%   { transform: scale(0.55) translateY(8%); opacity: 0; }
+  18%  { transform: scale(1.06); opacity: 1; }
+  26%  { transform: scale(0.98); }
+  44%  { transform: scale(1.04); }
+  56%  { transform: scale(1); }
+  88%  { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.04); opacity: 0; }
+}
+
+@keyframes bi-title {
+  0%   { transform: translateY(14px); opacity: 0; }
+  16%  { transform: translateY(0); opacity: 1; }
+  88%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bonus-intro,
+  .bonus-intro .bi-chest,
+  .bonus-intro .bi-title,
+  .bonus-intro .bi-sub { animation: none; }
 }
 
 /* ── JACKPOT 연출 (연출기획서 §6) ──────────────────────────────

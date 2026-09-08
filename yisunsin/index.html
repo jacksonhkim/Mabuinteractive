@@ -81,14 +81,18 @@
 
 
 
-      <!-- 🔴 프리스핀 선택 (기획서 §8-2). 세 선택지는 기대값이 같고 분산만 다르다. -->
-      <section id="choice" class="choice hidden" role="dialog" aria-label="프리스핀 선택">
-        <h2>프리스핀</h2>
-        <p class="choice-sub">셋 중 하나를 고르십시오</p>
-        <div id="choice-list" class="choice-list"></div>
-      </section>
+      <!-- 🔴 프리스핀 선택 화면은 **여기 없다** (대표님 지시 2026-09-08).
+           `.reel-panel { isolation: isolate }` 이 층을 가둬 릴 밖으로 나올 수 없어
+           무대 직계로 옮겼다 — 아래 §전체 화면 오버레이. -->
 
-      <!-- 당첨 등급 배너 (UI기획서 §6-2) — BIG 이상에서만 뜬다 -->
+      <!-- 당첨 등급 배너 (UI기획서 §6-2) — BIG 이상에서만 뜬다.
+           🔴 **등급 배너는 릴 안이 그대로 제자리다** (대표님 결재 「라」 2026-09-08).
+              잭팟일 때만 `jackpotwin.js` 가 이 요소를 무대 직계로 **들어 올린다**
+              (`overlay.js`). 연출이 끝나면 이 자리로 되돌아온다.
+           ⛔ 통째로 무대로 옮기지 않은 이유 — 등급 배너의 자리는 릴 개구부
+              (`inset: 8.6% 6.8% 8.9% 6.9%`)이고, 그 좌표는 릴 프레임 기준이라
+              무대 기준으로 옮기면 WEB·모바일 양쪽에서 다시 만들어야 한다.
+              **바뀌는 것만 바꾼다.** -->
       <section id="winbanner" class="winbanner hidden" role="status" aria-live="polite">
         <span id="wb-tier" class="wb-tier">BIG WIN</span>
         <strong id="wb-num" class="wb-num">0</strong>
@@ -240,6 +244,38 @@
            띠 안쪽 아래가 비어 있으므로 거기에 절대 배치한다. -->
       <p id="hint" class="hint" role="status" aria-live="polite"></p>
     </footer>
+
+    <!-- ══ 전체 화면 오버레이 (대표님 지시 2026-09-08) ══════════════════════
+         🔴 릴 안이 아니라 **무대 전체**를 덮는다.
+            ⛔ `.reel-panel` 안에 두면 절대 나올 수 없다 — `isolation: isolate` 가
+               자체 층을 만들어 z-index 를 아무리 올려도 갇힌다. 잭팟 코인
+               (`.jp-sky`)과 세로 안내(`#rotate`)가 이미 같은 이유로 밖에 있다.
+         🔴 기준은 **뷰포트가 아니라 무대**다 (대표님 결재 「다」).
+            뷰포트로 잡으면 WEB 에서 게임 배경 밖 검은 여백까지 덮는다.
+         📌 `#winbanner` 는 여기 없다. 잭팟일 때만 `overlay.js` 가 릴에서
+            이 자리로 **잠깐 올렸다가 되돌린다** — 등급 배너는 릴이 제자리다.
+         ⛔ `#winpop`·`#fs-total` 은 릴 안에 그대로 둔다 — 그 둘은 릴에서 일어난
+            일을 릴 자리에서 말하는 표시다. 이번 지시 대상이 아니다. -->
+
+    <!-- 🔴 프리스핀 선택 (기획서 §8-2). 세 선택지는 기대값이 같고 분산만 다르다. -->
+    <section id="choice" class="choice hidden" role="dialog" aria-label="프리스핀 선택">
+      <h2>프리스핀</h2>
+      <p class="choice-sub">셋 중 하나를 고르십시오</p>
+      <div id="choice-list" class="choice-list"></div>
+    </section>
+
+    <!-- 🔴 보너스 게임 진입 연출 (대표님 지시 2026-09-08) — 2,000ms.
+         보물상자 3개로 열리는 「보너스 게임」에는 **선택 화면이 없어**
+         (결재 2026-09-05) 지금까지 재트리거 축약 연출을 빌려 쓰고 있었다.
+         1/3,669 로 만나는 사건인데 아무 예고 없이 무료 스핀이 시작됐다.
+         🔑 상자 그림은 이미 있었다 — `symbols.json` 의 `x3_bonus_chest` 가
+            `use: "보너스 진입 연출"` 로 등재만 되고 한 번도 쓰이지 않았다.
+         ⛔ 글자는 그림에 박지 않는다 (§7-3) — 코드가 얹는다. -->
+    <section id="bonus-intro" class="bonus-intro hidden" role="status" aria-live="polite">
+      <img class="bi-chest" src="assets/scenes/x3_bonus_chest.webp" alt="" width="1280" height="1280">
+      <strong class="bi-title">BONUS GAME</strong>
+      <span class="bi-sub">무료 10회 · 와일드 누적</span>
+    </section>
   </main>
 
   <!-- ⛔ 개발용 두 줄 — **main 밖**에 둔다 (대표님 지시 2026-09-03).

@@ -157,7 +157,14 @@
     line-height: 1.02;
   }
 
-  html.is-touch .topbar.feature-mode .jb-money { visibility: hidden; }
+  /* 🔴 **현판을 가리지 않는다** (대표님 지적 2026-09-08).
+     2세대 모바일에는 좌우 패널이 없어서 이 현판에 프리스핀·보너스 정보를
+     통합했고, 그래서 `feature-mode` 일 때 JACKPOT 두 줄을 숨겼다.
+     3세대 3분할에서 **우측 난중일기 패널이 부활**하면서 그 이유가 사라졌는데
+     숨기는 규칙만 남아, 보너스·프리스핀 내내 현판이 **빈 남색 판**이었다
+     (실기 영상 47.5s·55.6s 실측). 규칙을 걷어 WEB 과 같이 늘 띄운다.
+     ⛔ `feature-mode` 클래스 토글 자체는 `ui.js` 에 남긴다 —
+        `fs-panel.bonus` 와 같은 판정을 공유한다. */
 
   /* ── 좌측 전략 패널 ──────────────────────────────────────────── */
   html.is-touch .side-left {
@@ -341,6 +348,32 @@
   /* 치트는 첫 화면 아래 문서 흐름에 남는다 (대표님 지시 — 배포 환경 테스트용) */
   html.is-touch .meta { margin-top: calc(100dvh + 0.9rem); }
   html.is-touch .dev { margin: 0.6rem auto 1.4rem; }
+
+  /* ── 전체 화면 오버레이 (대표님 지시 2026-09-08) ──────────────────
+     선택 화면과 잭팟 배너는 무대 전체(= 화면 전체)를 덮는다.
+     🔴 **배경은 노치까지, 내용은 노치 안쪽.** 릴 프레임에 쓴 것과 같은 규칙이다 —
+        노치에 걸린 버튼은 눌리지 않는다.
+     🔴 글자는 `vw` 가 아니라 `dvh` 에 매단다. 폰 가로는 2.12~2.35:1 이라 `vw` 로
+        잡으면 세로가 먼저 터진다 — 잭팟은 네 줄(제목·금액·LINE·TOTAL)이다. */
+  html.is-touch .choice {
+    padding: 2dvh max(var(--sa-r), 3vw) 2dvh max(var(--sa-l), 3vw);
+  }
+
+  html.is-touch .choice h2 { font-size: clamp(1rem, 5dvh, 1.8rem); }
+  html.is-touch .choice-sub { font-size: clamp(0.62rem, 2.6dvh, 0.95rem); }
+  html.is-touch .choice-list { gap: clamp(0.4rem, 2vw, 1rem); margin-top: 0.3rem; }
+  html.is-touch .choice-item .spec { font-size: clamp(0.72rem, 3.4dvh, 1.25rem); }
+  html.is-touch .choice-item .trait { font-size: clamp(0.56rem, 2.2dvh, 0.85rem); }
+
+  html.is-touch .winbanner.t-jackpot {
+    padding-left: var(--sa-l);
+    padding-right: var(--sa-r);
+  }
+
+  html.is-touch .winbanner.t-jackpot .wb-tier { font-size: clamp(1.1rem, 8dvh, 2.8rem); }
+  html.is-touch .winbanner.t-jackpot .wb-num { font-size: clamp(1.4rem, 12dvh, 3.8rem); }
+  html.is-touch .winbanner.t-jackpot .wb-line,
+  html.is-touch .winbanner.t-jackpot .wb-total { font-size: clamp(0.7rem, 3.6dvh, 1.25rem); }
 
   html.is-touch button { touch-action: manipulation; }
 }
