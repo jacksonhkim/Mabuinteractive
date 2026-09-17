@@ -83,6 +83,14 @@ body {
   color: var(--ink-dim);
 }
 
+.credit {
+  margin: 1.6rem 0 0;
+  font-size: clamp(0.6rem, 1.4vw, 0.72rem);
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+  opacity: 0.62;
+}
+
 #title .sub {
   margin: 0.5rem 0 0;
   color: var(--ink-dim);
