@@ -1,14 +1,3 @@
-/*
- * main.css — 화면 레이아웃 (UI기획서 v1.8 §2 · §3)
- *
- * 대응 환경 (기획서 §1): 데스크톱 1920×1080 / 모바일 390×844, 마우스·터치 동시.
- *
- * 🔴 릴은 논리 872×664 로 그리고 **CSS 로만 축소**한다.
- *    해상도마다 좌표를 다시 계산하면 한쪽에서만 나는 버그가 생긴다.
- *
- * 숫자는 고정폭으로 — 자릿수가 바뀔 때 HUD 가 흔들리면 안 된다 (UI기획서 §1).
- */
-
 :root {
   --ink: #f2e8d5;
   --ink-dim: #a99a80;
@@ -18,37 +7,13 @@
   --gold-lit: #e8c65a;
   --danger: #d4553f;
   --line: rgba(201, 162, 39, 0.28);
-  --tap: 44px;              /* 터치 최소 크기 */
+  --tap: 44px;
   --layout-vw: var(--vw0, 100vw);
   --layout-vh: 100dvh;
   --browser-zoom: 1;
 
-  /* 🔴 릴 프레임 · 상단 바 · 하단 바가 **같은 폭**을 쓴다.
-     프레임은 세로 제한(52dvh)에 걸리면 폭이 줄어드는데,
-     그때 상하 바만 넓게 남으면 어긋나 보인다. 계산을 한 곳에 둔다.
-     1024/622 는 프레임 종횡비다. */
   --frame-ar: 1.4831;
-  /* 🔴 상한을 1180 → 1014 로 낮췄다 (대표님 지시 2026-08-26).
-     넓은 화면에서 릴이 1180 까지 커지면 **옆 패널 자리가 사라진다.**
-       1920×1080  릴 1102 → 패널 높이비 54%  (레퍼런스 70%)
-       2560×1440  릴 1180 → 패널 높이비 42%
-     1014 로 묶으면 전 구간에서 레퍼런스 비율(70%)이 나온다.
-     ⚠️ 작은 화면은 `52dvh` 항이 먼저 걸리므로 **영향이 없다.** */
-  /* 🔴 마지막 항이 **옆 패널 자리를 보장**한다 (대표님 지시 2026-08-27).
-       패널이 릴 높이의 90% 가 되려면
-         0.90 × (릴폭/1.6463) × 0.6449 × 1.1313 ≤ (창폭 − 릴폭)/2 − 12
-       정리하면  릴폭 ≤ (창폭 − 24) / 1.7974
 
-     릴이 작아지는 폭은 창마다 다르다 —
-       1788×897  변화 없음           1600×900  919 → 877 (−5%)
-       1366×768  784 → 747 (−5%)     1920 이상  변화 없음 */
-  /* 🔴 릴이 화면에서 차지하는 비율 (대표님 지시 2026-09-03).
-     0.50 은 100% 배율에서 릴이 화면 폭의 35~42% 밖에 안 되어 작아 보였다.
-     대표님이 원하는 크기는 **브라우저 124% 확대 상태**이고, 그때 릴은 44~45% 다.
-     스크롤 없이 담을 수 있는 한계를 실측했더니 세로가 짧을수록 낮았다 —
-       1903×911 0.625 · 1920×1080 0.750 · 1489×800 0.605 · 1366×768 0.600
-     그래서 높이로 나눈다. 한계값을 그대로 쓰지 않고 조금 낮춘 것은,
-     폰트 렌더링이 1px 만 커져도 상단 현판이 잘리기 때문이다. */
   --reel-k: 0.595;
 
   --panel-w: min(
@@ -58,7 +23,6 @@
   );
 }
 
-/* 세로가 넉넉한 화면에서는 더 키운다 */
 @media (min-height: 850px), (orientation: landscape) and (max-height: 560px) {
   :root { --reel-k: 0.62; }
 }
@@ -68,7 +32,7 @@
 html, body {
   margin: 0;
   min-height: 100%;
-  /* 🔴 배경 에셋. 없어도 --sea-deep 이 깔려 있어 화면이 비지 않는다. */
+
   background: var(--sea-deep) url("../assets/ui/ui_background_land.webp") center / cover no-repeat fixed;
   color: var(--ink);
   font-family: system-ui, "Malgun Gothic", sans-serif;
@@ -79,7 +43,7 @@ body {
   display: grid;
   place-items: center;
   min-height: 100dvh;
-  /* 개발용 두 줄이 **문서 아래**에 붙을 기준점 (2026-09-03) */
+
   position: relative;
   padding: env(safe-area-inset-top) env(safe-area-inset-right)
            env(safe-area-inset-bottom) env(safe-area-inset-left);
@@ -87,7 +51,6 @@ body {
 
 .hidden { display: none !important; }
 
-/* ── 타이틀 — 오디오 잠금을 푸는 첫 제스처를 받는다 ── */
 #title {
   position: fixed;
   inset: 0;
@@ -113,10 +76,6 @@ body {
   text-shadow: 0 0 30px rgba(201, 162, 39, 0.35);
 }
 
-/* ⛔ `.title-era` 는 없앴다 (2026-09-08 로고 V2).
-   이전 로고에 「이순신」까지만 있어 「명 량」을 코드로 얹었는데, V2 에는
-   **「명량」이 그려져 있어** 그 줄이 중복이 됐다. 규칙과 요소를 함께 걷었다. */
-
 .tagline {
   margin: 0;
   font-size: clamp(0.7rem, 2vw, 0.9rem);
@@ -140,27 +99,19 @@ body {
   #title .sub { animation: none; opacity: 0.8; }
 }
 
-/* ── 스테이지 ── */
 #stage {
-  /* 🔴 우측 패널이 이 상자를 기준으로 **가로** 자리를 잡는다 (C단계).
-     세로는 아래 `grid-template-rows` 의 릴 행 이름을 쓴다 (2026-08-28 정정). */
+
   position: relative;
   width: min(1600px, calc(var(--vw0, 100vw) - 1.5rem));
   display: grid;
-  /* 🔴 릴 행에 **이름을 붙인다** (대표님 결재 2026-08-28).
-     우측 패널이 이 행에 매달려야 릴과 세로 중앙이 맞는다.
-     뒤따르는 행(컨트롤·힌트·meta·개발 버튼)은 암시적 행이라
-     늘거나 줄어도 `reel-start/reel-end` 는 흔들리지 않는다. */
+
   grid-template-rows: auto [reel-start] auto [reel-end];
-  /* 100% 배율에서 조작부 자리를 남기되, 각 행의 구분은 유지한다. */
+
   --stage-gap: clamp(6px, 0.8vw, 12px);
   gap: var(--stage-gap);
   padding: clamp(6px, 0.8vw, 12px) 0;
 }
 
-/* 상단 바 (§2-1 · 80px) — 릴 프레임과 같은 폭
-   🔴 누적 보너스를 **정중앙**에 둔다. 좌우를 같은 폭(1fr)으로 잡아야
-      브랜드 글자 길이가 변해도 가운데가 흔들리지 않는다. */
 .topbar {
   width: var(--panel-w);
   margin-inline: auto;
@@ -176,9 +127,6 @@ body {
 
 .brand { display: flex; align-items: center; min-width: 0; }
 
-/* 🔴 로고는 **높이로** 맞춘다. 폭으로 맞추면 상단 바(80px)를 넘어 삐져나온다.
-   원본 900×306 (2.94:1) 이므로 높이 56px 이면 폭 165px 이다.
-   `width: auto` + `object-fit: contain` 으로 어떤 경우에도 찌그러지지 않게 한다. */
 .brand-logo {
   display: block;
   height: clamp(32px, 5.2vw, 56px);
@@ -187,16 +135,9 @@ body {
   object-fit: contain;
 }
 
-/* ── 릴 패널 (§2-2) ──
-   🔴 프레임은 **비율을 고정**하고 릴을 그 안쪽에 앉힌다.
-      9-slice(border-image)를 써 봤지만, 이 프레임은 거북선·파도 장식이
-      **모서리가 아니라 변 중앙**에 있어 변을 늘리는 순간 세로로 찌그러졌다.
-      원본 비율 1024:566 을 지키는 것이 유일하게 원본대로 보이는 방법이다.
-
-   안쪽 여백은 실측값이다 — 좌 9.47% · 우 9.38% · 상 9.19% · 하 9.89% */
 .reel-panel {
   position: relative;
-  /* 상단 왕좌형 현판보다 한 단계 앞 — 겹치는 금테는 릴 프레임이 덮는다. */
+
   z-index: 3;
   width: var(--panel-w);
   margin: 0 auto;
@@ -204,34 +145,25 @@ body {
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: none;      /* 프레임은 ::after 로 **맨 위**에 올린다 */
+  background: none;
   display: block;
-  isolation: isolate;    /* 바깥 z-index 와 섞이지 않게 층을 가둔다 */
+  isolation: isolate;
 }
 
-/* 🔴 프레임을 **캔버스 위**에 얹는다 (대표님 지시).
-   배경으로 두면 릴과 프레임이 같은 평면에 놓여 밋밋하다.
-   위에 올려 심볼 가장자리를 살짝 덮으면 **릴이 프레임 뒤에서 도는** 깊이가 생긴다. */
 .reel-panel::after {
   content: "";
   position: absolute;
-  /* 원본 1602×981에서 릴 외곽 x 232..1371, y 209..977을
-     패널 네 변에 대응시킨다. 가로·세로 배율이 같아 이미지가 흐려지지 않는다. */
+
   left: -20.3687%;
   top: -27.2135%;
   width: 140.6497%;
   height: 127.7344%;
-  /* 🔴 프레임이 **모든 것 위**에 온다 (대표님 지시 2026-08-25).
-     프리스핀 배경이 프레임 안쪽을 넘어 장식을 덮어 잘려 보였다.
-     프레임은 창틀이므로 창 안에 무엇이 오든 창틀이 가려지면 안 된다.
-     ⛔ pointer-events: none 이 반드시 함께 있어야 한다 — 없으면 프레임이
-        선택 버튼 클릭을 통째로 삼킨다. */
+
   z-index: 5;
   background: url("../assets/ui/ui_slot_frame_unified_blank_v2.webp") center / 100% 100% no-repeat;
-  pointer-events: none;   /* 클릭이 프레임에 막히면 안 된다 */
+  pointer-events: none;
 }
 
-/* 프레임 안쪽 바닥 — 릴 뒤에 깔려 심볼을 또렷하게 한다 */
 .reel-panel::before {
   content: "";
   position: absolute;
@@ -241,54 +173,26 @@ body {
     radial-gradient(ellipse at 50% 0%, rgba(11, 26, 42, 0.92), rgba(6, 15, 24, 0.97));
 }
 
-/* 🔴 `inset` + `max-width:100%` 조합은 쓰지 않는다.
-   절대 위치 요소의 % 는 **부모 전체** 기준이라, 안쪽 영역을 잡아 놓고도
-   캔버스가 프레임 밖으로 커진다 (실제로 상하 테두리를 덮었다).
-   안쪽 영역을 폭·높이로 직접 주고, 비율은 object-fit 이 지킨다. */
-/* 🔴 실측 안쪽 여백(9.19/9.38/9.89/9.47%)보다 **조금 넓게** 잡는다.
-   그래야 심볼 가장자리가 프레임 밑으로 들어가 겹침이 생긴다.
-   딱 맞추면 프레임과 릴이 맞닿기만 해서 깊이가 안 보인다. */
-/* 🔴 상하 겹침은 좁히고 좌우 겹침은 남긴다.
-   위아래는 심볼이 프레임 바에 묻혀 판독을 해쳤고(대표님 지적),
-   좌우는 거북선 장식 뒤로 살짝 들어가는 편이 깊이가 산다. */
 .reel-panel canvas {
   position: absolute;
   top: 8.6%;
   left: 6.9%;
-  width: 86.3%;     /* 100 − 6.9 − 6.8  (좌우는 겹침 유지) */
-  height: 82.5%;    /* 100 − 8.6 − 8.9  (상하는 안쪽 경계에 가깝게) */
+  width: 86.3%;
+  height: 82.5%;
   z-index: 1;
   display: block;
   object-fit: contain;
 }
 
-/* ── 하단 컨트롤 (§2-1 · 140px) ──
-   🔴 좌·우 그룹을 **같은 폭(1fr)** 으로 두어 SPIN 이 정중앙에 고정된다.
-      flex + space-between 으로는 양쪽 내용 길이에 따라 버튼이 밀린다. */
 .controls {
-  /* 🔴 띠는 릴 폭에 묶지 않는다 (대표님 결재 2026-09-03).
-     릴 폭은 1920 에서 801px 인데 목표 배치(INFO·설정·BET·SPIN·WIN·BALANCE·
-     FAST·AUTO)에는 808px 이 필요하다 — 실측으로 들어가지 않는다.
-     받침대가 본체보다 넓은 것이 구조적으로도 맞고 목업과도 같다. */
-  /* 🔴 배수 공식을 버리고 **절대폭 clamp** 로 간다 (대표님 지시 2026-09-04).
-     띠가 릴 폭 × 1.85 였을 때 안쪽 1,430px 에 내용은 848px 뿐이라
-     **582px(41%)가 빈 공간**이었다 (1920 실측). 1366 에서도 440px(39%) 였다.
 
-     🔴 배수로는 두 해상도를 동시에 만족시킬 수 없다.
-        필요폭은 1920 에서 ≈1,260px · 1366 에서 ≈1,190px 로 **절대값이 거의 같은데**,
-        릴 폭은 993 vs 678 로 크게 달라 같은 배수가 한쪽을 반드시 어긋나게 한다.
-        내용물(INFO·BET·SPIN·WIN·BALANCE·FAST)의 폭 합은 해상도를 따라 크게
-        변하지 않으므로, 띠도 절대폭으로 잡는 것이 구조적으로 맞다.
-
-     ⛔ 이 폭 공식은 **좁은 화면(1060px 미만) 전용**이 되었다 (2026-09-04).
-        넓은 화면은 아래 §HUD-A 통짜 띠가 폭·높이·칸 배치를 통째로 가져간다. */
   width: min(100%, calc(var(--panel-w) * 1.85));
   margin-inline: auto;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: clamp(0.4rem, 1.2vw, 1.4rem);
-  /* 액자는 아래 §HUD-a 의 border-image 가 그린다 */
+
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -298,42 +202,21 @@ body {
 .side {
   display: flex;
   align-items: center;
-  /* 🔴 3vw 는 1366 에서 41px 이다. 그 gap 이 남는 공간을 전부 먹어
-     space-evenly 가 양 끝에 줄 여백이 0 이 되었고, FAST·AUTO 와 INFO 가
-     테두리 금박에 그대로 닿았다 (실측 2026-09-03). */
-  /* 🔴 간격·여백을 조였다 (2026-09-04). WIN·BALANCE 가 15자리(222px)로 커지면서
-     1366 에서 최대 자릿수일 때 FAST·AUTO 가 띠 테두리 위로 올라탔다 (실측).
-     간격 22→14px · 좌우 여백 16.4→10.9px 로 한 화면에서 약 45px 을 되찾는다. */
+
   gap: clamp(0.4rem, 1.0vw, 0.7rem);
-  /* 요소가 테두리에 붙지 않도록 안쪽 여백을 **보장**한다 */
+
   padding-inline: clamp(6px, 0.8vw, 10px);
 }
 
-/* 🔴 space-evenly 로 고르게 편다 (2026-09-03 2차).
-   space-between 은 요소를 **양 끝으로 밀어붙인다.** 띠가 넓어진 뒤로는
-   INFO·설정과 BET 사이에 352px 짜리 구멍이 생겼다 (1920 실측).
-   evenly 는 양 끝에도 같은 간격을 주므로 한쪽만 뚫리지 않는다. */
 .side.left { justify-content: space-evenly; }
 .side.right { justify-content: space-evenly; }
 
-/* 🔴 FAST · AUTO 는 **전 해상도에서 세로로 쌓는다** (대표님 지시 2026-09-04).
-   예전에는 1600px 초과에서만 가로였는데, 가로로 두면 143px 을 먹고 세로로
-   쌓으면 68px 이다 (실측). 구획별 액자를 넣으려면 그 75px 이 필요하다.
-   ⛔ 버튼 크기는 건드리지 않는다 — 배치만 바꾼다 (대표님 지시).
-   좁은 화면 규칙(구 @media max-width:1600px)은 이제 기본값과 같아져 사라졌다. */
 .toggles {
   display: grid;
   grid-auto-flow: row;
   gap: 0.3rem;
 }
 
-/* INFO · 설정의 세로 배치는 아래 §HUD-a 의 `.sys` 블록에 함께 둔다
-   (같은 선택자를 두 곳에 두면 나중 규칙이 gap 을 덮어써 혼란만 는다). */
-
-/* 🔴 켜짐/꺼짐이 한눈에 갈려야 한다.
-   처음에는 켜짐을 `color: var(--sea-deep)` 로 했다가, 어두운 남색 글씨가
-   남색 판에 묻혀 **오히려 꺼진 것처럼** 보였다 (대표님 지적).
-   켜짐은 **밝게 빛나는 쪽**이어야 한다. */
 button.toggle {
   position: relative;
   min-width: 68px;
@@ -346,7 +229,7 @@ button.toggle {
   border: 0;
   border-radius: 8px;
   cursor: pointer;
-  filter: saturate(0.45) brightness(0.72);      /* 꺼짐 — 차분하게 가라앉힌다 */
+  filter: saturate(0.45) brightness(0.72);
   transition: color 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -360,12 +243,10 @@ button.toggle[aria-pressed="true"] {
   filter: saturate(1.25) brightness(1.15);
   text-shadow: 0 0 10px rgba(232, 198, 90, 0.85);
   box-shadow:
-    0 0 14px rgba(232, 198, 90, 0.5),          /* 바깥 발광 */
-    inset 0 0 10px rgba(232, 198, 90, 0.28);   /* 안쪽 빛 */
+    0 0 14px rgba(232, 198, 90, 0.5),
+    inset 0 0 10px rgba(232, 198, 90, 0.28);
 }
 
-/* 🔴 AUTO 는 **지금 진행 중**이라는 신호가 필요하다.
-   FAST 는 설정이지만 AUTO 는 계속 돌고 있으므로 살아 있음을 보여야 한다. */
 #auto[aria-pressed="true"] {
   animation: auto-pulse 1.6s ease-in-out infinite;
 }
@@ -398,10 +279,8 @@ button.toggle[aria-pressed="true"] {
 }
 
 .num {
-  font-family: ui-monospace, "Consolas", monospace;   /* 자릿수 변동 시 흔들림 방지 */
-  /* 🔴 1.5rem 을 지킨다 (2026-09-04). 15자리 때문에 한때 1.05rem 까지 줄였으나,
-     WIN·BALANCE 를 세로로 쌓아 우측 폭을 절반으로 줄이자 **글자를 줄일 이유가
-     사라졌다.** 숫자를 작게 만드는 대신 배치를 바꾸는 쪽이 옳다. */
+  font-family: ui-monospace, "Consolas", monospace;
+
   font-size: clamp(1rem, 2.6vw, 1.5rem);
   font-variant-numeric: tabular-nums;
   color: var(--ink);
@@ -415,32 +294,12 @@ button.toggle[aria-pressed="true"] {
   gap: 0.4rem;
 }
 
-/* 🔴 `−` `+` 를 **코드가 그린다** (대표님 지적 2026-09-08 · §7-3 과 같은 판단).
-   글자로 두면 위치가 폰트 메트릭에 딸려 간다. 배경 그림은 `center` 로 정확히
-   중앙에 앉는데 글자는 엔진마다 다른 자리에 놓여, 기준이 둘로 갈렸다.
-
-   실측 (874×402 · DPR4 · 버튼 대비 %)
-   | 엔진             | `−` 가로 어긋남 | `+` 가로 어긋남 |
-   |------------------|----------------|----------------|
-   | Chromium         | 0%             | 0%             |
-   | **WebKit(사파리)** | **+10.9%**     | **+3.8%**      |
-   대표님 기기가 iOS 사파리라 여기서만 드러났다. 크롬으로는 재현되지 않는다.
-
-   막대를 그리면 상자 계산만 남아 **어느 엔진에서도 정확히 중앙**이다.
-   덤으로 `−`(폭 74%)와 `+`(62%)의 길이가 제각각이던 것도 60% 로 맞췄다.
-   ⛔ `::after` 는 쓰지 않는다 — 모바일 터치 히트박스가 이미 쓰고 있다(§터치 영역).
-   📌 접근성 손실 0 — 두 버튼 모두 `aria-label` 이 이미 붙어 있어 글자는 읽히지 않았다.
-
-   ⚠️ **글자를 지우지 않고 «투명하게»만 한다.** 한 번 `font-size: 0` 으로 없앴더니
-      버튼이 17 → 8px 로 반토막 났다 — 폭이 `22%` 인데 그 기준인 `.bet-group` 의
-      max-content 폭을 **버튼 안의 글자가 만들고 있었다.** 글자를 지우면 기준이
-      함께 줄어든다. 상자는 그대로 두고 잉크만 바꾼다. */
 .bet-group button {
   position: relative;
   min-width: var(--tap);
   min-height: var(--tap);
   font-size: 1.2rem;
-  color: transparent;               /* 글리프는 자리만 지킨다 — 막대가 대신 그린다 */
+  color: transparent;
   background: url("../assets/ui/ui_small_button.webp") center / 100% 100% no-repeat;
   background-size: 40px 40px;
   border: 0;
@@ -448,9 +307,6 @@ button.toggle[aria-pressed="true"] {
   cursor: pointer;
 }
 
-/* 글리프 상자 — 버튼의 60%. 막대 두께는 이 상자의 13.3%(= 버튼의 8%).
-   🔴 버튼 그림(`background-size: 78%`)이 차지하는 판의 **77%** 다.
-      예전 `−` 는 판의 95% 를 가로질러 길었고 `+` 는 79% 였다 — 그 사이로 맞췄다. */
 .bet-group button::before {
   content: "";
   position: absolute;
@@ -462,7 +318,6 @@ button.toggle[aria-pressed="true"] {
   background: linear-gradient(var(--ink), var(--ink)) center / 100% 13.3% no-repeat;
 }
 
-/* `+` 는 세로 막대를 한 겹 더 얹는다 — 두 겹 모두 `center` 라 교차점이 정중앙이다 */
 #bet-up::before {
   background:
     linear-gradient(var(--ink), var(--ink)) center / 100% 13.3% no-repeat,
@@ -471,13 +326,8 @@ button.toggle[aria-pressed="true"] {
 
 .bet-group button:active { background: rgba(201, 162, 39, 0.3); }
 
-/* 🔴 SPIN — 에셋 3상태. 글자는 코드가 얹는다(§7-3). */
 button.primary {
-  /* 🔴 기준이 **릴 폭에서 띠 높이로** 바뀌었다 (대표님 지시 2026-09-03).
-     이 에셋에는 용머리·구름·밧줄 링이 이미 들어 있는데, 124px 로 두면
-     그 장식이 뭉개져 보이지 않는다. 대표님 예시에서 프레임 외곽은
-     **띠 높이의 1.11배**다 — 띠 위아래로 조금 솟는 그 비율이다.
-     ⛔ --hud-h 는 .controls 의 변수이고 #spin 은 그 자식이라 상속받는다. */
+
   width: calc(var(--hud-h) * 1.11);
   height: calc(var(--hud-h) * 1.11);
   font-size: calc(var(--hud-h) * 0.115);
@@ -512,10 +362,6 @@ button.primary:disabled {
   color: var(--ink-dim);
 }
 
-/* 🔴 hint 를 띠 안쪽 아래에 겹친다 (2026-09-03).
-   행으로 두면 16px + 간격 12px 을 먹는데, 그 28px 이 그대로 릴 크기였다.
-   띠 안쪽은 숫자칸이 가운데를 쓰고 위는 라벨, **아래가 비어 있다** — 그 자리다.
-   평소에는 비어 있다가 안내가 필요할 때만 뜨므로 숫자칸을 가리지 않는다. */
 .hint {
   position: absolute;
   left: 50%;
@@ -541,12 +387,10 @@ button.primary:disabled {
   z-index: 60;
 }
 
-/* ── 모바일 390×844 (§3) ── */
 @media (max-width: 640px) and (min-height: 561px) {
   .topbar { padding: 0.5rem 0.85rem; }
   .brand-logo { height: clamp(26px, 6.5vw, 38px); }
 
-  /* 좁은 화면에서는 정보줄 위, SPIN 아래 — 버튼은 여전히 가운데다 */
   .controls {
     grid-template-columns: 1fr 1fr;
     gap: 0.7rem 1rem;
@@ -559,7 +403,6 @@ button.primary:disabled {
   .reel-panel canvas { max-height: 46dvh; }
 }
 
-/* 기동 실패 표시 — 타이틀 위에 뜬다 */
 .boot-error {
   display: none;
   max-width: 34rem;
@@ -577,20 +420,8 @@ button.primary:disabled {
 
 .boot-error.shown { display: block; }
 
-/* 개발용 도구 — P8 QA 에서 제거한다 */
-/* ⛔ 개발용 두 줄은 **레이아웃에서 뺀다** (2026-09-03 3차).
-   행으로 두면 개발 버튼 44px + meta 14px + gap 23px = 81px 을 먹는다.
-   1366×768 의 세로 여유가 8px 뿐이라 그 81px 이 곧 띠 높이였다.
-   화면 하단에 겹쳐 띄우면 검수는 그대로 되고 높이만 차지하지 않는다.
-   ⛔ P8 QA 에서 두 블록을 통째로 지운다 — 그때 이 규칙도 함께 지운다. */
 .dev {
-  /* 🔴 fixed 가 아니라 **문서 기준** absolute 다 (대표님 지시 2026-09-03).
-     fixed 는 뷰포트에 붙으므로, 화면을 확대하면 게임만 커지고 치트 바는
-     제자리에 남아 하단 띠 위로 올라탔다.
-     `top: 100%` 는 body 하단 — body 는 min-height:100dvh 이므로
-       · 게임이 화면보다 작으면 화면 바로 아래  → 100% 배율에서 안 보인다
-       · 게임이 화면보다 크면 게임 바로 아래    → 확대해도 겹치지 않는다
-     절대 배치라 stage 높이는 먹지 않고, 스크롤 영역에는 포함되어 휠로 닿는다. */
+
   position: absolute;
   top: 100%;
   left: 50%;
@@ -620,20 +451,12 @@ button.ghost[aria-pressed="true"] {
   text-shadow: 0 0 8px rgba(255, 231, 130, 0.8);
 }
 
-/* ── UI 에셋 (2026-08-24 수령분) ────────────────────────────
-   🔴 에셋이 없어도 화면은 성립한다. 아래는 전부 **덧입히는** 규칙이다. */
-
-/* 세로 화면에서는 세로판 배경으로 바꾼다 — 가로판을 늘리면 수평선이 화면 밖으로 나간다 */
 @media (orientation: portrait) {
   html, body {
     background-image: url("../assets/ui/ui_background_port.webp");
   }
 }
 
-/* 누적 보너스 — 액자 위에 숫자를 얹는다.
-   🔴 액자 원본이 640:92 로 **매우 납작**하다. 라벨과 숫자를 두 줄로 쌓으면
-      액자를 세로로 늘려야 하고, 그러면 금테가 두꺼워져 원본과 달라진다.
-      **한 줄로 배치**해야 원본 비율 그대로 쓸 수 있다. (기획서 §2 레이아웃도 한 줄) */
 .topbar .field.jackpot {
   display: flex;
   align-items: center;
@@ -647,8 +470,6 @@ button.ghost[aria-pressed="true"] {
 
 .topbar .field.jackpot .label { white-space: nowrap; }
 
-/* ── N3 통합 프레임 상단 표시 ──────────────────────────────────
-   현판 장식은 릴 프레임 이미지에 포함하고, 라벨과 금액만 별도 레이어로 둔다. */
 .topbar.jackpot-bar {
   position: relative;
   z-index: 4;
@@ -666,7 +487,6 @@ button.ghost[aria-pressed="true"] {
   pointer-events: none;
 }
 
-/* 좌우 장식과 금테를 침범하지 않는 현판 내부 무대 */
 .jb-stage {
   position: relative;
   width: 100%;
@@ -722,8 +542,6 @@ button.ghost[aria-pressed="true"] {
   text-shadow: 0 0 18px rgba(232, 198, 90, 0.8), 0 2px 6px #030a12;
 }
 
-/* 이전 전광판의 12초 주기와 3회 점멸 리듬을 유지한다.
-   교대 화면은 없으므로 점멸 뒤에도 잭팟 정보가 계속 보인다. */
 @keyframes jb-money-blink {
   0% { opacity: 1; }
   6% { opacity: 0.12; }
@@ -734,8 +552,6 @@ button.ghost[aria-pressed="true"] {
   36%, 100% { opacity: 1; }
 }
 
-/* 근접(3연속) — 전광판 전체가 반응한다 */
-/* 테두리를 그리지 않으므로(그림에 있다) 프레임 **자체를 밝힌다** */
 .topbar.jackpot-bar.near {
   animation: jp-near 0.7s ease-in-out 3;
   filter: brightness(1.18) drop-shadow(0 0 16px rgba(232, 198, 90, 0.7));
@@ -745,7 +561,6 @@ button.ghost[aria-pressed="true"] {
   filter: brightness(1.18) drop-shadow(0 0 16px rgba(232, 198, 90, 0.7));
 }
 
-/* 릴 전체 흔들림 중에도 통합 현판 위 금액이 프레임과 따로 놀지 않게 맞춘다. */
 .topbar.jackpot-bar:has(+ .reel-panel.shake-1) .jb-stage {
   animation: shake-1 0.15s ease-in-out 2;
 }
@@ -756,21 +571,6 @@ button.ghost[aria-pressed="true"] {
   animation: shake-3 0.4s ease-in-out 2;
 }
 
-/* 🔴 프리스핀 표시는 릴 위로 옮겼다 — 상단바를 잭팟이 통째로 쓰기 때문이다 */
-/* ── 🔴 우측 패널 — 난중일기 프리스핀 (C단계 「가안」 2026-08-26) ──
-   릴 옆에 남는 공간을 쓴다. 화면이 넓을수록 여백이 커진다.
-
-     1366×768   한쪽 279px      1600×900   한쪽 329px
-     1920×1080  한쪽 249px      2560×1440  한쪽 210px
-
-   빨간 박스 확정안은 릴 대비 높이 90%를 보장하며, 가로 자리 보장식과 회전 여백으로 잘림을 막는다.
-
-   ⛔ 좌측 전략 패널(해전 BONUS 진행도)은 **P6 보너스 게임과 함께** 만든다.
-      지금 만들면 P6 에서 다시 손대게 된다. */
-/* 🔴 좌측 패널 — `.side-right` 를 좌우로 뒤집은 거울상이다 (2026-09-03).
-   같은 `grid-row: reel-start/reel-end` · 같은 `top:50%/translateY(-50%)` ·
-   같은 12px 간격. `left` 대신 `right` 를 써서 스테이지 중앙에서 반대쪽으로
-   같은 거리만큼 붙인다 — 좌우 대칭이 어긋나지 않는다. */
 .side-left {
   position: absolute;
   grid-row: reel-start / reel-end;
@@ -781,10 +581,6 @@ button.ghost[aria-pressed="true"] {
   pointer-events: none;
 }
 
-/* 🔴 크기 공식은 `.fs-panel` 과 **동일**(릴 높이의 63%) 하되,
-   비율은 이 액자 자체의 실측값(780×1465)을 쓴다 — 우측 슬림 액자(780×1449)와
-   별개 생성본이라 1.1% 차이가 있다. 다른 비율을 강제로 물리면 그림이 눌린다.
-   `<img>` 가 자기 비율을 갖고 있어 높이만 주면 폭이 따라온다. */
 .tc-panel {
   position: relative;
   aspect-ratio: 780 / 1465;
@@ -800,8 +596,7 @@ button.ghost[aria-pressed="true"] {
   height: 100%;
   width: auto;
 }
-/* 🔴 N2 좌측 전략 패널 — 네 장이 5초마다 교대한다 (2026-09-06)
-   겹쳐 두고 투명도만 바꾼다. 이동은 없다 — 연출기획서 §7-2 원칙. */
+
 .tc-frame {
   position: absolute;
   inset: 0;
@@ -811,20 +606,11 @@ button.ghost[aria-pressed="true"] {
 
 .tc-frame.tc-on { opacity: 1; }
 
-/* 🔴 `<picture>` 는 레이아웃에 없다 (2026-09-08).
-   폰 가로에서 모바일 재조판본만 내려받게 `<img>` 를 감쌌을 뿐이므로 상자를
-   만들면 안 된다. `display: contents` 면 자식이 그대로 부모의 자식이 된다. */
 .tc-panel > picture,
 .fs-panel > picture { display: contents; }
 
-/* 🔴 첫 장은 흐름에 남겨 상자 크기를 정하게 한다.
-   전부 absolute 로 띄우면 `.tc-panel` 이 높이를 잃는다.
-   ⛔ `picture` 로 감싼 뒤로는 **모든** `.tc-frame` 이 자기 picture 안에서
-      first-of-type 이다. 부모를 picture 로 세어야 한 장만 걸린다. */
 .tc-panel > picture:first-of-type > .tc-frame { position: relative; }
 
-/* 로테이션 점 — 지금 몇 번째인지 알린다.
-   ⛔ 그림에 넣지 않았다. 활성 표시가 바뀌어야 하므로 CSS 가 그린다. */
 .tc-dots {
   position: absolute;
   left: 0;
@@ -848,96 +634,52 @@ button.ghost[aria-pressed="true"] {
 
 .tc-dots li.on { background: #ffe066; box-shadow: 0 0 6px rgba(255, 224, 102, 0.8); }
 
-
 .side-right {
   position: absolute;
-  /* 🔴 세로 기준은 **스테이지가 아니라 릴 행**이다 (대표님 결재 2026-08-28).
-       스테이지 기준으로 두면 「릴 아래 − 릴 위」의 절반만큼 패널이 내려앉는다.
-         릴 위   전광판 116px + gap
-         릴 아래 컨트롤 174px + 힌트 + meta + ⛔개발용 버튼 + gap ×4
-       실측 약 90px 아래로 밀려 있었고, 대표님 빨간 박스는 **릴 세로 중앙**이었다.
-     ⛔ 개발용 버튼 행을 P8 에서 지우면 그만큼 또 움직인다 — 행에 매달아 고정한다.
-     ⚠ `grid-column` 은 **주지 않는다.** 절대 위치 요소의 기준 상자는 축별로
-        따로 정해지므로, 행만 지정하면 가로는 지금처럼 스테이지 기준을 그대로 쓴다.
-        (크기·좌우 위치·간격 12px 은 전부 불변)
-     ⛔ `padding-left` 로 5° 회전의 왼쪽 돌출분을 예약하던 항목은 지웠다
-        (2026-09-03). 슬림 액자로 바뀌며 회전 자체를 걷어냈으니 예약도 무의미하다.
-        간격은 이제 `left` 의 `+ 12px` 하나로 충분하다. */
+
   grid-row: reel-start / reel-end;
   top: 50%;
-  /* 릴 오른쪽에 12px 간격을 두고 붙인다 */
+
   left: calc(50% + var(--panel-w) / 2 + 12px);
   transform: translateY(-50%);
-  width: max-content;          /* 그림 크기에 맞춰 감싼다 */
+  width: max-content;
   pointer-events: none;
 }
 
-/* 🔴 크기는 **높이로만** 정한다 (대표님 지적 2026-08-27).
-   폭까지 지정하면 상자 비율과 그림 비율이 어긋나 그림이 늘어난다.
-   높이만 주고 폭은 `<img>` 가 자기 비율로 정하게 두면 **찌그러질 수가 없다.**
-
-   두 값 중 작은 쪽
-     ① **릴 프레임 높이의 90%** — 첨부 빨간 박스 실측값 (대표님 결재 2026-08-27)
-     ② 창 끝까지의 자리로 낼 수 있는 높이 — 안전판
-        (5° 회전은 가로로 1.1313배를 차지하므로 그만큼 나눠 준다)
-
-   ⚠️ ②는 안전판이다. `--panel-w` 의 마지막 항이 자리를 보장하므로
-      평소에는 ①이 이긴다. ②는 예상 못 한 규격에서 **잘리는 것만 막는다.** */
 .fs-panel {
   position: relative;
   container-type: inline-size;
-  /* 🔴 비율의 주인이 **액자**로 바뀌었다 (2026-09-03). 예전 977:1515 는 종이 비율이다. */
+
   aspect-ratio: 780 / 1449;
-  /* 🔴 90% → 63% (대표님 지시 2026-09-03 — 약 30% 축소).
-     세로 중앙정렬은 `.side-right` 의 top:50%+translateY(-50%) 가 구조적으로
-     맡고 있어 이 값을 바꿔도 자동으로 다시 중앙에 맞는다(실측 오차 0~0.5px). */
+
   height: min(
     calc(var(--panel-w) / var(--frame-ar) * 0.63),
     calc((var(--vw0, 100vw) - var(--panel-w) - 24px) / 2 * 1449 / 780)
   );
   filter: drop-shadow(0 8px 22px rgba(3, 10, 18, 0.7));
-  /* ⛔ 5° 기울임을 걷어냈다 — **종이라서** 놓인 물건처럼 보이게 한 것인데,
-        액자가 된 이상 기울일 이유가 없고 좌측 전략 패널과도 어긋난다.
-        회전분(1.1313)을 예약하던 위 안전판과 `.side-right` 여백도 함께 풀었다. */
+
   transition: filter 0.3s ease;
 }
 
-/* 액자가 크기의 주인이다. 높이를 채우고 폭은 비율대로 따라온다. */
 .fp-frame {
   position: relative;
-  z-index: 2;                       /* 속지 위 — 개구부가 뚫려 있어 속지가 비친다 */
+  z-index: 2;
   display: block;
   height: 100%;
   width: auto;
 }
 
-/* 🔴 액자 v2 교체(대표님 원본 2026-09-04) — 용머리·파도·나침반 문양의 화려한
-   액자로 바뀌며 테두리가 두꺼워져 개구부가 줄었다. scipy 연결영역 분석으로
-   재실측: 개구부 원시값 left 9.74% · top 6.07% · 폭 80.64% · 높이 88.41%
-   (사각형 채움률 98% — 파도 문양이 모서리에서 살짝 파고드는 정도, 액자가
-   z-index 로 위에 있어 속지를 살짝 덮어도 문제없다).
-   🔴 처음에는 속지(702×1339, 비율 0.524)를 개구부(비율 0.491) 안에서
-   자기 비율대로 축소했더니 폭은 꽉 찼지만 위아래에 여백이 남았다
-   (대표님 스크린샷 지적 2026-09-04). **개구부를 그대로 채운다** — 세로만
-   6.8% 더 늘어나(가로 배율 0.8960 vs 세로 배율 0.9567) 먹 원이 살짝
-   타원이 되지만, 뚜렷한 여백보다 낫다. */
 .fp-paper {
   position: absolute;
   left: 9.74%;
   top: 6.07%;
   width: 80.64%;
   height: 88.41%;
-  /* 🔴 슬림 액자는 개구부가 **투명**이라 속지를 뒤에 깐다 (2026-09-03).
-     ⛔ 좌측 전략 패널은 개구부가 남색으로 채워진 `_filled` 본을 쓴다 —
-        같은 원본에서 만들어 프레임이 화소 단위로 동일하다. */
+
   z-index: 1;
   transition: filter 0.3s ease;
 }
 
-/* 🔴 프리스핀이 안 걸렸을 때 (대표님 지시 2026-08-27 — 상시 노출).
-   패널을 숨기지 않고 **가라앉힌다.** 조건이 무엇인지 늘 보이는 편이 낫다. */
-/* 🔴 가라앉히는 대상은 **속지와 숫자**다 (2026-09-03).
-   예전처럼 패널 전체에 걸면 액자 금테까지 탁해져 좌측 패널과 색이 어긋난다. */
 .fs-panel.idle .fp-paper {
   filter: saturate(0.5) brightness(0.72);
 }
@@ -953,26 +695,15 @@ button.ghost[aria-pressed="true"] {
   color: #3a2c16;
 }
 
-/* 🔴 실측 좌표 (원본 1006×1563 · 종이 977×1515 를 화소로 재서 얻었다)
-     원반    세로 31.6% ~ 62.8% · 중심 x 48.5% · y 47.2% · 지름 = 종이 폭의 55.0%
-     ×N 자리  FREE SPINS 띠(~77.4%) 와 MULTIPLIER 띠(85.7%~) 사이 · 중심 81.6%
-
-   ⚠️ 원반은 아래 먹 띠와 맞닿아 있어 덩어리로 세면 하나로 잡힌다.
-      행별 중앙 먹 폭을 재어 볼록한 구간만 원반으로 분리했다.
-
-   그림에 글자가 박혀 있으므로 **숫자만** 이 자리에 얹는다. */
 .fp-num {
   position: absolute;
-  z-index: 3;                       /* 속지 위 */
-  /* 🔴 액자 v2 재환산 (2026-09-04, 여백 제거 후 2차) — 속지 내부 좌표
-     (50.57%, 48.88%)는 불변, 속지가 개구부를 그대로 채우도록 바뀌었다.
-     x = 9.74 + 50.57×0.8064  ·  y = 6.07 + 48.88×0.8841 */
+  z-index: 3;
+
   left: 50.52%;
   top: 49.29%;
   transform: translate(-50%, -50%);
   font-family: ui-monospace, "Consolas", monospace;
-  /* 속지가 액자 폭의 90%→80.64%로 축소(배율 0.8960)된 만큼 글자도 같은 배율로
-     줄인다 — 먹 원 대비 채움비는 옛 버전과 동일(약 54%). 32cqw × 0.8960 */
+
   font-size: 28.7cqw;
   line-height: 1;
   color: #fff6d8;
@@ -981,36 +712,32 @@ button.ghost[aria-pressed="true"] {
 
 .fp-mult {
   position: absolute;
-  z-index: 3;                       /* 속지 위 */
-  /* 🔴 액자 v2 재환산 (2026-09-04, 여백 제거 후 2차) — 배수 박스 내부 좌표
-     (49.57%, 87.86%)는 불변. y = 6.07 + 87.86×0.8841 */
+  z-index: 3;
+
   left: 49.73%;
   top: 83.75%;
   transform: translate(-50%, -50%);
   font-family: ui-monospace, "Consolas", monospace;
-  /* 속지 축소 배율 0.8960 동일 적용. 11.5cqw × 0.8960 */
+
   font-size: 10.3cqw;
   font-weight: 700;
   letter-spacing: 0.04em;
-  /* ⛔ 박스가 **검은 먹으로 채워졌다.** 예전 먹색 글자(#1a1206)를 그대로 두면
-        검정 위 검정이 되어 사라진다 — 위 먹 원 안 숫자와 같은 밝은 색으로 맞춘다. */
+
   color: #fff6d8;
   text-shadow: 0 0 14px rgba(232, 198, 90, 0.7), 0 2px 4px #030a12;
 }
 
-/* 🔴 좁은 화면에는 남는 공간이 없다. 릴 위 가로 배지로 되돌린다. */
 @media (max-width: 1180px) and (min-height: 561px), (orientation: portrait) and (min-height: 561px) {
-  /* 우측 패널이 위쪽 배지로 바뀌므로 데스크톱의 측면 자리 보장식을 해제한다. */
+
   :root {
     --panel-w: min(calc(var(--vw0, 100vw) - 24px), calc(var(--layout-vh) * 0.50 * var(--frame-ar)));
   }
 
-  /* 내용이 아직 없는 장식이라 좁은 화면에서는 그냥 숨긴다 — N2 에서 재검토 */
   .side-left { display: none; }
 
   .side-right {
     position: static;
-    /* 확대나 좁은 화면에서 상단 현판 위로 올라오지 않도록 문서 흐름에 둔다. */
+
     grid-row: auto;
     top: auto;
     left: auto;
@@ -1021,10 +748,8 @@ button.ghost[aria-pressed="true"] {
     justify-self: center;
   }
 
-  /* 비활성 상태의 대기 배지는 기획 화면에 필요하지 않으므로 표시하지 않는다. */
   .side-right:has(.fs-panel.idle) { display: none; }
 
-  /* 세로 패널을 놓을 자리가 없다. 그림을 끄고 가로 배지로 되돌린다. */
   .fp-frame, .fp-paper { display: none; }
 
   .fs-panel {
@@ -1040,7 +765,7 @@ button.ghost[aria-pressed="true"] {
     border-radius: 8px;
     background: rgba(6, 15, 24, 0.85);
     filter: none;
-    transform: none;          /* 좁은 화면에서는 회전하지 않는다 */
+    transform: none;
   }
 
   .fp-num, .fp-mult {
@@ -1053,17 +778,11 @@ button.ghost[aria-pressed="true"] {
   .fp-mult { font-size: 0.9rem; color: var(--ink); }
 }
 
-/* 연출을 끄는 환경 — 움직임을 없애고 **금액만** 남긴다 (조건은 흐름으로만 전달되므로) */
 @media (prefers-reduced-motion: reduce) {
   .topbar.jackpot-bar.near { animation: none; }
   .jb-money { animation: none; opacity: 1; }
 }
 
-/* ── 잭팟 조건 표시 (기획서 §10 · 결재 2026-08-25) ──────────────
-   🔴 거북선 심볼에 `JACKPOT` 라벨을 붙이는 안은 기각됐다.
-      거북선은 7스핀에 한 번 화면에 뜨는데(실측 13.6%) 실제 성립은 1/69,767 이다.
-      라벨을 붙이면 정보가 아니라 **헛된 기대**를 주게 된다.
-      그래서 릴이 아니라 액자가 조건을 말한다. */
 .jp-cond {
   display: flex;
   align-items: center;
@@ -1086,7 +805,6 @@ button.ghost[aria-pressed="true"] {
   color: var(--ink-dim);
 }
 
-/* 🔴 근접 연출 — 3연속이 붙은 **그 순간에만** 알린다. 매 스핀 떠들지 않는다. */
 .topbar .field.jackpot.near {
   animation: jp-near 0.7s ease-in-out 3;
 }
@@ -1103,10 +821,6 @@ button.ghost[aria-pressed="true"] {
 }
 .topbar .field.jackpot .num { font-size: clamp(0.95rem, 2vw, 1.35rem); }
 
-/* 타이틀 로고 — 이미지에 「명량」이 이미 들어 있으므로 글자는 숨긴다.
-   ⛔ display:none 은 쓰지 않는다. 스크린리더가 제목을 읽지 못한다.
-   🔴 비율은 **에셋이 정한다** — V2 는 크로마 키 + 여백 트림 후 900×303 이다
-      (구본 900×306). 높이를 따로 주면 좌우 용이 잘리거나 여백이 생긴다. */
 #title h1 {
   width: min(620px, 86vw);
   aspect-ratio: 900 / 303;
@@ -1117,33 +831,12 @@ button.ghost[aria-pressed="true"] {
   text-shadow: none;
 }
 
-/* ── §HUD-a ─ 하단 HUD 띠 (2026-09-03) ─────────────────
-   🔴 늘리지 않고 **반복**한다.
-      띠는 화면에서 1600×170, 즉 9.4:1 로 쓰는데 원본은 3:1 이다.
-      `stretch`(border-image 기본값) 로 두면 상하 변이 세로 0.35배로 눌리면서
-      가로로는 늘어나, 금 구슬이 **가로 12배짜리 타원**이 된다 (실측 2026-09-03).
-      `round` 는 같은 배율로 줄인 타일을 정수 개 반복하므로 왜곡이 3.5% 로 떨어진다.
-
-   슬라이스 130 / 229 는 눈대중이 아니라 실측값이다.
-      · 코너 메달리온 145×127 을 온전히 감싼다
-      · 변 슬라이스 폭 1078px = 구슬 주기 89.7px × 12.02 → 이음매가 맞아떨어진다
-   border-width 45 / 79 는 그 비율(0.346)을 그대로 지킨 값이다.
-   비율을 어기면 코너 메달리온이 찌그러진다.
-
-   ⛔ `ui_bottom_panel.webp`(야경 패널)는 더 쓰지 않는다.
-      배경 대비 밝기가 4.84배 어긋나 있었다 (실측 2026-09-03). */
 .controls {
-  /* 🔴 높이를 고정 170px 로 두었더니 1366×768 에서 문서가 30px 넘쳐
-     스크롤이 생기고 **상단 현판이 잘렸다** (실측 2026-09-03).
-     테두리 두께는 높이에 비례해야 한다 — 45/170 = 0.265, 79/170 = 0.465.
-     이 비를 어기면 코너 메달리온이 찌그러진다. */
+
   --hud-h: clamp(150px, 17vh, 190px);
   height: var(--hud-h);
-  position: relative;               /* hint 가 이 상자를 기준으로 앉는다 */
-  /* 🔴 SPIN 은 띠 안쪽보다 크다. 그래서 grid 행이 SPIN 높이만큼 늘어나는데,
-     행이 위쪽에 정렬되어 **모든 요소가 넘침의 절반만큼 아래로 밀려 있었다**
-     (1920 에서 +22px · 실측 2026-09-03). `center` 는 행을 안쪽 상자 중앙에 놓아
-     요소를 제자리로 되돌리고, SPIN 은 위아래로 균등하게 솟는다. */
+  position: relative;
+
   align-content: center;
   box-sizing: border-box;
   border-style: solid;
@@ -1154,10 +847,6 @@ button.ghost[aria-pressed="true"] {
   background: none;
 }
 
-/* INFO · 설정 — HUD-a 에서 자리만 잡고 기능은 HUD-b 에서 붙인다.
-   🔴 44px 은 터치 최소 규격(--tap)이다. 아이콘이라고 더 줄이지 않는다.
-   🔴 전 해상도 **세로 배치** (대표님 지시 2026-09-04) — 가로 112px → 52px.
-      버튼 크기는 그대로 두고 쌓기만 한다. */
 .sys {
   display: flex;
   flex-direction: column;
@@ -1184,15 +873,6 @@ button.ghost[aria-pressed="true"] {
 .icon-btn .ico { font-size: 1.05rem; font-weight: 700; line-height: 1; }
 .icon-btn .cap { font-size: 0.5rem; letter-spacing: 0.12em; color: var(--ink-dim); }
 
-/* 숫자 칸 — 목업처럼 값마다 금테 칸을 두른다.
-   🔴 최소 폭을 **같게** 잡는다. WIN 은 27px, BALANCE 는 79px 로
-      제각각이라 자릿수가 바뀔 때마다 정렬이 흔들렸다 (실측 2026-09-03).
-      `ch` 는 tabular-nums 와 맞물려 자릿수 기준으로 안정적이다. */
-/* 🔴 라벨을 **흐름에서 뺀다** (2026-09-03 5차).
-   라벨 14px + 간격 4px 이 필드 높이에 들어가 있어서, 필드가 중앙 정렬되면
-   숫자칸은 그 절반인 **9px 만큼 아래로** 내려갔다 (실측). INFO·FAST 와
-   높이가 어긋나 보인 원인이 이것이다.
-   절대 배치하면 필드 높이 = 숫자칸 높이가 되어 숫자칸이 정확히 중앙에 온다. */
 .controls .side .field {
   position: relative;
   display: flex;
@@ -1206,15 +886,14 @@ button.ghost[aria-pressed="true"] {
   bottom: calc(100% + 3px);
   transform: translateX(-50%);
   white-space: nowrap;
-  /* 🔴 SPIN 글자의 80% 다. 완전히 같은 크기로 하면 띠 안쪽 위로
-     1920 에서 2px, 1366 에서 10px 삐져나온다 (실측). 색은 SPIN 과 같다. */
+
   font-size: calc(var(--hud-h) * 0.092);
-  font-weight: 700;                 /* SPIN 글자와 같은 굵기 */
+  font-weight: 700;
   color: var(--gold-lit);
 }
 
 .controls .side .field .num {
-  /* BET 은 최대 `100,000` 7자다 (대표님 지시 2026-09-04). */
+
   min-width: 7ch;
   padding: 0.2rem 0.7rem;
   text-align: center;
@@ -1223,23 +902,12 @@ button.ghost[aria-pressed="true"] {
   border-radius: 7px;
 }
 
-/* 🔴 WIN · BALANCE 의 15자리(`999,999,999,999`) 자리 예약은 **넓은 화면 전용**이다.
-   좁은 화면에서는 칸 두 개가 444px 이라 애초에 들어가지 않는다 (§HUD-A 에서 지정). */
-
-/* 🔴 WIN · BALANCE 세로 2단 (대표님 결재 2026-09-04).
-   가로로 나란히 두면 우측이 좌측보다 훨씬 무거워지는데, `1fr auto 1fr` 은
-   **넓은 쪽의 2배**를 띠 폭으로 요구한다. 쌓으면 우측 폭이 절반이 되어
-   좌우가 균형을 이루고, 숫자를 1.5rem 그대로 두고도 띠가 짧아진다. */
 .values {
   display: grid;
   grid-auto-flow: row;
   gap: 0.3rem;
 }
 
-/* 🔴 쌓으면 라벨을 위에 둘 수 없다 — 아래 칸의 라벨이 위 칸을 덮는다.
-   띠 안쪽 높이는 hud-h 의 47%(1366 에서 70px)뿐이라 라벨 두 줄을 세울 자리도
-   없다. 그래서 이 두 칸만 **라벨을 왼쪽에 나란히** 둔다. 한 줄 높이가
-   숫자칸 높이와 같아져 두 줄이 78px 에 들어간다 (실측 2026-09-04). */
 .controls .side .values .field {
   display: flex;
   align-items: center;
@@ -1250,47 +918,16 @@ button.ghost[aria-pressed="true"] {
 .controls .side .values .field .label {
   position: static;
   transform: none;
-  /* 두 라벨의 길이가 달라도(WIN·BALANCE) 숫자칸 왼쪽 선이 맞도록 폭을 고정한다 */
+
   min-width: 7ch;
   text-align: right;
 }
 
-/* 🔴 띠를 **위로 당긴다** (대표님 지적 2026-09-03).
-   릴 프레임 이미지는 아래쪽에 10~13px 의 빈 여백을 품고 있다. 그래서
-   레이아웃 간격이 23~29px 일 때 **눈에는 33~42px 로 보인다** (실측).
-   그 여백만큼 파고들어야 화면에서 14px 안팎으로 읽힌다.
-   ⛔ 프레임의 시각적 하단과는 겹치지 않는다 — 파고드는 것은 빈 여백뿐이다. */
 .controls { margin-top: clamp(-8px, -0.45vh, -3px); }
 
-/* 🔴 SPIN 이 띠 위로 솟는 만큼 위쪽을 되돌려 준다 (2026-09-03 4차).
-   SPIN 을 띠 높이의 1.11배로 키우자 위로 8~10px 솟았고, 릴 프레임 하단과
-   **4px** 까지 붙었다 (실측). 당김을 절반쯤 풀어 10px 안팎을 확보한다.
-   빈 공간은 조금 늘지만 그 자리를 SPIN 이 채우므로 화면은 오히려 꽉 찬다. */
-
-/* ══ §HUD-A ─ 통짜 HUD 띠 (대표님 결재 2026-09-04) ══════════════════════
-   🔴 예전 띠(`ui_hud_band`)는 **빈 액자**였고 칸은 CSS 가 그렸다.
-      새 띠(`ui_hud_bar_slots`)는 **칸까지 그림에 들어 있다** — INFO·설정 /
-      BET / WIN / BALANCE / FAST·AUTO 다섯 칸과, 가운데 SPIN 자리(빈 구간).
-      그래서 요소를 흐름으로 놓을 수 없다. 칸 좌표에 **절대 배치**한다.
-      (N3 통합 프레임에서 릴 외곽을 매핑한 것과 같은 방식이다)
-
-   실측값 — 원본 1647×230 (7.161:1) · 칸 안쪽 개구부를 금테 기준으로 잰 것
-   (대표님 재제작본 `ui_hud_band_original3.png` 기준 2026-09-04):
-       A 4.25 / 16.09 / 7.59 / 66.96      B 15.18 / 23.91 / 23.44 / 53.48
-       C 61.08 / 17.83 / 25.50 / 26.96    D 61.02 / 53.48 / 25.56 / 27.39
-       E 89.01 / 16.09 / 6.62 / 66.96     SPIN 빈 구간 38.62~61.08 (중심 49.85)
-
-   ⛔ 900px 미만에서는 이 블록이 통째로 꺼지고 예전 흐름 배치로 돌아간다.
-      버튼 크기를 띠 높이에 비례시켜(아래) 칸이 줄어도 함께 줄어들므로,
-      브라우저 200% 확대(논리 폭 ≈951px)에서도 통짜 띠가 유지된다.
-
-   ⚠️ **A안의 대가** — 칸 좌표가 그림에 고정되어 있으므로, 앞으로 자릿수나
-      버튼 크기를 바꾸면 그림과 어긋난다. 그때는 에셋을 다시 받아야 한다. */
 @media (min-width: 900px), (orientation: landscape) and (max-height: 560px) {
   .controls {
-    /* 폭이 정해지면 높이는 그림 비율이 정한다 — 칸이 늘 제자리에 온다.
-       ⛔ `100%` 를 쓰지 않는 이유: 높이 계산의 백분율은 부모 높이를 기준으로
-          잡혀 버린다. 스테이지 폭 공식을 그대로 적어 준다. */
+
     --bar-ar: 7.1609;
     --bar-w: min(
       min(1600px, calc(var(--vw0, 100vw) - 1.5rem)),
@@ -1299,7 +936,7 @@ button.ghost[aria-pressed="true"] {
     --hud-h: calc(var(--bar-w) / var(--bar-ar));
 
     position: relative;
-    display: block;                  /* 대칭 그리드 해제 — 칸에 절대 배치한다 */
+    display: block;
     width: var(--bar-w);
     height: var(--hud-h);
     margin-inline: auto;
@@ -1308,13 +945,9 @@ button.ghost[aria-pressed="true"] {
     background: url("../assets/ui/ui_hud_bar_slots.webp") center / 100% 100% no-repeat;
   }
 
-  /* 묶음 상자는 자리만 차지하지 않게 걷어낸다 — 자식이 직접 칸에 앉는다 */
   .controls .side,
   .controls .values { display: contents; }
 
-  /* 🔴 `.controls .side .field` 가 `position: relative` 를 이미 갖고 있어
-     선택자를 같은 무게(0,3,0)까지 올려야 한다. `.controls .cell`(0,2,0) 로는
-     졌고, BET·WIN·BALANCE 세 칸만 흐름에 남아 아래로 흘러내렸다 (실측). */
   .controls .side .cell {
     position: absolute;
     display: flex;
@@ -1324,27 +957,16 @@ button.ghost[aria-pressed="true"] {
     padding: 0;
   }
 
-  /* 세로 2단 규칙(`.controls .side .values .field`, 0,4,0)이 라벨을 오른쪽으로
-     밀고 있었다 — 칸 안에서는 라벨과 숫자를 한 덩어리로 가운데 둔다. */
   .controls .side .values .field {
     justify-content: center;
     gap: calc(var(--hud-h) * 0.03);
   }
 
-  /* 🔴 WIN 과 BALANCE 는 라벨 길이가 달라(3자 vs 7자) 가운데 정렬만 하면
-     두 줄의 숫자가 서로 다른 x 에서 시작한다. 라벨 상자를 같은 폭으로 잡아
-     숫자 왼쪽 선을 맞춘다 — 위아래가 한 벌로 읽힌다. */
   .controls .side .values .field .label {
     min-width: 7ch;
     text-align: right;
   }
 
-  /* 🔴 BET 라벨은 **칸 안**에 둔다 (대표님 지시 2026-09-04).
-     한때 칸이 작아 라벨을 칸 밖 위로 뺐었는데, 대표님이 칸을 키운 판을 다시
-     그려 주셔서(높이 40.43% → 53.48%) 라벨과 버튼줄이 함께 들어간다.
-     ⚠️ `.field.cell-b` 로 무게를 올려 둔다. `.controls .side .cell-b .label`(0,4,0)
-        은 뒤에 오는 `.controls .side .field .label`(0,4,0)에 밀린다 — 실제로
-        한 번 밀려서 라벨이 움직이지 않았다. */
   .controls .side .field.cell-b .label {
     position: static;
     transform: none;
@@ -1353,16 +975,12 @@ button.ghost[aria-pressed="true"] {
   }
 
   .cell-a { left: 4.25%;  top: 16.09%; width: 7.59%;  height: 66.96%; flex-direction: column; }
-  /* 🔴 BET 칸은 대표님이 다시 그려 주신 판에서 커졌다 — 23.44% × 53.48%
-     (표시 272×87px). 라벨을 **칸 안**으로 되돌리고 라벨+버튼줄을 한 덩어리로
-     중앙에 둔다 (대표님 지시 2026-09-04). 내용 63px 이라 위아래 12px 씩 남는다. */
+
   .cell-b { left: 15.18%; top: 23.91%; width: 23.44%; height: 53.48%; flex-direction: column; }
   .cell-c { left: 61.08%; top: 17.83%; width: 25.50%; height: 26.96%; }
   .cell-d { left: 61.02%; top: 53.48%; width: 25.56%; height: 27.39%; }
   .cell-e { left: 89.01%; top: 16.09%; width: 6.62%;  height: 66.96%; flex-direction: column; }
 
-  /* 🔴 SPIN 은 칸이 아니라 **빈 구간 위**에 놓인다. 중심 49.91% 는 실측값이며
-     50% 가 아니다 — 그림의 좌우 여백이 미세하게 다르다. */
   #spin {
     position: absolute;
     left: 49.85%;
@@ -1374,7 +992,6 @@ button.ghost[aria-pressed="true"] {
     font-size: calc(var(--hud-h) * 0.115);
   }
 
-  /* 라벨·숫자는 띠 높이에 매단다 — 확대·해상도가 바뀌어도 칸과 함께 커진다 */
   .controls .side .field .label {
     position: static;
     transform: none;
@@ -1387,8 +1004,6 @@ button.ghost[aria-pressed="true"] {
     font-size: calc(var(--hud-h) * 0.14);
   }
 
-  /* 🔴 칸의 금테는 **그림이 그린다.** 숫자칸이 자기 테두리를 또 그리면
-     액자 안에 액자가 생긴다. 배경·테두리를 걷어낸다. */
   .controls .side .field .num {
     min-width: 0;
     padding: 0;
@@ -1397,21 +1012,12 @@ button.ghost[aria-pressed="true"] {
     border-radius: 0;
   }
 
-  /* WIN·BALANCE 는 `999,999,999,999` 15자를 담는다 (대표님 지시).
-     칸 C·D 안쪽 폭이 25.55% × 1,160 = 296px 이고 15자는 204px 이라 들어간다. */
   #win, #credit { min-width: 15ch; }
 
   .cell-c .label, .cell-d .label { flex: 0 0 auto; }
 
-  /* 두 버튼이 한 칸에 들어간다 — 칸 A·E 는 세로로 쌓는다 */
   .cell-a, .cell-e { gap: calc(var(--hud-h) * 0.035); }
 
-  /* 🔴 버튼 크기도 **띠에 매단다** (2026-09-04).
-     px 로 고정해 두면 칸은 띠 폭에 비례해 줄어드는데 버튼은 그대로여서,
-     브라우저를 확대할수록(논리 폭이 줄어들수록) 버튼이 칸 밖으로 나간다.
-     실제로 68px 고정이던 FAST·AUTO 때문에 띠가 1,030px 아래로 못 내려갔다.
-     비례로 바꾸니 경계를 1060 → 900px 까지 내릴 수 있었고, 200% 확대에서도
-     통짜 띠가 유지된다. 배율은 띠 162px 기준 실측값(52/44 · 68/32)과 같다. */
   .controls .side .icon-btn {
     min-width: calc(var(--hud-h) * 0.32);
     min-height: calc(var(--hud-h) * 0.27);
@@ -1421,10 +1027,6 @@ button.ghost[aria-pressed="true"] {
   .controls .side .icon-btn .ico { font-size: calc(var(--hud-h) * 0.105); }
   .controls .side .icon-btn .cap { font-size: calc(var(--hud-h) * 0.05); }
 
-  /* 🔴 FAST·AUTO 는 **좁고 높게** (대표님 지시 2026-09-04).
-     칸 E 는 77×108px 인데 버튼 두 개가 70.5px 만 써서 37.5px 이 비어 있었다.
-     폭 68→58px(좌우 여백 4.5→9.4px) · 높이 32→46px(두 개 합 98px)로
-     칸을 꽉 채운다. 글자 11.7px 은 그대로 — 58px 폭에 「FAST」가 32px 이다. */
   .controls .side button.toggle {
     min-width: calc(var(--hud-h) * 0.36);
     min-height: calc(var(--hud-h) * 0.285);
@@ -1442,15 +1044,10 @@ button.ghost[aria-pressed="true"] {
   backdrop-filter: blur(2px);
 }
 
-/* 🔴 세로 화면에서는 프레임을 쓰지 않는다.
-   프레임 비율이 1.81 이라 좁은 화면에서 릴이 손톱만 해진다.
-   장식보다 심볼이 보이는 것이 먼저다. */
 @media (max-width: 760px) and (min-height: 561px), (orientation: portrait) and (min-height: 561px) {
-  /* 프레임을 쓰지 않으므로 폭을 화면에 맞춘다 */
+
   :root { --panel-w: 100%; }
 
-
-  /* 작은 화면도 배경 틈이 드러나지 않도록 릴 경계 안으로 넣는다. */
   .topbar.jackpot-bar {
     width: 78%;
     height: auto;
@@ -1503,41 +1100,19 @@ button.ghost[aria-pressed="true"] {
   }
 }
 
-/* ── 프리스핀 (기획서 §8-2 · UI기획서 §5-1) ─────────────────── */
-
-/* 🔴 선택 화면은 **릴 위에** 띄운다. 릴이 보이는 채로 물어야
-   "무엇으로 이걸 돌릴 것인가" 라는 맥락이 유지된다. */
-/* 🔴 **무대 전체**로 나왔다 (대표님 지시 2026-09-08).
-   예전에는 릴 개구부(`inset: 8.6% 6.8% 8.9% 6.9%`) 안에서 골랐다. 프리스핀은
-   라운드가 통째로 바뀌는 사건인데 릴 창 안에서 조용히 일어나 무게가 맞지 않았다.
-   ⛔ `.reel-panel` 안에 두면 절대 나올 수 없다 — `isolation: isolate` 가 층을
-      가둔다. 그래서 `index.html` 에서 **무대 직계로 옮겼다.**
-   🔴 기준은 뷰포트가 아니라 **무대(`#stage`)** 다 (대표님 결재 「다」).
-      `position: fixed` 로 잡으면 WEB 에서 게임 배경 밖 검은 여백까지 덮는다. */
 .choice {
   position: absolute;
   inset: 0;
-  z-index: 30;                      /* HUD(10)·SPIN(12) 위 · 세로 안내(100) 아래 */
+  z-index: 30;
   display: grid;
-  /* 🔴 `place-content: center` 는 트랙을 **내용 크기(max-content)** 로 잡는다.
-     그래서 선택지 세 장이 컨테이너(691px)보다 넓어도(772px) 트랙이 함께 커져,
-     flex 가 줄어들 기회를 얻지 못하고 프레임 밖으로 삐져나갔다 (실측 2026-09-03).
-     트랙을 `minmax(0, 1fr)` 로 묶으면 컨테이너 폭을 넘지 못하고 flex 가 줄어든다. */
+
   grid-template-columns: minmax(0, 1fr);
   align-content: center;
-  /* ⛔ `justify-items: center` 는 넣지 않는다 — 아이템 폭이 다시
-     내용 크기가 되어 트랙 제한이 무력해진다. 기본값 stretch 로 두고
-     가운데 정렬은 `.choice` 의 text-align 과 리스트의 justify-content 가 맡는다. */
+
   gap: clamp(0.5rem, 1.5vw, 1rem);
   padding: 1rem;
   text-align: center;
-  /* 🔴 배경은 군기 이미지, **딤 없이** (대표님 결재 2026-08-25 「다안」).
-     처음에 "딤 제거" 를 배경째 들어내라는 뜻으로 잘못 읽어 배경을 지웠다.
-     의도는 **배경이 잘 보이게** 하라는 것이었다.
 
-     ⛔ 딤을 걸지 않으므로 글자는 스스로 버텨야 한다.
-        실측 결과 제목이 놓이는 상단 중앙의 평균 밝기가 **197**(최대 255, 태양 광선)이라
-        금색 글자가 그대로는 묻힌다. 아래 h2·choice-sub 의 다중 그림자가 그 대책이다. */
   background: url("../assets/scenes/x2_freespin_flags.webp") center / cover no-repeat;
 }
 
@@ -1545,12 +1120,11 @@ button.ghost[aria-pressed="true"] {
 
 .choice h2 {
   margin: 0;
-  /* 🔴 그림자를 겹쳐 **외곽선처럼** 쓴다. 배경 최대 밝기가 255 라 한 겹으로는 안 된다. */
+
   text-shadow:
     0 0 3px #030a12, 0 0 3px #030a12, 0 0 3px #030a12,
     0 2px 6px rgba(3, 10, 18, 0.95), 0 0 24px rgba(3, 10, 18, 0.85);
-  /* 한 번 줄였다가 너무 작다는 지적을 받아 다시 키웠다 (2026-08-25).
-     배경이 화사해진 만큼 글자도 그에 맞는 무게가 필요하다. */
+
   font-size: clamp(1.3rem, 3.4vw, 2.1rem);
   letter-spacing: 0.14em;
   letter-spacing: 0.1em;
@@ -1561,7 +1135,7 @@ button.ghost[aria-pressed="true"] {
   margin: 0;
   font-size: clamp(0.9rem, 2vw, 1.15rem);
   color: var(--ink);
-  /* 릴 위에 바로 얹히므로 글자가 스스로 배경에서 떨어져야 한다 */
+
   text-shadow:
     0 0 3px #030a12, 0 0 3px #030a12,
     0 2px 6px rgba(3, 10, 18, 0.95), 0 0 18px rgba(3, 10, 18, 0.85);
@@ -1571,40 +1145,25 @@ button.ghost[aria-pressed="true"] {
   display: flex;
   gap: clamp(0.5rem, 2vw, 1.25rem);
   justify-content: center;
-  /* 🔴 wrap 이면 세 개가 컨테이너를 넘는 순간 **두 줄로 접힌다**
-     (1903×911 에서 필요 771px / 가용 551px · 실측 2026-09-03).
-     접히면 세로로도 넘쳐 플레이트가 프레임 밖에서 잘려 사라진 것처럼 보였다.
-     한 줄로 묶고 대신 줄어들 수 있게 한다 — 글자는 nowrap 이라 쪼개지지 않고,
-     `.spec` 의 상한이 최소 폭 150px 에서도 안 넘도록 잡혀 있다. */
+
   flex-wrap: nowrap;
   margin-top: 0.5rem;
 }
 
-/* 🔴 플레이트는 그림 한 장이고, 글자는 코드가 얹는다 (§7-3).
-   그림에 글자가 박혀 있으면 나중에 문구를 못 바꾼다. */
 button.choice-item {
   display: grid;
-  /* 🔴 플레이트에서 금색 구분선이 사라졌다 (2026-08-25 재생성).
-     안쪽이 한 칸이 되었으므로 두 줄을 **한 덩어리로 중앙 정렬**한다.
-     칸을 54.6:17 로 나눠 쓰던 시절에는 아랫칸이 18px 밖에 안 돼 글자를 못 키웠다. */
+
   place-content: center;
   gap: 0.18em;
-  /* 🔴 3개 + 간격이 선택 화면 가용 폭(약 700px)을 넘으면 flex 가 버튼을 **줄여** 글자가
-     쪼개진다. 실제로 230px 로 키웠다가 `12 / 회 / ×2` 세 줄로 깨졌다.
-     폭을 줄이고, 줄어들지 못하게 막고, 줄바꿈 자체를 금지한다 — 세 겹으로 방어한다. */
+
   width: clamp(150px, 25vw, 232px);
-  /* ⛔ 0 이면 줄어들지 못해 컨테이너를 넘고 두 줄로 접힌다 (2026-09-03).
-     150px 아래로는 못 내려가므로 `.spec` 의 글자 상한이 계속 유효하다. */
+
   flex-shrink: 1;
   min-width: 150px;
-  /* 원본 512×240 — 비율이 틀어지면 파도와 연화문이 늘어난다.
-     ⛔ `aspect-ratio` 는 **내용이 들어갈 때만** 지켜진다. 넘치면 상자가 늘어난다.
-        아래 .spec 의 글자 상한이 그 조건을 보장한다. 둘은 한 쌍이다. */
+
   aspect-ratio: 512 / 240;
   overflow: hidden;
-  /* 🔴 세로 padding 도 **가로 폭** 기준으로 계산된다 (CSS 규격).
-     실측 안쪽 여백 상 12.5% / 하 12.1% (높이 기준) → 여유 2%p 를 얹어
-     환산:  14.5% × (240 / 512) = 6.80%  */
+
   padding: 6.8% 10%;
   color: var(--ink);
   background: url("../assets/ui/ui_choice_plate_wave2.webp") center / 100% 100% no-repeat;
@@ -1616,7 +1175,7 @@ button.choice-item {
 button.choice-item:hover,
 button.choice-item:focus-visible {
   transform: translateY(-2px);
-  /* 테두리를 덧그리지 않는다 — 금테는 이미 그림에 있다. 그림 자체를 밝힌다. */
+
   filter: brightness(1.14) drop-shadow(0 0 14px rgba(232, 198, 90, 0.45));
 }
 
@@ -1624,39 +1183,31 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
 
 .choice-item .spec {
   font-family: ui-monospace, "Consolas", monospace;
-  /* ⛔ `12회 ×2` 는 어떤 폭에서도 한 줄이어야 한다 */
+
   white-space: nowrap;
-  /* 🔴 상한 1.65rem(26.4px) 은 임의 값이 아니다.
-     **버튼이 최소 폭(150px)일 때도 안 넘치는 크기**로 잡았다.
-       가로  26.4 × 4.1 = 108px  ≤ 안쪽 120px
-       세로  26.4 + 15.2 + 5 = 47px  ≤ 안쪽 50px
-     상한이 이 선을 넘으면 글자가 상자를 밀어내고,
-     그러면 `aspect-ratio` 가 깨져 배경 그림이 세로로 늘어난다. */
+
   font-size: clamp(1.05rem, 2.4vw, 1.65rem);
   color: var(--gold-lit);
   text-shadow: 0 2px 6px rgba(3, 10, 18, 0.85);
 }
 
 .choice-item .trait {
-  /* 아래 칸이 좁다. 흐린 회색으로 두면 작은 화면에서 사라진다 */
+
   white-space: nowrap;
   font-size: clamp(0.75rem, 1.3vw, 0.95rem);
   letter-spacing: 0.06em;
   color: var(--ink);
 }
 
-/* ── 당첨 등급 연출 (UI기획서 §6-2) ────────────────────────────
-   🔴 딤 농도는 등급 명세 그대로다 — BIG 35% / MEGA 55% / LEGENDARY 70%.
-      숫자를 올리는 동안 릴이 서서히 물러나야 시선이 배너로 모인다. */
 .winbanner {
   position: absolute;
   inset: 8.6% 6.8% 8.9% 6.9%;
-  z-index: 4;                       /* 릴(1) 위 · 프레임(5) 아래 */
+  z-index: 4;
   display: grid;
   place-content: center;
   gap: 0.2rem;
   text-align: center;
-  pointer-events: auto;             /* 클릭하면 즉시 끝난다 (§6-2-4 스킵) */
+  pointer-events: auto;
   cursor: pointer;
   background: rgba(3, 10, 18, 0.35);
   transition: background-color 0.2s ease;
@@ -1666,24 +1217,16 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
 .winbanner.t-mega { background: rgba(3, 10, 18, 0.55); }
 .winbanner.t-legendary { background: rgba(3, 10, 18, 0.7); }
 
-/* 누적 보너스 — 전각(殿閣) 배경 (UI기획서 §6, 3.0s) */
 .winbanner.t-jackpot {
-  /* 🔴 잭팟만 **무대 전체**다 (대표님 지시 2026-09-08 · 결재 「라」).
-     이 요소는 평소 `.reel-panel` 안에 살지만, 잭팟 연출 동안에는
-     `jackpotwin.js` 가 `overlay.js` 로 **무대 직계로 들어 올린다** —
-     `isolation: isolate` 때문에 CSS 만으로는 릴 밖으로 못 나온다.
-     그래서 아래 `inset: 0` 은 릴이 아니라 **무대**를 채운다.
-     ⛔ 노출 시간은 손대지 않았다 — 4,000ms / 3단 합산 5,700ms 그대로다. */
+
   inset: 0;
-  z-index: 40;                      /* 선택 화면(30) 위 · 세로 안내(100) 아래 */
+  z-index: 40;
   background:
     linear-gradient(rgba(3, 10, 18, 0.62), rgba(3, 10, 18, 0.72)),
     url("../assets/scenes/x1_bonus_palace.webp") center / cover no-repeat;
   animation: wb-flash 0.8s ease-out 3;
 }
 
-/* 🔴 잭팟은 게임에서 가장 큰 사건이다. 등급 배너보다 확실히 커야 한다.
-   작아졌다 커졌다 하는 맥동으로 "살아 있음" 을 준다 (대표님 지시 2026-08-25). */
 .winbanner.t-jackpot .wb-tier {
   font-size: clamp(1.9rem, 6.4vw, 4.4rem);
   font-weight: 800;
@@ -1695,7 +1238,7 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
 .winbanner.t-jackpot .wb-num {
   font-size: clamp(2.4rem, 9vw, 5.4rem);
   font-weight: 700;
-  animation: jp-beat 0.82s ease-in-out infinite 0.14s;   /* 살짝 늦게 — 두 줄이 어긋나며 뛴다 */
+  animation: jp-beat 0.82s ease-in-out infinite 0.14s;
 }
 
 @keyframes jp-beat {
@@ -1723,26 +1266,21 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   text-shadow: 0 0 26px rgba(232, 198, 90, 0.85), 0 3px 10px #030a12;
 }
 
-/* 등급이 오를수록 배너도 커진다 */
 .winbanner.t-mega .wb-tier { font-size: clamp(1.3rem, 4.2vw, 2.9rem); }
 .winbanner.t-legendary .wb-tier { font-size: clamp(1.5rem, 5vw, 3.4rem); }
 
-/* 가장자리 금색 펄스 — BIG 2회 · 위 등급은 계속 */
 .winbanner { box-shadow: inset 0 0 0 rgba(232, 198, 90, 0); }
 .winbanner.t-big { animation: wb-edge 0.9s ease-out 2; }
 .winbanner.t-mega { animation: wb-edge 0.8s ease-out infinite; }
 .winbanner.t-legendary { animation: wb-flash 0.7s ease-out 3; }
 
-/* 🔴 잭팟 3단 합산 (대표님 결재 2026-08-30) — JACKPOT → + LINE WIN → TOTAL WIN
-   ⛔ **등급 배너에는 절대 새지 않는다.** 값을 지우는 것만으로는 부족하다 —
-      구조로 막아야 «지난 잭팟 금액이 BIG WIN 배너에 남는» 사고가 원천 차단된다. */
 .winbanner:not(.t-jackpot) .wb-line,
 .winbanner:not(.t-jackpot) .wb-total { display: none; }
 
 .wb-line, .wb-total {
   font-family: ui-monospace, "Consolas", monospace;
   letter-spacing: 0.06em;
-  /* 각자의 차례에 아래에서 떠오른다 — 합산의 «순서»가 읽혀야 한다 */
+
   animation: wb-rise 0.42s ease-out both;
 }
 .wb-line {
@@ -1753,7 +1291,7 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
 .wb-total {
   margin-top: 0.28rem;
   padding-top: 0.34rem;
-  /* 가로선이 «합계»임을 말한다 — 라벨보다 먼저 읽힌다 */
+
   border-top: 1px solid rgba(232, 198, 90, 0.45);
   font-size: clamp(1.05rem, 3.4vw, 2.1rem);
   color: var(--gold-lit);
@@ -1766,7 +1304,6 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   to { opacity: 1; transform: none; }
 }
 
-/* 🔴 승격 섬광 (§6-2-3) — 0.15초. 배너가 바뀌는 순간을 눈이 놓치지 않게 한다 */
 .winbanner.promote { background: rgba(255, 250, 235, 0.72); }
 
 @keyframes wb-edge {
@@ -1779,17 +1316,12 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   40% { box-shadow: inset 0 0 140px rgba(255, 240, 190, 0.75); }
 }
 
-/* ── WIN 등급 — 배너 대신 금액만 떠오른다 (당첨의 82%) ──────────
-   🔴 이 구간에 배너를 띄우면 1/5 스핀마다 화면이 가려져 게임이 답답해진다. */
 .winpop {
   position: absolute;
   left: 50%;
-  /* 🔴 정중앙(52%)에 두면 5×4 격자 특성상 **항상 어떤 심볼 칸 위**에 겹쳐
-     "그 심볼의 배당" 으로 읽힌다. 실제로 영상 검토에서 오독이 발생했다.
-     캔버스는 패널의 8.6%~91.1% 를 쓰므로(`.reel-panel canvas`) 그 아래
-     장식 밴드만이 안전지대다. 34px 떠오른 뒤에도 격자에 닿지 않는다. */
+
   top: 100%;
-  /* 🔴 프레임(::after)이 z-index 5 다. 4 로 두면 장식 밴드 뒤에 숨는다. */
+
   z-index: 6;
   transform: translate(-50%, -50%);
   font-family: ui-monospace, "Consolas", monospace;
@@ -1809,15 +1341,9 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   100% { opacity: 0; transform: translate(-50%, calc(-50% - var(--rise, 34px))) scale(1); }
 }
 
-/* ── 화면 흔들림 (§6-2-4) — 3px / 5px / 8px ──────────────────── */
-/* ── FREE 트리거 연출 (연출기획서 §4-3) ──
-   🔴 프레임(`::after` · z-index 5)은 **창틀**이다. 창 안에 무엇이 오든 창틀이 가려지면
-      안 된다는 결재가 이미 있다. 그래서 어둡게 하는 것은 **캔버스뿐**이고
-      상단바·하단바·프레임은 건드리지 않는다. */
 .reel-panel canvas { transition: filter 0.25s ease; }
 .reel-panel.fx-dim canvas { filter: brightness(0.45) saturate(0.85); }
 
-/* 금빛 번짐 — 어둠에서 한 번 확 밝아졌다 제자리로. 새 요소를 얹지 않는다. */
 @keyframes fx-wipe {
   0%   { filter: brightness(0.45) saturate(0.85); }
   35%  { filter: brightness(2.1) saturate(1.5) sepia(0.45); }
@@ -1845,39 +1371,30 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   60% { transform: translate(8px, -3px); }
 }
 
-/* 연출을 끄는 환경 — 정보는 남기고 움직임만 없앤다 */
 @media (prefers-reduced-motion: reduce) {
   .winbanner, .winpop, .reel-panel.shake-1,
   .reel-panel.shake-2, .reel-panel.shake-3,
   .topbar.jackpot-bar:has(+ .reel-panel.shake-1) .jb-stage,
   .topbar.jackpot-bar:has(+ .reel-panel.shake-2) .jb-stage,
   .topbar.jackpot-bar:has(+ .reel-panel.shake-3) .jb-stage { animation: none; }
-  /* 번짐도 끈다 — 대신 어두워졌다 밝아지는 것만 남는다 */
+
   .reel-panel.fx-wipe canvas { animation: none; }
   .winpop { opacity: 1; }
 }
 
-/* ── 프리스핀 종료 — 총 획득 (대표님 지시 2026-08-25) ─────────
-   🔴 릴 위에 띄우되 **가리지는 않는다.** 마지막 릴 결과를 보면서
-      합계를 받아야 "이만큼 벌었다" 가 성립한다. 그래서 배경을 덮지 않고
-      가운데 띠만 놓는다. */
 .fs-total {
   position: absolute;
-  /* 🔴 릴 **정중앙** 이다 (대표님 지시 2026-09-03).
-     `bottom: 26%` 로 두었더니 4행 격자의 3행 자리에 얹혀, 그 순간 가장 중요한
-     정보인 총 획득이 아래로 처져 무게가 실리지 않았다.
-     ⛔ 아래 keyframes 도 함께 `translateY(-50%)` 기준이다 — 한쪽만 고치면
-        등장 연출이 끝나는 순간 위치가 아래로 튄다. */
+
   inset: auto 6.9%;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 4;                       /* 릴(1) 위 · 프레임(5) 아래 */
+  z-index: 4;
   display: grid;
   justify-items: center;
   gap: 0.15rem;
   padding: clamp(0.6rem, 2vw, 1.1rem) 1rem;
   text-align: center;
-  pointer-events: none;             /* 버튼을 가로채지 않는다 */
+  pointer-events: none;
   background: radial-gradient(ellipse at center,
     rgba(6, 15, 24, 0.94) 0%, rgba(6, 15, 24, 0.82) 55%, rgba(6, 15, 24, 0) 100%);
   animation: fs-total-in 0.35s ease-out both;
@@ -1906,17 +1423,15 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
 }
 
 @keyframes fs-total-in {
-  /* 중앙 정렬분(-50%)을 **키프레임 안에서도** 유지한다 (2026-09-03) */
+
   from { opacity: 0; transform: translateY(calc(-50% + 10px)) scale(0.94); }
   to   { opacity: 1; transform: translateY(-50%) scale(1); }
 }
 
-/* 연출을 끄는 환경에서는 등장만 생략한다 — 내용은 그대로 보여야 한다 */
 @media (prefers-reduced-motion: reduce) {
   .fs-total { animation: none; }
 }
 
-/* 프리스핀 진행 표시 — 상단 우측 */
 .topbar-tail {
   display: flex;
   justify-content: flex-end;
@@ -1952,32 +1467,22 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
 }
 
 @media (max-width: 760px) and (min-height: 561px), (orientation: portrait) and (min-height: 561px) {
-  /* ⛔ `inset: 0` 은 이제 기본값이다 (2026-09-08 무대 전체 전환) — 여기서 다시 쓰지 않는다.
-     좁은 세로 화면에서는 선택지 세 장이 가로로 들어가지 않아 세로로 쌓는다. */
+
   .choice-list { flex-direction: column; align-items: center; }
   button.choice-item { width: min(78vw, 260px); }
 }
 
-/* ══ §BONUS-INTRO ─ 보너스 게임 진입 연출 (대표님 지시 2026-09-08) ═══════
-   🔴 보물상자 3개(1/3,669)로 열리는 라운드에 **예고가 없었다.**
-      프리스핀에는 트리거 연출 + 선택 화면이 있는데, 보너스 게임은 결재
-      2026-09-05 로 선택 화면이 사라지면서 재트리거 축약 연출(500ms)만 남았다.
-   🔴 무대 전체다 — 선택 화면·잭팟과 같은 층 규칙 (대표님 결재 「다」).
-   ⛔ 클릭을 받지 않는다. 2초는 「알리는 시간」이지 「기다리는 시간」이 아니다 —
-      건너뛸 것을 주면 그만큼 못 보고 지나간다. */
 .bonus-intro {
   position: absolute;
   inset: 0;
-  z-index: 35;                      /* 선택 화면(30) 위 · 잭팟(40) 아래 */
+  z-index: 35;
   display: grid;
   place-content: center;
   justify-items: center;
   gap: 0.4rem;
   text-align: center;
   pointer-events: none;
-  /* 🔴 딤을 충분히 건다. 0.62 로 두었더니 릴 심볼이 그대로 읽혀 상자와 시선이
-     갈렸다 (실측 2026-09-08). 잭팟 배너의 0.62~0.72 보다 진한 이유는 그쪽엔
-     전각(殿閣) 그림이 화면을 통째로 덮지만 여기는 상자 한 점뿐이기 때문이다. */
+
   background:
     radial-gradient(ellipse at 50% 45%, rgba(6, 15, 26, 0.82), rgba(3, 10, 18, 0.94));
   animation: bi-in 0.28s ease-out both;
@@ -1985,14 +1490,6 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
 
 .bonus-intro.hidden { display: none; }
 
-/* 🔴 상자는 **높이에 매단다** (`dvh`). 폰 가로는 2.12~2.35:1 이라 `vw` 로 잡으면
-   글자 두 줄과 합쳐 세로가 먼저 터진다 — 모바일 3분할에서 배운 것과 같다.
-
-   🔴 **가장자리를 녹인다.** 원본은 알파가 없는 1280² 정사각이라 그대로 얹으면
-      파란 하늘 네모가 릴 위에 붙여넣은 것처럼 보인다 (실측 확인 2026-09-08).
-      원형 마스크로 바깥을 지우면 상자의 금빛만 남아 어두운 배경에 얹힌다.
-      ⛔ 에셋을 다시 뽑지 않는다 — 대표님이 지정하신 그림 그대로다 (§7-3 과 같은
-         판단: 그림은 그림대로 두고 화면 쪽에서 처리한다). */
 .bonus-intro .bi-chest {
   width: auto;
   height: clamp(90px, 40dvh, 420px);
@@ -2006,7 +1503,7 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   font-size: clamp(1.2rem, 9dvh, 3.2rem);
   font-weight: 800;
   letter-spacing: 0.22em;
-  /* 마지막 글자 자간이 오른쪽에 남아 가운데가 밀린다 — 절반을 되돌린다 (§명량 선례) */
+
   text-indent: 0.11em;
   color: var(--gold-lit);
   text-shadow: 0 0 4px #030a12, 0 2px 10px #030a12, 0 0 34px rgba(232, 198, 90, 0.75);
@@ -2026,18 +1523,13 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   to   { opacity: 1; }
 }
 
-/* 상자는 「튀어나와 자리를 잡고, 끝에 물러난다」 — 🔴 **종소리 세 타**와 박자를 맞춘다
-   (대표님 지시 2026-09-08 2차 — 「땡-땡-땡」).
-   사운드 실측 타격 시각 0.00 / 0.46 / 0.92s ÷ 3.0s = **0% · 15% · 31%**.
-   ⛔ 정점을 타격보다 조금 **뒤**에 둔다 — 소리와 그림이 동시에 정점이면
-      두 자극이 겹쳐 오히려 한 번으로 뭉쳐 읽힌다. */
 @keyframes bi-chest {
   0%   { transform: scale(0.55) translateY(8%); opacity: 0; }
-  6%   { transform: scale(1.06); opacity: 1; }   /* 1타 */
+  6%   { transform: scale(1.06); opacity: 1; }
   12%  { transform: scale(0.97); }
-  20%  { transform: scale(1.05); }               /* 2타 */
+  20%  { transform: scale(1.05); }
   27%  { transform: scale(0.98); }
-  36%  { transform: scale(1.04); }               /* 3타 */
+  36%  { transform: scale(1.04); }
   46%  { transform: scale(1); }
   90%  { transform: scale(1); opacity: 1; }
   100% { transform: scale(1.04); opacity: 0; }
@@ -2057,19 +1549,6 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   .bonus-intro .bi-sub { animation: none; }
 }
 
-/* ── JACKPOT 연출 (연출기획서 §6) ──────────────────────────────
-   🔴 없던 것은 기능이 아니라 **끝나는 순간**이었다.
-      섬광으로 열고(flash) · 로고를 키우고(scale) · 코인이 튀고 폭죽이 터지는 동안
-      숫자가 오르고 · **마지막 금액에서 한 번 더 터진다(hit)**.
-
-   🔴 1차 구현이 실물에서 실패한 지점 (2026-08-29 영상)
-      `.jp-flash::before` 와 `.jp-hit::before` 에 **같은 키프레임**을 길이만 달리 물렸다.
-      이름이 같으면 이미 끝난 애니메이션은 **다시 재생되지 않는다** — 최종 Hit 의
-      밝기 변화가 +0.3 이었다(첫 섬광은 +91.9). 그래서 `jp-burst2` 를 따로 둔다.
-
-   ⛔ 클래스는 `jackpotfx.js` 가 켜고 끈다. 길이의 정본은 `planJackpot()` 이다. */
-
-/* 섬광은 배경이 아니라 덧막이다 — `.t-jackpot` 의 전각 배경을 건드리지 않는다 */
 .winbanner.t-jackpot::before {
   content: "";
   position: absolute;
@@ -2080,7 +1559,7 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
 }
 
 .winbanner.jp-flash::before { animation: jp-burst 0.2s ease-out 1; }
-/* 🔴 이름이 달라야 다시 터진다. 여기가 「마지막 한 방」이다 */
+
 .winbanner.jp-hit::before { animation: jp-burst2 0.3s ease-out 1; }
 
 @keyframes jp-burst {
@@ -2094,11 +1573,9 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   100% { opacity: 0; }
 }
 
-/* 글자는 입자·링보다 위에 있어야 한다 — 배치된 요소가 흐름 내용을 덮기 때문이다 */
 .winbanner .wb-tier,
 .winbanner .wb-num { position: relative; z-index: 3; }
 
-/* 로고는 작게 들어와 살짝 넘겼다 제자리로 온다. 끝나면 기존 맥동으로 넘긴다 */
 .winbanner.jp-scale .wb-tier {
   animation:
     jp-in 0.4s cubic-bezier(0.2, 1.5, 0.4, 1) 1 backwards,
@@ -2110,7 +1587,6 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   to { transform: scale(1); opacity: 1; }
 }
 
-/* 최종 금액이 확정되는 순간 숫자가 한 번 부푼다 */
 .winbanner.jp-hit .wb-num {
   animation:
     jp-pop 0.3s ease-out 1,
@@ -2123,16 +1599,14 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   100% { transform: scale(1); }
 }
 
-/* 🔴 금빛 충격파 링 — **신규 에셋 0종.** P6 전투용으로 확보해 둔 물보라 링
-   (`fx_shockwave`, 호출 0건)을 금색으로 물들여 쓴다. */
 #jp-ring {
-  /* 🔴 배너(릴 프레임) 안에 있으면 「릴 안에서 터지는」 것으로 읽힌다.
-     화면 기준으로 올린다 — 폭죽이 화면 전체인데 링만 릴 안이면 따로 논다. */
+
   position: fixed;
   left: 50%;
   top: 50%;
   width: 78vmin;
-  z-index: 9;
+
+  z-index: 44;
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, -50%) scale(0.25);
@@ -2146,37 +1620,23 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(2.1); }
 }
 
-/* ── 코인과 폭죽 — 🔴 **화면 전체** ────────────────────────────
-   대표님 지시 (2026-08-29): *"릴 프레임 안에서만이 아니라 화면 전체에서 코인이 떨어져야 됨"*
-
-   🔴 왜 `body` 직계인가
-      `.reel-panel { isolation: isolate }` 가 **자체 stacking context** 를 만든다.
-      그 안에 있는 한 z-index 를 아무리 올려도 릴 밖으로 나올 수 없다. 층을 옮겨야 한다.
-
-   🔴 수치의 출처 — 레퍼런스 실측 (`잭팟레퍼런스.mp4` · Gates of Olympus 1000)
-      동시 65개 · 폭 2.2~9.1%(화면 높이) · 낙하 약 960px/s · 세로 늘임 1.2~2.75배
-      감으로 정한 값이 아니다. 바꾸려면 다시 재고 바꾼다. */
 .jp-sky {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  /* ⛔ 클릭을 먹으면 스킵이 죽는다 — 배너가 눌림을 받아야 한다 */
+
   pointer-events: none;
-  /* 타이틀(10) 아래 · 게임 UI 위. 타이틀이 다시 뜰 일은 없지만 순서는 지킨다 */
-  z-index: 9;
+
+  z-index: 45;
 }
 
-/* 코인은 바깥 span 이 **날고**, 안쪽 ::before 가 **뒤집힌다.**
-   transform 은 한 애니메이션만 가질 수 있어 역할을 둘로 나눈다. */
 .jp-sky .coin {
   position: absolute;
   width: var(--s);
   height: var(--s);
   margin-left: calc(var(--s) / -2);
   opacity: 0;
-  /* ⛔ `will-change` 를 100개 넘는 요소에 걸지 않는다. 요소마다 합성 레이어를
-     강제해 메모리와 승격 비용이 오히려 커진다 — 실측으로 확인했다.
-     transform·opacity 만 쓰므로 브라우저가 알아서 애니메이션 중에만 승격한다. */
+
 }
 
 .jp-sky .coin::before {
@@ -2188,11 +1648,10 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
     #fff3bf 0%, #e8c65a 40%, #a5761c 76%, #6b4a10 100%);
   box-shadow:
     0 0 0.9vmin rgba(232, 198, 90, 0.8),
-    inset 0 0 0 0.14vmin rgba(107, 74, 16, 0.55);   /* 테두리 각인 */
+    inset 0 0 0 0.14vmin rgba(107, 74, 16, 0.55);
   animation: jp-flip var(--spin) linear infinite;
 }
 
-/* 구리빛 — 레퍼런스는 금색 하나가 아니라 금·구리 두 색이 섞여 있다 */
 .jp-sky .coin.cu::before {
   background: radial-gradient(circle at 34% 30%,
     #ffd9a0 0%, #e0913a 42%, #9c5518 78%, #5e300c 100%);
@@ -2201,26 +1660,17 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
     inset 0 0 0 0.14vmin rgba(94, 48, 12, 0.55);
 }
 
-/* 🔴 원경일수록 흐리고 옅다. 크기만 줄이면 **먼 것이 아니라 그냥 작은 것**이 된다 */
 .jp-sky .coin.L0 { filter: brightness(0.86) opacity(0.72); }
 .jp-sky .coin.L2::before { filter: blur(0.12vmin); }
 
-/* 🌧 강우 — 화면 위에서 아래로. 레퍼런스의 지배적 요소다 */
 .jp-sky .coin.rain {
   top: 0;
-  /* 🔴 낙하와 페이드를 **두 애니메이션으로 가른다.**
-     CSS 타이밍 함수는 **키프레임 구간마다 다시 적용**된다. 위치와 투명도를 한
-     키프레임에 섞어 0/8/55/100 으로 쪼갰더니 낙하 속도가 세 번 재시작했다 —
-     대표님이 본 *"같은 속도로 내려가다 속도가 줄어드는"* 느낌의 절반이 이것이다.
-     위치는 0%·100% 두 점만 둔다. 속도를 만드는 것은 타이밍 함수 하나뿐이다. */
+
   animation:
     jp-fall var(--dur) cubic-bezier(0.55, 0.085, 0.68, 0.53) var(--d) 1 both,
     jp-fade var(--dur) linear var(--d) 1 both;
 }
 
-/* 🔴 중력은 **가속**이다. 이전 곡선 `cubic-bezier(0.35,0,0.75,1)` 은 제어점이
-   (0.75,1) 이라 **끝 속도가 0** — 코인이 바닥에서 멈추듯 느려졌다. 정확히 반대였다.
-   `easeInQuad` 계열로 끝 기울기 1.47 을 준다. 늘임(모션 블러)도 함께 자란다. */
 @keyframes jp-fall {
   from { transform: translate3d(0, -14vh, 0) rotate(var(--tilt)) scaleY(1); }
   to {
@@ -2237,8 +1687,6 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   100% { opacity: 0; }
 }
 
-/* 🪙 분출 — 중앙 하단에서 튀어올랐다 **시작점보다 아래로 떨어진다**(`fall > rise`).
-   위로 사라지기만 하면 그건 연기지 코인이 아니다. */
 .jp-sky .coin.pop {
   bottom: 4%;
   animation: jp-coin 1.5s cubic-bezier(0.3, 0, 0.6, 1) var(--d) 1 both;
@@ -2261,15 +1709,11 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   }
 }
 
-/* 납작해졌다 펴지는 것이 금속으로 읽히게 한다 */
-/* 🔴 0.14 까지 납작하게 하면 늘임과 곱해져 **쌀알**이 된다.
-   금속으로 읽히는 데는 0.3 이면 충분하다 — 완전히 사라질 필요가 없다. */
 @keyframes jp-flip {
   0%, 100% { transform: scaleX(1); }
   50% { transform: scaleX(0.3); }
 }
 
-/* 폭죽 — 한 점에서 16갈래로 터진다 (360 ÷ 16 = 22.5°) */
 .jp-sky .burst {
   position: absolute;
   left: var(--bx);
@@ -2313,9 +1757,6 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   }
 }
 
-/* 🔴 금빛 비네트 — 레퍼런스는 화면 전체를 보라로 물들이지만 우리는 청록·금색이다.
-   그대로 베끼면 세계관이 깨진다. **가장자리에서만** 금빛이 번지게 하고 가운데는
-   비워 둔다 — 문헌의 경고: *"장식을 하다 축하 문구와 당첨금을 잃지 말 것."* */
 #jp-sky::after {
   content: "";
   position: absolute;
@@ -2334,7 +1775,6 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   100% { opacity: 0; }
 }
 
-/* 연출을 끄는 환경 — 금액은 남기고 움직임만 없앤다 */
 @media (prefers-reduced-motion: reduce) {
   .winbanner.jp-flash::before,
   .winbanner.jp-hit::before { animation: none; }
@@ -2348,61 +1788,9 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   .jp-sky .burst i { animation: none; opacity: 0; }
 }
 
-/* ⛔ 개발용 버튼 묶음 — P8 QA 에서 `.dev` 블록과 함께 주석 처리한다
-      (대표님 지시 2026-08-30: *"라이브에선 치트 코드를 주석 처리할 것"*).
-
-   🔴 **2026-08-30 고정 배치를 걷어내고 하단 문서 흐름으로 되돌렸다.**
-      남은 규칙은 442행 `.dev { margin: 0; text-align: center }` 하나뿐이다.
-
-   왜 되돌렸나 — **좌측을 비워야 하기 때문이다.** 그 자리는 전략 패널(N2)이 쓴다.
-      대표님: *"하단 버튼은 굳이 한눈에 안 보여도 됨. 휠 내려서 보면 됨.
-               테스트 이외에 사용목적이 없음."*
-
-   🔴 「문서 흐름에 두면 하단에서 잘린다」는 2026-08-29 의 판단은 **실측으로 기각됐다.**
-        1366×768   scrollH 960  / 뷰 768   최상단 stage.top=0  최하단 dev.bottom=748  ≤ 768
-        1820×910   scrollH 1071 / 뷰 910   최상단 stage.top=0  최하단 dev.bottom=890  ≤ 910
-        1920×1080  scrollH 1122 / 뷰 1080  최상단 stage.top=0  최하단 dev.bottom=1060 ≤ 1080
-      상단·치트바 **양쪽 모두 스크롤로 도달**하며, `safe center` 를 넣은 경우와 측정값이 같았다.
-
-      까닭은 `body` 가 `height` 가 아니라 **`min-height: 100dvh`** 라서다 —
-      내용이 길어지면 body 가 그만큼 늘어나고 그리드 행도 `auto` 라
-      **중앙정렬이 잘라낼 것이 없다.** 중앙정렬 클리핑은 높이가 고정일 때 생기는 문제다.
-
-   ⛔ 따라서 `body` 의 `min-height` 를 `height` 로 바꾸면 이 롤백이 깨진다.
-      `layout.test.mjs` 가 그 조건을 지킨다. */
-
-/* ══ §FIT ─ 고정 무대 · 데스크톱 화면을 통째로 축소한다 (대표님 결재 2026-09-06) ══
-   🔴 **반응형 재배치를 하지 않는다.**
-      폰 가로는 넓고(874px) 짧다(272px). 세로가 릴 크기를 그대로 정하는데,
-      통합 프레임이 「현판 + 릴」을 쌓아 릴 폭의 0.858배를 세로로 요구하므로
-      아무리 다시 배치해도 릴은 화면의 1/4을 넘지 못했다(실측 231px).
-
-      그래서 배치를 바꾸는 대신 **데스크톱 1920×1080 화면을 그대로 굳혀 놓고
-      `transform: scale()` 하나로 줄인다.** 데스크톱과 픽셀 배치가 같아지고,
-      좌측 전략 패널·우측 난중일기·통짜 HUD 띠가 폰에서도 함께 나온다.
-
-   🔴 **무대 안에서는 뷰포트가 1920×1080 인 척한다.**
-      `--vw0` 를 `#stage` 에만 선언하므로 무대 밖(배경·잭팟 연출·개발용 줄)은
-      진짜 뷰포트를 그대로 쓴다. ⛔ **데스크톱에는 `--vw0` 가 없다** —
-      `var(--vw0, 100vw)` 의 대체값이 걸려 기존 동작이 한 줄도 변하지 않는다.
-
-   ⚠️ **`--panel-w` 를 여기서 다시 선언해야 한다.** 그 변수는 `:root` 에 정의돼
-      있어 `:root` 의 `--layout-vh` 로 계산된다. `#stage` 에서 `--layout-vh` 만
-      바꿔도 소용없다. 실제로 그렇게 했다가 좌우 패널 높이가 **음수**가 되어
-      두 패널이 통째로 사라졌다(프로토타입 실측).
-
-   ⚠️ **transform 순서가 결과를 바꾼다.** `translateX(-50%) scale(f)` 로 쓰면
-      translate 가 축소 **전** 좌표계에서 -800px 움직여 무대가 화면 밖으로 밀린다
-      (실측 좌 -363px). `scale(f)` 를 **먼저** 적어야 -800×f 만큼 움직여 정중앙에 온다.
-
-   🔴 **개발용 줄은 화면 아래 스크롤 구간으로 내린다** (대표님 지시).
-      덤으로 문서에 스크롤 여지가 생기는데, 그래야 **사파리가 주소창을 숨긴다.**
-      바가 숨으면 세로가 272 → 402px 이 되고 배율이 0.262 → 0.387 로 올라
-      릴 격자가 **2.2배** 커진다. 두 요구가 서로를 돕는다.
-      ⛔ 치트 기능·내용은 건드리지 않는다. 자리만 옮긴다. */
 @media (orientation: landscape) and (max-height: 560px) {
   :root {
-    /* JS 가 읽어 배율을 계산한다 — env() 는 스크립트에서 직접 읽을 수 없다 */
+
     --sa-t: env(safe-area-inset-top, 0px);
     --sa-b: env(safe-area-inset-bottom, 0px);
   }
@@ -2410,10 +1798,7 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   html { overflow-x: hidden; }
 
   body {
-    /* 무대를 흐름에서 뺐으므로 grid 중앙정렬이 필요 없다.
-       🔴 `block` 이 아니라 **`flow-root`** 다. block 이면 `.meta` 의 `margin-top`
-          이 body 밖으로 합쳐져 나가(margin collapsing) 개발용 줄이 게임 위로
-          올라온다 (실측 top 74px). flow-root 는 그 합침을 막는다. */
+
     display: flow-root;
     position: relative;
     min-height: 100dvh;
@@ -2430,8 +1815,7 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
       calc(1080px * 0.62 * var(--frame-ar)),
       calc((1920px - 24px) / 1.8856)
     );
-    /* 🔴 absolute 로 흐름에서 뺀다 — transform 은 레이아웃 공간을 줄이지 않으므로
-       그냥 두면 문서가 1600×1040 을 그대로 차지해 스크롤이 화면 세 배로 늘어난다. */
+
     position: absolute;
     top: var(--sa-t);
     left: 50%;
@@ -2440,7 +1824,6 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
     transform: scale(var(--fit, 0.26)) translateX(-50%);
   }
 
-  /* ── 개발용 구간 — 게임 한 화면 아래로 내린다 ── */
   .meta,
   .dev {
     position: static;
@@ -2451,23 +1834,10 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
     text-align: center;
   }
 
-  /* 게임 한 화면만큼 비워 두고 그 아래에서 시작한다 */
   .meta { margin: calc(100dvh + 0.9rem) auto 0; }
 
   .dev { margin: 0.6rem auto 1.4rem; }
 
-  /* ── 터치 영역 — 그림은 그대로 두고 손가락이 닿는 범위만 넓힌다 ──
-     🔴 화면 전체를 0.39배로 줄이면 버튼도 0.39배가 된다. BET 의 −/+ 는 40px
-        이라 화면에서 15px 이 되어 누를 수 없다. 무대 좌표계에서 미리 넓혀 두면
-        축소된 뒤에도 손가락이 닿는 크기가 남는다.
-     ⛔ 보이는 그림은 한 픽셀도 바뀌지 않는다 — 투명한 영역만 얹는다.
-
-     ⚠️ **짝을 이룬 버튼 사이로는 넓히지 않는다.** INFO·설정 과 FAST·AUTO 는
-        4.8px 간격으로 세로로 쌓여 있어, 양쪽으로 26px 씩 넓혔더니 위 버튼의
-        히트박스가 아래 버튼의 상단 21px 을 덮었다 — 아래 버튼이 안 눌린다.
-        **바깥쪽으로만** 넓히고 마주 보는 면은 간격의 절반만 준다.
-     ⛔ 위로 넓히는 양은 띠 안쪽까지다. 더 넓히면 릴을 덮어 「연출 건너뛰기」
-        탭을 가로챈다. */
   .icon-btn,
   .bet-group button,
   button.toggle { position: relative; }
@@ -2480,11 +1850,8 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
     inset: 0;
   }
 
-  /* BET −/+ 는 위아래로 이웃이 없다 — 세로로 마음껏 넓힌다.
-     가로는 숫자 칸이 붙어 있으므로 그 여백(0.7rem)의 절반까지만. */
   .bet-group button::after { inset: -37px -5px; }
 
-  /* 세로로 쌓인 짝 — 위 버튼은 위로, 아래 버튼은 아래로 */
   #info::after,
   #fast::after     { inset: -34px -30px -2px; }
   #settings::after,
@@ -2493,20 +1860,11 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   #auto::after     { left: -12px; right: -12px; }
 }
 
-/* ══ §ROTATE ─ 세로 안내 (대표님 지시 2026-09-06) ═══════════════════════════
-   🔴 **표시 여부는 JS 가 정한다** (`orientation.js`). CSS 로만 `orientation:
-      portrait` 을 걸면 **창을 세로로 늘린 데스크톱까지 잠긴다** — 그 사용자는
-      기기를 돌릴 수 없으므로 게임이 영영 열리지 않는다.
-      JS 가 `pointer: coarse` 를 함께 보고 손가락 기기에서만 `.shown` 을 붙인다.
-
-   ⛔ 다만 **가로에서는 CSS 가 무조건 내린다.** 방향 이벤트가 늦게 오는 기기가
-      있어(회전 직후 수백 ms) 그 사이 안내가 가로 화면을 덮는 일이 실제로 생긴다.
-      JS 가 주인이되, 가로일 때만은 CSS 가 마지막 안전장치를 건다. */
 .rotate {
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 100;                 /* 타이틀(10)·선택(20)·프레임(5) 모두 위 */
+  z-index: 100;
   place-items: center;
   padding: 2rem 1.5rem;
   text-align: center;
@@ -2521,7 +1879,6 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
 
 .rotate-box { display: grid; justify-items: center; gap: 1.1rem; }
 
-/* 세로로 선 폰이 가로로 눕는다 — 무엇을 하라는 말인지 글자 없이 먼저 보인다 */
 .rotate-phone {
   width: 54px;
   height: 92px;
@@ -2559,16 +1916,87 @@ button.choice-item:active { transform: translateY(0) scale(0.985); }
   color: var(--ink-dim);
 }
 
-/* 뒤에서 화면이 밀리지 않게 — 안내가 떠 있는 동안은 문서가 움직이지 않는다 */
 html.rotate-blocked, html.rotate-blocked body { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .rotate-phone { animation: none; transform: rotate(-90deg); }
 }
 
-/* 🔴 손가락 기기에서 **두 번 탭 확대**를 끈다 (2026-09-06).
-   슬롯은 SPIN 을 연달아 누르는 게임이라, 두 번째 탭이 확대 제스처로 먹히면
-   화면이 튀고 그 탭은 스핀으로 가지 않는다. 300ms 탭 지연도 함께 사라진다.
-   ⛔ 손가락으로 벌리는 확대(pinch)는 그대로 둔다 — 접근성이다.
-   `is-touch` 는 `layout_scale.js` 가 `pointer: coarse` 를 보고 붙인다. */
 html.is-touch body { touch-action: manipulation; }
+
+.seabattle {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: block;
+  background: #04121a;
+}
+
+.seabattle.hidden { display: none; }
+
+#battle {
+  display: block;
+  width: 100vw;
+  height: 100dvh;
+  background: #072634;
+
+  touch-action: none;
+}
+
+.combo-dim {
+  position: absolute;
+  inset: 8.6% 6.8% 8.9% 6.9%;
+  z-index: 6;
+  background: rgba(3, 10, 18, var(--dim, 0));
+  transition: background-color 0.18s ease;
+  pointer-events: none;
+}
+
+.combo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 7;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-family: ui-monospace, "Consolas", monospace;
+  font-weight: 800;
+  font-size: clamp(2.2rem, 8vw, 4.6rem);
+  line-height: 1;
+  color: var(--gold-lit, #f0cf72);
+  text-shadow: 0 0 6px #030a12, 0 3px 16px #030a12, 0 0 34px rgba(232, 198, 90, 0.85);
+  pointer-events: none;
+
+  padding: 0.26em 0.6em 0.2em;
+  border-radius: 0.16em;
+  background: rgba(3, 10, 18, 0.55);
+  box-shadow:
+    inset 0 0 0 1px rgba(232, 198, 90, 0.32),
+    0 6px 22px rgba(3, 10, 18, 0.5);
+}
+
+.combo::after {
+  content: "연환격";
+  display: block;
+  margin-top: 0.12em;
+  font-size: 0.24em;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  color: rgba(240, 231, 200, 0.92);
+  text-shadow: 0 0 4px #030a12, 0 2px 8px #030a12;
+}
+
+.combo[data-why="cap"]::after { content: "연환격 5 · 확정"; }
+.combo[data-why="chain"]::after { content: "연쇄로 열렸다"; }
+
+.combo[data-why="cap"],
+.combo[data-why="chain"] { font-size: clamp(1.5rem, 5vw, 3.1rem); }
+
+.combo.pop { animation: combo-pop 0.34s cubic-bezier(0.2, 1.5, 0.4, 1); }
+
+@keyframes combo-pop {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.55); }
+  55% { opacity: 1; transform: translate(-50%, -50%) scale(1.14); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}

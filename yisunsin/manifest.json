@@ -7,13 +7,31 @@
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
-  "display_override": ["fullscreen", "standalone"],
+  "display_override": [
+    "fullscreen",
+    "standalone"
+  ],
   "orientation": "landscape",
   "background_color": "#060f18",
   "theme_color": "#060f18",
   "icons": [
-    { "src": "assets/ui/app_icon_192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "assets/ui/app_icon_512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "assets/ui/app_icon_maskable_512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "assets/ui/app_icon_192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/ui/app_icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/ui/app_icon_maskable_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

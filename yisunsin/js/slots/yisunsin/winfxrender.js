@@ -1,9 +1,3 @@
-/**
- * winfxrender.js — 일반 WIN 전용 Canvas 충격광·Spark
- *
- * render.js의 릴·페이라인 책임과 분리한다. 좌표와 색은 주입받아
- * 이 파일이 슬롯 레이아웃 상수를 복제하지 않게 한다.
- */
 export function createWinFxRenderer(ctx, {
   cellWidth, cellHeight, pitch, colX, color,
 }) {

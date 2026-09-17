@@ -1,9 +1,3 @@
-/**
- * _normalwincheat.js — 개발용 일반 WIN 연속 결과 탐색
- *
- * 배당이나 격자를 합성하지 않는다. 실제 RNG가 만든 합법적인 스트립 위치 중
- * 계약에 맞는 결과만 고른다. OFF일 때는 이 파일을 호출하지 않는다.
- */
 const MAX_ATTEMPTS = 4096;
 
 export function isNormalWinResult(result, totalBet) {

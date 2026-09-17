@@ -1,38 +1,16 @@
-/* 모바일 가로 전용 표현 계층. WEB 규칙은 main.css 그대로 유지한다.
-   ⛔ 이 파일은 폰 가로에서만 켜진다. 데스크톱·세로·태블릿은 한 줄도 타지 않는다.
-
-   🔴 구조 (UI기획서 §16 · 대표님 결재 2026-09-08)
-        ┌────────┬──────────────────┬────────┐
-        │  좌    │   릴 프레임       │   우   │  상단 = 100dvh − 띠
-        │ 전략   │  현판 + 개구부     │ 난중일기│
-        ├────────┴──────────────────┴────────┤
-        │            HUD 띠 100%             │  띠 = 폭 ÷ 10.4
-        └────────────────────────────────────┘
-
-   🔴 릴 격자는 WEB 과 같은 872×664 **정사각** 좌표다 (renderlayout.js).
-      예전에는 모바일만 칸 폭을 2.4배로 넓혀 남는 가로를 메웠는데, 심볼은 칸
-      높이 기준이라 함께 커지지 않아 칸의 36.7% 만 차지했다. 남는 폭은 이제
-      프레임 기둥과 좌우 패널이 가져간다.
-
-   🔴 안전영역(노치)은 **배경만** 회수한다. 배치 요소는 안쪽에 둔다 —
-      노치에 버튼이 물리면 눌리지 않는다. */
 @media (orientation: landscape) and (max-height: 560px) {
   html.is-touch {
     --sa-l: env(safe-area-inset-left, 0px);
     --sa-r: env(safe-area-inset-right, 0px);
     --vw-safe: calc(100vw - var(--sa-l) - var(--sa-r));
 
-    /* 띠 비율이 높이를 정하고, 남는 세로가 통째로 상단 영역이 된다 */
     --m-hud-h: calc(var(--vw-safe) / 10.4);
     --m-top-h: calc(100dvh - var(--m-hud-h));
 
-    /* 프레임 그림 1266×857 · 유효 높이 802 (아래 55px 은 HUD 위로 걸치는 장식)
-       🔴 상단 압축을 0.685 → 0.85배로 완화해 현판 찌그러짐을 풀었다 (2026-09-08) */
     --m-frame-w: calc(var(--m-top-h) * 1266 / 802);
     --m-frame-h: calc(var(--m-top-h) * 857 / 802);
     --m-frame-l: calc(var(--sa-l) + (var(--vw-safe) - var(--m-frame-w)) / 2);
 
-    /* 좌우 패널 — 프레임과 6px 띄우고 5% 줄여 세로 중앙에 놓는다 (대표님 지시) */
     --m-side-gap: 6px;
     --m-side-w: calc((var(--vw-safe) - var(--m-frame-w)) / 2 - var(--m-side-gap));
     --m-side-h: calc(var(--m-top-h) * 0.95);
@@ -52,7 +30,6 @@
     padding: 0;
   }
 
-  /* 무대는 노치까지 덮는다 — 검게 죽던 좌우 7% 를 배경이 가져간다 */
   html.is-touch #stage {
     --vw0: 100vw;
     --layout-vh: 100dvh;
@@ -68,7 +45,6 @@
 
   html.is-touch #stage.hidden { display: none; }
 
-  /* ── 릴 프레임 ───────────────────────────────────────────────── */
   html.is-touch .reel-panel {
     position: absolute;
     left: var(--m-frame-l);
@@ -80,7 +56,6 @@
     overflow: visible;
   }
 
-  /* 프레임 그림은 모든 것 위에 온다 — 창틀이므로 창 안 무엇에도 가리지 않는다 */
   html.is-touch .reel-panel::after {
     display: block;
     left: 0;
@@ -90,15 +65,12 @@
     background: url("../assets/ui/mobile/ui_mobile_reel_frame_v2.webp") center / 100% 100% no-repeat;
   }
 
-  /* 릴 바닥 — 개구부(12.6~87.3%)보다 넓게 깔아 프레임 뒤로 밀어 넣는다.
-     개구부 경계가 높이마다 들쭉날쭉해(판옥선·파도) 딱 맞추면 배경이 샌다. */
   html.is-touch .reel-panel::before {
     display: block;
     inset: 7% 7.98% 6.65% 7.9%;
     background: radial-gradient(ellipse at 50% 0%, rgba(11, 26, 42, 0.97), rgba(4, 10, 17, 1));
   }
 
-  /* 캔버스는 개구부 실측 좌표에 앉힌다 (프레임 원본 x160~1105 · y124~761) */
   html.is-touch .reel-panel canvas {
     position: absolute;
     left: 12.64%;
@@ -111,11 +83,6 @@
     z-index: 1;
   }
 
-  /* ── JACKPOT 현판 — 프레임에 그려진 남색 판 실측 좌표 ───────────── */
-  /* 🔴 원본 1266×857 에서 빈 남색 판만 골라 잰 값 (2026-09-08 3차 실측).
-     1차에는 아래 금테 바까지 남색으로 세어 9.72% 로 잡았고 글자가 금테에 겹쳤다.
-     2차(6.48%)는 상단 압축이 0.685배이던 때의 값이다. 압축을 0.85배로 풀면서
-     판이 커져 **높이 7.93%** 가 됐다 — 판 크기는 압축률과 함께 움직인다. */
   html.is-touch .topbar.jackpot-bar {
     position: absolute;
     z-index: 8;
@@ -134,9 +101,6 @@
 
   html.is-touch .jb-stage { position: absolute; inset: 0; }
 
-  /* ⛔ `display` 를 건드리지 않는다. main.css 의 2행 그리드를 그대로 쓴다.
-     flex 로 바꾸면 `.jb-label{align-self:end}` · `.jb-amount{align-self:start}` 가
-     **교차축(가로) 정렬**로 뒤집혀 두 줄이 현판 좌우로 벌어진다 (780×360 실측). */
   html.is-touch .jb-money {
     position: absolute;
     inset: 0;
@@ -146,7 +110,6 @@
     gap: 0;
   }
 
-  /* 두 줄 합이 판 높이(7.93%)를 넘으면 금테를 침범한다 — 넉넉히 아래로 잡는다 */
   html.is-touch .jb-label {
     font-size: clamp(0.42rem, 1.75dvh, 0.62rem);
     line-height: 1;
@@ -157,16 +120,6 @@
     line-height: 1.02;
   }
 
-  /* 🔴 **현판을 가리지 않는다** (대표님 지적 2026-09-08).
-     2세대 모바일에는 좌우 패널이 없어서 이 현판에 프리스핀·보너스 정보를
-     통합했고, 그래서 `feature-mode` 일 때 JACKPOT 두 줄을 숨겼다.
-     3세대 3분할에서 **우측 난중일기 패널이 부활**하면서 그 이유가 사라졌는데
-     숨기는 규칙만 남아, 보너스·프리스핀 내내 현판이 **빈 남색 판**이었다
-     (실기 영상 47.5s·55.6s 실측). 규칙을 걷어 WEB 과 같이 늘 띄운다.
-     ⛔ `feature-mode` 클래스 토글 자체는 `ui.js` 에 남긴다 —
-        `fs-panel.bonus` 와 같은 판정을 공유한다. */
-
-  /* ── 좌측 전략 패널 ──────────────────────────────────────────── */
   html.is-touch .side-left {
     position: absolute;
     left: var(--sa-l);
@@ -195,7 +148,6 @@
 
   html.is-touch .tc-dots { bottom: 2.4%; gap: 5px; }
 
-  /* ── 우측 난중일기 패널 ─────────────────────────────────────── */
   html.is-touch .side-right {
     position: absolute;
     left: auto;
@@ -225,8 +177,6 @@
     object-fit: fill;
   }
 
-  /* 🔴 속지는 액자 개구부(1002×1417 중 701×1221)보다 **2% 크게** 깐다.
-     딱 맞추면 액자 안쪽 테두리와의 경계에 남색이 비친다 (대표님 지적). */
   html.is-touch .fp-paper {
     left: 14.37%;
     top: 6.14%;
@@ -234,7 +184,6 @@
     height: 87.86%;
   }
 
-  /* 속지 내부 좌표는 WEB 과 같다. 속지 폭이 80.64% → 71.36% 로 바뀐 만큼만 환산 */
   html.is-touch .fp-num {
     left: 50.46%;
     top: 49.09%;
@@ -248,7 +197,6 @@
 
   html.is-touch .fs-panel.idle .fp-mult { font-size: 5.5cqw; }
 
-  /* ── 하단 HUD 띠 ───────────────────────────────────────────── */
   html.is-touch .controls {
     --hud-h: var(--m-hud-h);
     position: absolute;
@@ -278,10 +226,6 @@
     pointer-events: auto;
   }
 
-  /* 칸 좌표 — 재조판 띠(2392×230) 실측. 세로는 원본 띠 값 그대로다.
-     🔴 좌우 확장 배율을 비대칭(칸B 1.841 / 나머지 1.731)으로 주어 SPIN 빈 구간
-        중심을 **정확히 50%** 에 맞췄다. 균등 확장이면 49.39% 로 밀려 릴 프레임
-        하단 꽃과 SPIN 용 장식이 어긋난다 (대표님 지적 2026-09-08). */
   html.is-touch .cell-a { left: 2.93%;  top: 16.09%; width: 5.23%;  height: 66.96%; flex-direction: column; }
   html.is-touch .cell-b { left: 10.45%; top: 23.91%; width: 26.21%; height: 53.48%; flex-direction: column; }
   html.is-touch .cell-c { left: 63.38%; top: 17.83%; width: 27.42%; height: 26.96%; }
@@ -303,9 +247,6 @@
 
   html.is-touch #spin:active:not(:disabled) { transform: translate(-50%, -50%) scale(0.95); }
 
-  /* 🔴 버튼 크기를 **칸에 종속**시킨다 (대표님 지적 2026-09-08).
-     고정 44px 을 걸어 두니 칸 E(폭 4.54%)처럼 좁은 칸에서 버튼이 칸 밖으로
-     삐져나왔다. 터치 최소치는 칸 자체(높이 = 띠의 66.96%)가 확보한다. */
   html.is-touch .controls .side .icon-btn,
   html.is-touch .controls .side .toggle {
     min-width: 0;
@@ -335,7 +276,6 @@
     background-size: 78% 78%;
   }
 
-  /* 힌트는 띠 안에 산다 — 행으로 두면 그 높이가 그대로 릴에서 빠진다 */
   html.is-touch .hint {
     position: absolute;
     left: 40%;
@@ -345,27 +285,9 @@
     font-size: clamp(0.46rem, 1.6dvh, 0.6rem);
   }
 
-  /* 치트는 첫 화면 아래 문서 흐름에 남는다 (대표님 지시 — 배포 환경 테스트용) */
   html.is-touch .meta { margin-top: calc(100dvh + 0.9rem); }
   html.is-touch .dev { margin: 0.6rem auto 1.4rem; }
 
-  /* ── 전체 화면 오버레이 (대표님 지시 2026-09-08) ──────────────────
-     선택 화면과 잭팟 배너는 무대 전체(= 화면 전체)를 덮는다.
-     🔴 **배경은 노치까지, 내용은 노치 안쪽.** 릴 프레임에 쓴 것과 같은 규칙이다 —
-        노치에 걸린 버튼은 눌리지 않는다.
-     🔴 글자는 `vw` 가 아니라 `dvh` 에 매단다. 폰 가로는 2.12~2.35:1 이라 `vw` 로
-        잡으면 세로가 먼저 터진다 — 잭팟은 네 줄(제목·금액·LINE·TOTAL)이다. */
-  /* 🔴 **화면에 못 박는다** (대표님 지적 2026-09-08 2차 — *"어쩔때는 릴프레임만 덮어서 나온다"*).
-     원인은 **페이지 스크롤**이었다. 개발용 치트 바가 문서를 뷰포트보다 **106px** 늘려
-     놓았는데, 오버레이는 결재 「다」에 따라 **무대 기준**이라 스크롤을 따라가지 않는다.
-     실측 — 스크롤 0 에서는 화면의 100% 를 덮지만 스크롤 106px 에서는 **74%** 만 덮고,
-     **선택지 3장이 화면 밖으로 밀려 아예 눌리지 않았다.**
-
-     🔑 모바일에서는 **무대 = 화면**이다(`#stage` 가 `100vw × 100dvh`). 따라서 `fixed` 로
-        바꿔도 「무대를 덮는다」는 결재 취지가 그대로 성립하며, 스크롤과 무관해진다.
-     ⛔ WEB 은 `absolute` 그대로 둔다 — 그쪽은 무대가 뷰포트보다 작아서 `fixed` 로 두면
-        게임 배경 밖 검은 여백까지 덮는다.
-     📌 근본 원인인 치트 바는 P8 에서 사라진다. 이 규칙은 그 뒤에도 남는 안전망이다. */
   html.is-touch .choice,
   html.is-touch .bonus-intro,
   html.is-touch .winbanner.t-jackpot {
