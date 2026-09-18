@@ -15,6 +15,8 @@ import { createFreespinRunner } from './slots/yisunsin/freespin_runner.js';
 import { installLayoutScale } from './layout_scale.js';
 import { bindControls } from './boot_controls.js';
 import { createBgm } from './bgm.js';
+import { createSettings } from './platform/settings.js';
+import { createScreens } from './boot_screens.js';
 import { createRoundEnd } from './round_end.js';
 import { createRevealGate } from './reveal_gate.js';
 import { createSeaBattle } from './slots/yisunsin/seabattle/battle_bind.js';
@@ -62,7 +64,9 @@ async function boot() {
   const audio = createAudio();
   const sfx = createSfx({ audio });
   sfx.define(manifest);
-  sfx.setMasterVolume(platform.audio.masterVolume);
+
+  const settings = createSettings();
+  for (const kind of ['master', 'sfx', 'bgm']) audio.setVolume(kind, settings.get(kind));
 
   const rng = createRng(platform.rngSeed || Date.now() >>> 0);
 
@@ -216,8 +220,10 @@ async function boot() {
     if (!raf) raf = requestAnimationFrame(loop);
   }
 
+  const screens = createScreens($, { paytable, symbols, audio, settings, sfx, slot, sea });
+
   bindControls($, {
-    slot, wallet, sfx, audio, play, free, fx, renderer, doSpin, fmt,
+    slot, wallet, sfx, audio, play, free, fx, renderer, doSpin, fmt, screens,
 
     onResize: () => {
       fx.draw(performance.now());

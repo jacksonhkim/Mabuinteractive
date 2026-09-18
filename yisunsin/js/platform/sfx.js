@@ -6,10 +6,14 @@ export function createSfx({ audio }) {
 
   const bank = new Map();
 
-  let synth = null;
+  const synths = new Map();
   let enabled = true;
-  let master = 1.0;
   const missing = new Set();
+
+  const synthFor = (kind) => {
+    if (!synths.has(kind)) synths.set(kind, createSynth(audio.context, audio.busFor(kind)));
+    return synths.get(kind);
+  };
 
   const trace = [];
   let tracing = false;
@@ -64,9 +68,12 @@ export function createSfx({ audio }) {
       const ctx = audio.context;
       if (!def || !ctx || !audio.unlocked) return NOOP_HANDLE;
 
+      const kind = opt.bus === 'bgm' ? 'bgm' : 'sfx';
+      const out = audio.busFor(kind);
+      if (!out) return NOOP_HANDLE;
+
       if (!def.buffers.length) {
-        if (!synth) synth = createSynth(ctx);
-        return synth.play(id, opt) || NOOP_HANDLE;
+        return synthFor(kind).play(id, opt) || NOOP_HANDLE;
       }
 
       const n = def.buffers.length;
@@ -78,9 +85,10 @@ export function createSfx({ audio }) {
       src.loop = def.loop;
 
       const gain = ctx.createGain();
-      gain.gain.value = (opt.volume == null ? 1 : opt.volume) * master;
 
-      src.connect(gain).connect(ctx.destination);
+      gain.gain.value = (opt.volume == null ? 1 : opt.volume);
+
+      src.connect(gain).connect(out);
       src.start();
 
       const stop = (fade = 0.12) => {
@@ -101,10 +109,6 @@ export function createSfx({ audio }) {
       enabled = Boolean(on);
     },
 
-    setMasterVolume(v) {
-      master = Math.min(1, Math.max(0, v));
-    },
-
     startTrace() {
       tracing = true;
       trace.length = 0;
@@ -119,7 +123,7 @@ export function createSfx({ audio }) {
       const defined = bank.size;
       const ready = [...bank.values()].reduce((a, d) => a + d.buffers.length, 0);
       const ctx = audio.context;
-      if (ctx && !synth) synth = createSynth(ctx);
+      const synth = ctx && audio.busFor('sfx') ? synthFor('sfx') : null;
       const synthesized = synth
         ? [...bank.keys()].filter((id) => !bank.get(id).buffers.length && synth.has(id)).length
         : 0;

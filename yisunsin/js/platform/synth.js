@@ -2,7 +2,9 @@ import { createRng } from '../slots/yisunsin/rng.js';
 
 const FX_SEED = 0x5eed;
 
-export function createSynth(ctx) {
+export function createSynth(ctx, out) {
+
+  if (!out) throw new Error('createSynth: 출구 노드가 필요하다 (audio.busFor)');
   const rngFx = createRng(FX_SEED);
   let noiseBuf = null;
 
@@ -36,7 +38,7 @@ export function createSynth(ctx) {
     bp.Q.value = q;
 
     const g = ctx.createGain();
-    src.connect(bp).connect(g).connect(ctx.destination);
+    src.connect(bp).connect(g).connect(out);
     env(g, t0, vol, dur, 0.002);
     src.start(t0);
     src.stop(t0 + dur + 0.02);
@@ -53,7 +55,7 @@ export function createSynth(ctx) {
     osc.detune.value = detune;
 
     const g = ctx.createGain();
-    osc.connect(g).connect(ctx.destination);
+    osc.connect(g).connect(out);
     env(g, t0, vol, dur);
     osc.start(t0);
     osc.stop(t0 + dur + 0.02);
@@ -73,7 +75,7 @@ export function createSynth(ctx) {
     lp.frequency.exponentialRampToValueAtTime(Math.max(to * 4, 1), t0 + dur);
 
     const g = ctx.createGain();
-    osc.connect(lp).connect(g).connect(ctx.destination);
+    osc.connect(lp).connect(g).connect(out);
     env(g, t0, vol, dur, 0.02);
     osc.start(t0);
     osc.stop(t0 + dur + 0.02);

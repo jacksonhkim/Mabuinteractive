@@ -10,7 +10,8 @@ export function createBgm(sfx, { volume = 1 } = {}) {
     if (!sfx || !id) return;
     if (current === id) return;
     if (handle) handle.stop();
-    handle = sfx.play(id, { volume });
+
+    handle = sfx.play(id, { volume, bus: 'bgm' });
     current = id;
   }
 

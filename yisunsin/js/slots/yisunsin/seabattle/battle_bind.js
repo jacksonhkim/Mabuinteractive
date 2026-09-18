@@ -118,6 +118,9 @@ export function createSeaBattle($, {
   return {
     get active() { return Boolean(scene); },
 
+    pause() { pauseLoop(); },
+    resume() { resumeLoop(); },
+
     shouldEnter(state) {
       return Boolean(renderer && state.result && state.result.seaBattleTrigger);
     },

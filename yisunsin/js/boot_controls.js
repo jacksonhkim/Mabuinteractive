@@ -3,8 +3,17 @@ import { installOrientationGuard } from './layout_scale.js';
 
 export function bindControls($, {
   slot, wallet, sfx, audio, play, free, fx, renderer,
-  doSpin, fmt, onResize, stopSpinLoop, getBgm,
+  doSpin, fmt, onResize, stopSpinLoop, getBgm, screens,
 }) {
+
+  $('#info').addEventListener('click', () => {
+    sfx.play('btn_toggle');
+    screens.openInfo();
+  });
+  $('#settings').addEventListener('click', () => {
+    sfx.play('btn_toggle');
+    screens.openSettings();
+  });
 
   $('.reel-panel').addEventListener('click', () => fx.skipTrigger());
 

@@ -6,6 +6,29 @@ export function createAudio() {
   let retryArmed = false;
   const waiting = [];
 
+  const vol = { master: 1, sfx: 1, bgm: 1 };
+  let masterGain = null;
+  const buses = { sfx: null, bgm: null };
+
+  const clamp01 = (v) => {
+    const x = Number(v);
+    return Number.isFinite(x) ? Math.min(1, Math.max(0, x)) : 0;
+  };
+
+  const ensureGraph = () => {
+    if (masterGain || !ctx) return masterGain;
+    masterGain = ctx.createGain();
+    masterGain.gain.value = vol.master;
+    masterGain.connect(ctx.destination);
+    for (const kind of ['sfx', 'bgm']) {
+      const bus = ctx.createGain();
+      bus.gain.value = vol[kind];
+      bus.connect(masterGain);
+      buses[kind] = bus;
+    }
+    return masterGain;
+  };
+
   const win = typeof window !== 'undefined' ? window : null;
   const Ctor = win ? (win.AudioContext || win.webkitAudioContext) : null;
 
@@ -81,6 +104,27 @@ export function createAudio() {
 
     get context() {
       return ctx;
+    },
+
+    get master() {
+      return ensureGraph();
+    },
+
+    busFor(kind) {
+      ensureGraph();
+      return buses[kind] || null;
+    },
+
+    setVolume(kind, v) {
+      if (!(kind in vol)) return;
+      vol[kind] = clamp01(v);
+      ensureGraph();
+      const node = kind === 'master' ? masterGain : buses[kind];
+      if (node) node.gain.value = vol[kind];
+    },
+
+    getVolume(kind) {
+      return vol[kind];
     },
 
     unlock() {

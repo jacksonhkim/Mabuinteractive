@@ -194,11 +194,49 @@
 
   </main>
 
+  <section id="info-screen" class="scrim hidden" role="dialog" aria-label="게임 안내" aria-modal="true">
+    <div class="card card--info">
+    <div class="sheet-bar">
+      <h2>게임 안내</h2>
+
+      <div class="pager">
+        <button id="info-prev" type="button" class="pager-arrow" aria-label="이전 쪽">◀</button>
+        <div id="info-dots" class="dots" role="tablist" aria-label="쪽 이동"></div>
+        <button id="info-next" type="button" class="pager-arrow" aria-label="다음 쪽">▶</button>
+      </div>
+      <button type="button" class="sheet-x" data-close aria-label="닫기">✕</button>
+    </div>
+    <div id="info-body" class="card-body"></div>
+    </div>
+  </section>
+
+  <section id="settings-screen" class="scrim hidden" role="dialog" aria-label="설정" aria-modal="true">
+    <div class="card card--set">
+      <div class="sheet-bar">
+        <h2>설정</h2>
+        <button type="button" class="sheet-x" data-close aria-label="닫기">✕</button>
+      </div>
+      <div id="settings-body" class="card-body"></div>
+    </div>
+
+    <div id="resume-count" class="resume-count hidden" role="status" aria-live="polite"></div>
+  </section>
+
   <section id="seabattle" class="seabattle hidden" aria-label="해전 미니게임">
     <canvas id="battle" aria-label="해전 전장"></canvas>
   </section>
 
   <p id="meta" class="meta"></p>
+
+  <p class="dev">
+    <button id="cheat-win" type="button" class="ghost" aria-pressed="false">일반 WIN 연속: OFF</button>
+    <button id="ledger" type="button" class="ghost">잔액 등식 확인</button>
+    <button id="cheat-fs" type="button" class="ghost">▶ 프리스핀 강제</button>
+    <button id="cheat-bonus" type="button" class="ghost">▶ 보너스 강제</button>
+    <button id="cheat-jp" type="button" class="ghost">▶ 잭팟 강제</button>
+    <button id="cheat-sea" type="button" class="ghost">▶ 해전 강제</button>
+    <button id="cheat-combo" type="button" class="ghost">▶ 5콤보 강제</button>
+  </p>
 
   <div id="jp-sky" class="jp-sky" aria-hidden="true"></div>
 
