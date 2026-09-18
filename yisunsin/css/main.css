@@ -395,8 +395,12 @@ button.primary:disabled {
   max-width: 32vw;
   margin: 0;
   font-size: 0.72rem;
-  opacity: 0.55;
   z-index: 60;
+
+  padding: 0.2rem 0.5rem;
+  border-radius: 8px;
+  background: rgba(6, 15, 24, 0.86);
+  color: var(--ink-dim);
 }
 
 @media (max-width: 640px) and (min-height: 561px) {
@@ -441,6 +445,13 @@ button.primary:disabled {
   margin: 0.6rem 0 0;
   text-align: center;
   z-index: 60;
+
+  max-width: min(96vw, 1100px);
+  padding: 0.5rem 0.7rem;
+  border-radius: 10px;
+  background: rgba(6, 15, 24, 0.92);
+  border: 1px solid rgba(201, 162, 39, 0.42);
+  box-shadow: 0 0.6rem 1.6rem rgba(0, 0, 0, 0.5);
 }
 .dev button { pointer-events: auto; }
 
@@ -448,9 +459,10 @@ button.ghost {
   min-height: var(--tap);
   padding: 0 1rem;
   font-size: 0.8rem;
-  color: var(--ink-dim);
-  background: transparent;
-  border: 1px solid rgba(201, 162, 39, 0.28);
+
+  color: var(--ink);
+  background: rgba(10, 22, 34, 0.94);
+  border: 1px solid rgba(201, 162, 39, 0.55);
   border-radius: 8px;
   cursor: pointer;
 }
